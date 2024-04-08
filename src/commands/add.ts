@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js'
 
+import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
@@ -37,6 +38,7 @@ discord.addCommand({
         await interaction.reply({
             embeds: [
                 {
+                    color: 0x3498db,
                     author: {
                         name: '>>>',
                     },
