@@ -1,7 +1,7 @@
 import { createCanvas } from 'canvas'
 
 const width = 400
-const height = 22
+const height = 10
 const ticks = 40
 const tickSize = 2
 const paddingX = 2
@@ -14,12 +14,7 @@ export default function divider() {
 
     ctx.fillStyle = '#ffffff'
     for (let i = 0; i < ticks; i++) {
-        ctx.fillRect(
-            i * interval + paddingX,
-            (height - tickSize) / 2,
-            tickSize,
-            tickSize,
-        )
+        ctx.fillRect(i * interval + paddingX, 0, tickSize, tickSize)
     }
 
     return canvas.toBuffer()
