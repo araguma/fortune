@@ -17,6 +17,11 @@ export const ClientSchema = new Schema({
         required: true,
         default: [],
     },
+    lastClaim: {
+        type: Date,
+        required: true,
+        default: new Date(0),
+    },
 })
 
 export const ClientModel = model('client', ClientSchema)

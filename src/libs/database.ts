@@ -26,6 +26,7 @@ export class Database {
                 clientId: client.clientId,
                 balance: client.balance,
                 watchlist: client.watchlist,
+                lastClaim: client.lastClaim,
             },
             { upsert: true, new: true },
         ).catch(console.error)
