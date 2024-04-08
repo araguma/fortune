@@ -30,17 +30,25 @@ export class Discord extends Client {
 
         const command = this.commands[interaction.commandName]
         if (command) {
-            await command.handler(interaction).catch((error) => {
-                console.error(error)
-                interaction
-                    .reply({
+            await command.handler(interaction).catch(async (error) => {
+                if (error instanceof UserError) {
+                    await interaction.reply({
+                        embeds: [
+                            {
+                                title: 'Error',
+                                description: error.message,
+                                color: 0x000000,
+                            },
+                        ],
+                    })
+                } else {
+                    console.error(error)
+                    await interaction.reply({
                         content:
-                            error instanceof UserError
-                                ? error.message
-                                : 'There was an error while executing this command',
+                            'There was an error while executing this command',
                         ephemeral: true,
                     })
-                    .catch(console.error)
+                }
             })
         } else {
             interaction
