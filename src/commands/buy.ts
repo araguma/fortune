@@ -77,6 +77,7 @@ discord.addCommand({
         await interaction.reply({
             embeds: [
                 {
+                    color: 0x3498db,
                     author: {
                         name: '>>>',
                     },
