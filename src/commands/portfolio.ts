@@ -31,7 +31,7 @@ discord.addCommand({
             if (!snapshot) throw new Error('Failed to get snapshot')
             return acc + snapshot.latestTrade.p * share.quantity
         }, 0)
-        const todayYield = shares.reduce((acc, share) => {
+        const delta = shares.reduce((acc, share) => {
             const snapshot = snapshots[share.symbol]
             if (!snapshot) throw new Error('Failed to get snapshot')
             return (
@@ -39,42 +39,34 @@ discord.addCommand({
                 (snapshot.latestTrade.p - snapshot.dailyBar.o) * share.quantity
             )
         }, 0)
+        const description = shares
+            .map((share) => {
+                const snapshot = snapshots[share.symbol]
+                if (!snapshot) throw new Error('Failed to get snapshot')
+                const symbol = share.symbol
+                const quantity = share.quantity
+                const quote = snapshot.latestTrade.p
+                const total = quote * quantity
+                const percent =
+                    ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
+                const sign = percent >= 0 ? '▴' : '▾'
+                return `${sign} **${symbol}** ${quantity} ⋅ $${quote} ▸ $${total.toFixed(2)} (${percent.toFixed(2)}%)`
+            })
+            .join('\n')
 
         await interaction.reply({
             embeds: [
                 {
+                    color: delta >= 0 ? 0x2ecc71 : 0xe74c3c,
                     author: {
                         name: '---',
                     },
                     title: 'Portfolio',
-                    description:
-                        shares.length === 0
-                            ? '​\n> *No shares found*\n​'
-                            : '​\n' +
-                              shares
-                                  .map((share) => {
-                                      const snapshot = snapshots[share.symbol]
-                                      if (!snapshot)
-                                          throw new Error(
-                                              'Failed to get snapshot',
-                                          )
-                                      const symbol = share.symbol
-                                      const quantity = share.quantity
-                                      const quote = snapshot.latestTrade.p
-                                      const total = quote * quantity
-                                      const percent =
-                                          ((quote - snapshot.dailyBar.o) /
-                                              snapshot.dailyBar.o) *
-                                          100
-                                      const sign = percent >= 0 ? '▴' : '▾'
-                                      return `${sign} **${symbol}** ${quantity} ⋅ $${quote} ▸ $${total.toFixed(2)} (${percent.toFixed(2)}%)`
-                                  })
-                                  .join('\n') +
-                              '\n​',
+                    description: description || '> *No shares found*',
                     fields: [
                         {
                             name: 'Value',
-                            value: `$${value.toFixed(2)} (${value === 0 ? '0.00' : ((todayYield / value) * 100).toFixed(2)}%)`,
+                            value: `$${value.toFixed(2)} (${value === 0 ? '0.00' : ((delta / value) * 100).toFixed(2)}%)`,
                             inline: true,
                         },
                         {
@@ -84,7 +76,7 @@ discord.addCommand({
                         },
                         {
                             name: 'Total',
-                            value: `$${(value + client.balance).toFixed(2)} (${((todayYield / (value + client.balance)) * 100).toFixed(2)}%)`,
+                            value: `$${(value + client.balance).toFixed(2)} (${((delta / (value + client.balance)) * 100).toFixed(2)}%)`,
                             inline: true,
                         },
                     ],
@@ -95,7 +87,6 @@ discord.addCommand({
                         text: client._id.toString().toUpperCase(),
                     },
                     timestamp: new Date().toISOString(),
-                    color: todayYield >= 0 ? 0x2ecc71 : 0xe74c3c,
                 },
             ],
             files: [

@@ -51,6 +51,8 @@ discord.addCommand({
                     article.headline + ' ' + article.summary,
                 ).comparative
                 return {
+                    color:
+                        score > 0 ? 0x2ecc71 : score < 0 ? 0xe74c3c : 0x9b59b6,
                     title: article.headline,
                     url: article.url ?? '',
                     description: he.decode(article.summary),
@@ -73,8 +75,6 @@ discord.addCommand({
                         text: `${article.source}  •  ${article.id}`,
                     },
                     timestamp: new Date(article.updated_at).toISOString(),
-                    color:
-                        score > 0 ? 0x2ecc71 : score < 0 ? 0xe74c3c : 0xecf0f1,
                 }
             }),
         })

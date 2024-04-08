@@ -34,26 +34,25 @@ discord.addCommand({
         const movers = await alpaca.movers(10)
 
         const sign = type === 'Gainers' ? '▴' : '▾'
+        const description = movers[type.toLowerCase() as Lowercase<typeof type>]
+            .map((mover) => {
+                return `${sign} **${mover.symbol}** $${mover.price} (${mover.percent_change}%)`
+            })
+            .join('\n')
 
         await interaction.reply({
             embeds: [
                 {
+                    color: type === 'Gainers' ? 0x2ecc71 : 0xe74c3c,
                     author: {
                         name: '---',
                     },
                     title: `Top ${type} Today`,
-                    description:
-                        '​\n' +
-                        movers[type.toLowerCase() as Lowercase<typeof type>]
-                            .map((mover) => {
-                                return `${sign} **${mover.symbol}** $${mover.price} (${mover.percent_change}%)`
-                            })
-                            .join('\n'),
+                    description: description || '> *No stocks found*',
                     image: {
                         url: 'attachment://divider.png',
                     },
                     timestamp: new Date().toISOString(),
-                    color: type === 'Gainers' ? 0x2ecc71 : 0xe74c3c,
                 },
             ],
             files: [

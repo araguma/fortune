@@ -23,33 +23,27 @@ discord.addCommand({
 
         const snapshots = await alpaca.snapshots(client.watchlist)
 
+        const description = client.watchlist
+            .map((symbol) => {
+                const snapshot = snapshots[symbol]
+                if (!snapshot) throw new Error('Failed to get snapshot')
+                const quote = snapshot.latestTrade.p
+                const percent =
+                    ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
+                const sign = percent >= 0 ? '▴' : '▾'
+                return `${sign} **${symbol}** $${quote} (${percent.toFixed(2)}%)`
+            })
+            .join('\n')
+
         await interaction.reply({
             embeds: [
                 {
+                    color: 0x3498db,
                     author: {
                         name: '---',
                     },
                     title: 'Watchlist',
-                    description:
-                        client.watchlist.length === 0
-                            ? '​\n> *No stocks found*\n​'
-                            : '​\n' +
-                              client.watchlist
-                                  .map((symbol) => {
-                                      const snapshot = snapshots[symbol]
-                                      if (!snapshot)
-                                          throw new Error(
-                                              'Failed to get snapshot',
-                                          )
-                                      const quote = snapshot.latestTrade.p
-                                      const percent =
-                                          ((quote - snapshot.dailyBar.o) /
-                                              snapshot.dailyBar.o) *
-                                          100
-                                      const sign = percent >= 0 ? '▴' : '▾'
-                                      return `${sign} **${symbol}** $${quote} (${percent.toFixed(2)}%)`
-                                  })
-                                  .join('\n'),
+                    description: description || '> *No stocks found*',
                     image: {
                         url: 'attachment://divider.png',
                     },

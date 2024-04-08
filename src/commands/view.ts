@@ -46,6 +46,7 @@ discord.addCommand({
         await interaction.reply({
             embeds: [
                 {
+                    color: delta >= 0 ? 0x2ecc71 : 0xe74c3c,
                     author: {
                         name: '---',
                     },
@@ -89,7 +90,6 @@ discord.addCommand({
                     footer: {
                         text: '1Y',
                     },
-                    color: delta >= 0 ? 0x2ecc71 : 0xe74c3c,
                 },
             ],
             files: [
