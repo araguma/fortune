@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from 'discord.js'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
-import divider from '@/images/divider'
+import alpaca from '@/libs/alpaca'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -23,6 +23,9 @@ discord.addCommand({
                 throw new UserError('Symbol is required')
             })()
         ).toUpperCase()
+
+        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
+        if (!snapshot) throw new UserError('Symbol not found')
 
         const client = await database.getClient(interaction.user.id)
         if (client.watchlist.includes(symbol))
