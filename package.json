@@ -1,0 +1,30 @@
+{
+    "scripts": {
+        "lint": "eslint ./ --ext .ts",
+        "format": "prettier ./ --write",
+        "dev": "tsx watch src/index.ts",
+        "start": "tsx src/index.ts"
+    },
+    "devDependencies": {
+        "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+        "@tsconfig/strictest": "^2.0.2",
+        "@types/he": "^1.2.3",
+        "@types/sentiment": "^5.0.4",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "prettier": "^3.2.5",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "canvas": "^2.11.2",
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.4.5",
+        "he": "^1.2.0",
+        "mongoose": "^8.3.0",
+        "sentiment": "^5.0.2",
+        "sharp": "^0.33.3",
+        "tsx": "^4.7.1"
+    }
+}
