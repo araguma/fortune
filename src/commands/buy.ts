@@ -16,13 +16,13 @@ discord.addCommand({
                 .setDescription('Stock ticker')
                 .setRequired(true),
         )
-        .addIntegerOption((option) =>
+        .addNumberOption((option) =>
             option
                 .setName('shares')
                 .setDescription('Quantity of shares')
                 .setRequired(false),
         )
-        .addIntegerOption((option) =>
+        .addNumberOption((option) =>
             option
                 .setName('dollars')
                 .setDescription('Amount in dollars')
@@ -42,36 +42,38 @@ discord.addCommand({
         const quote = snapshot.latestTrade.p
 
         const quantity =
-            interaction.options.getInteger('shares') ??
+            interaction.options.getNumber('shares') ??
             (() => {
                 const dollars =
-                    interaction.options.getInteger('dollars') ??
+                    interaction.options.getNumber('dollars') ??
                     (() => {
                         throw new UserError('Shares or Dollars is required')
                     })()
                 return dollars / quote
             })()
+        if (quantity <= 0)
+            throw new UserError('Quantity must be greater than 0')
+
         const total = quote * quantity
 
         const client = await database.getClient(interaction.user.id)
-        if (client.balance < total) throw new UserError('Insufficient funds')
+        if (client.balance < total)
+            throw new UserError(
+                `Insufficient funds\nTotal: $${total.toFixed(2)}\nBalance: $${client.balance.toFixed(2)}`,
+            )
 
-        const shares = await database.getShares(interaction.user.id, symbol)
+        const share = client.portfolio.get(symbol)
 
         client.balance -= total
-        await database.putClient(client)
-        await database.putShares(
-            interaction.user.id,
-            symbol,
-            (shares?.quantity ?? 0) + quantity,
-            (shares?.seed ?? 0) + total,
-        )
+        client.portfolio.set(symbol, {
+            quantity: (share?.quantity ?? 0) + quantity,
+            seed: (share?.seed ?? 0) + total,
+        })
+        await client.save().catch(console.error)
         const transaction = await database.postTransaction(
             interaction.user.id,
-            'buy',
             symbol,
             quantity,
-            total,
         )
 
         await interaction.reply({

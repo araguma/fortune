@@ -7,20 +7,11 @@ export const TransactionSchema = new Schema({
         type: String,
         required: true,
     },
-    type: {
-        type: String,
-        required: true,
-        enum: ['buy', 'sell'],
-    },
     symbol: {
         type: String,
         required: true,
     },
     quantity: {
-        type: Number,
-        required: true,
-    },
-    total: {
         type: Number,
         required: true,
     },

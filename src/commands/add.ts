@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
+import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
-import alpaca from '@/libs/alpaca'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -26,14 +26,14 @@ discord.addCommand({
         ).toUpperCase()
 
         const snapshot = (await alpaca.snapshots([symbol]))[symbol]
-        if (!snapshot) throw new UserError('Symbol not found')
+        if (!snapshot) throw new UserError(`Invalid symbol: ${symbol}`)
 
         const client = await database.getClient(interaction.user.id)
         if (client.watchlist.includes(symbol))
             throw new UserError(`${symbol} is already in watchlist`)
 
         client.watchlist.push(symbol)
-        await database.putClient(client)
+        await client.save()
 
         await interaction.reply({
             embeds: [

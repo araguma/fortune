@@ -7,6 +7,19 @@ export const ClientSchema = new Schema({
         type: String,
         required: true,
     },
+    portfolio: {
+        type: Map,
+        of: {
+            quantity: Number,
+            seed: Number,
+        },
+        default: {},
+    },
+    seed: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     balance: {
         type: Number,
         required: true,

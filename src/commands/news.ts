@@ -26,13 +26,13 @@ discord.addCommand({
             ? [symbol.toUpperCase()]
             : await (async () => {
                   const symbols = new Set<string>()
-                  const shares = await database.getAllShares(
-                      interaction.user.id,
-                  )
+                  const client = await database.getClient(interaction.user.id)
                   const watchlist = await database
                       .getClient(interaction.user.id)
                       .then((client) => client.watchlist)
-                  shares.forEach((share) => symbols.add(share.symbol))
+                  Array.from(client.portfolio.keys()).forEach((symbol) =>
+                      symbols.add(symbol),
+                  )
                   watchlist.forEach((symbol) => symbols.add(symbol))
                   return Array.from(symbols)
               })()
@@ -52,7 +52,7 @@ discord.addCommand({
                 ).comparative
                 return {
                     color:
-                        score > 0 ? 0x2ecc71 : score < 0 ? 0xe74c3c : 0x9b59b6,
+                        score > 0 ? 0x2ecc71 : score < 0 ? 0xe74c3c : 0x3498db,
                     title: article.headline,
                     url: article.url ?? '',
                     description: he.decode(article.summary),

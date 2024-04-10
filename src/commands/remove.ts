@@ -20,7 +20,7 @@ discord.addCommand({
         const symbol = (
             interaction.options.getString('symbol') ??
             (() => {
-                throw new UserError('Symbol is required')
+                throw new UserError('Symbol option is required')
             })()
         ).toUpperCase()
 
@@ -29,7 +29,7 @@ discord.addCommand({
             throw new UserError(`${symbol} is not in watchlist`)
 
         client.watchlist = client.watchlist.filter((s) => s !== symbol)
-        await database.putClient(client)
+        await client.save()
 
         await interaction.reply({
             embeds: [

@@ -36,17 +36,18 @@ discord.addCommand({
         )[symbol]
         if (!history) throw new UserError('Failed to get history')
 
-        const shares = await database.getShares(interaction.user.id, symbol)
-        const quantity = shares?.quantity ?? 0
+        const client = await database.getClient(interaction.user.id)
+        const quantity = client.portfolio.get(symbol)?.quantity ?? 0
 
         const quote = snapshot.latestTrade.p
         const delta = quote - snapshot.dailyBar.o
-        const sign = delta >= 0 ? '▴' : '▾'
+        const sign = delta > 0 ? '▴' : delta < 0 ? '▾' : '•'
 
         await interaction.reply({
             embeds: [
                 {
-                    color: delta >= 0 ? 0x2ecc71 : 0xe74c3c,
+                    color:
+                        delta > 0 ? 0x2ecc71 : delta < 0 ? 0xe74c3c : 0x3498db,
                     author: {
                         name: '---',
                     },
@@ -101,7 +102,11 @@ discord.addCommand({
                                 y: bar.o,
                             }
                         }),
-                        delta >= 0 ? '#2ecc71' : '#e74c3c',
+                        delta > 0
+                            ? '#2ecc71'
+                            : delta < 0
+                              ? '#e74c3c'
+                              : '#3498db',
                     ),
                     name: 'graph.png',
                 },
