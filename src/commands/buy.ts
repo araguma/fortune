@@ -1,121 +1,135 @@
-import { SlashCommandBuilder } from 'discord.js'
+import {
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder
+} from 'discord.js'
 
-import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import { TransactionReply } from '@/libs/reply'
+import { Stock } from '@/types'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('buy')
-        .setDescription('Purchase shares')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
+        .setDescription('Purchase stocks')
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('max')
+                .setDescription('Exhaust balance')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                ),
         )
-        .addNumberOption((option) =>
-            option
-                .setName('shares')
-                .setDescription('Quantity of shares')
-                .setRequired(false),
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('share')
+                .setDescription('Purchase by shares')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                )
+                .addNumberOption((option) =>
+                    option
+                        .setName('shares')
+                        .setDescription('Number of shares')
+                        .setRequired(true),
+                ),
         )
-        .addNumberOption((option) =>
-            option
-                .setName('dollars')
-                .setDescription('Amount in dollars')
-                .setRequired(false),
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('value')
+                .setDescription('Purchase by value')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                )
+                .addNumberOption((option) =>
+                    option
+                        .setName('value')
+                        .setDescription('Total stock value')
+                        .setRequired(true),
+                ),
         )
         .toJSON(),
     handler: async (interaction) => {
-        const symbol = (
-            interaction.options.getString('symbol') ??
-            (() => {
-                throw new UserError('Symbol is required')
-            })()
-        ).toUpperCase()
-
-        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
-        if (!snapshot) throw new UserError('Symbol not found')
-        const quote = snapshot.latestTrade.p
-
-        const quantity =
-            interaction.options.getNumber('shares') ??
-            (() => {
-                const dollars =
-                    interaction.options.getNumber('dollars') ??
-                    (() => {
-                        throw new UserError('Shares or Dollars is required')
-                    })()
-                return dollars / quote
-            })()
-        if (quantity <= 0)
-            throw new UserError('Quantity must be greater than 0')
-
-        const total = quote * quantity
-
         const client = await database.getClient(interaction.user.id)
-        if (client.balance < total)
-            throw new UserError(
-                `Insufficient funds\nTotal: $${total.toFixed(2)}\nBalance: $${client.balance.toFixed(2)}`,
-            )
 
-        const share = client.portfolio.get(symbol)
+        const cart: Stock[] = []
+        switch (interaction.options.getSubcommand()) {
+            case 'max': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
+                if (!snapshot) UserError.throw('Failed to get snapshot')
+                const shares = client.balance / snapshot.latestTrade.p
+                cart.push({ symbol, shares })
+                break
+            }
+            case 'share': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const shares = interaction.options.getNumber('shares', true)
+                cart.push({ symbol, shares })
+                break
+            }
+            case 'value': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const value = interaction.options.getNumber('value', true)
+                const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
+                if (!snapshot) UserError.throw('Failed to get snapshot')
+                const shares = value / snapshot.latestTrade.p
+                cart.push({ symbol, shares })
+                break
+            }
+        }
 
-        client.balance -= total
-        client.portfolio.set(symbol, {
-            quantity: (share?.quantity ?? 0) + quantity,
-            seed: (share?.seed ?? 0) + total,
+        const snapshots = await alpaca.getSnapshots(
+            cart.map((stock) => stock.symbol),
+        )
+        cart.forEach((stock) => {
+            if (stock.shares <= 0) UserError.throw('Invalid shares')
+
+            const snapshot = snapshots[stock.symbol]
+            if (!snapshot) throw new Error('Failed to get snapshot')
+            const current = client.portfolio.get(stock.symbol)
+            const shares = current?.shares ?? 0
+            const seed = current?.seed ?? 0
+
+            const total = snapshot.latestTrade.p * stock.shares
+            if (client.balance < total) UserError.throw('Insufficient funds')
+
+            client.balance -= total
+            client.portfolio.set(stock.symbol, {
+                shares: shares + stock.shares,
+                seed: seed + total,
+            })
         })
         await client.save().catch(console.error)
         const transaction = await database.postTransaction(
-            interaction.user.id,
-            symbol,
-            quantity,
+            client.clientId,
+            cart,
         )
 
-        await interaction.reply({
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '>>>',
-                    },
-                    title: `${symbol} Purchased`,
-                    fields: [
-                        {
-                            name: 'Quote',
-                            value: `$${quote}`,
-                            inline: true,
-                        },
-                        {
-                            name: 'Quantity',
-                            value: quantity.toString(),
-                            inline: true,
-                        },
-                        {
-                            name: 'Total',
-                            value: `$${total.toFixed(2)}`,
-                            inline: true,
-                        },
-                    ],
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    footer: {
-                        text: transaction._id.toString().toUpperCase(),
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
-        })
+        await interaction.reply(
+            new TransactionReply(
+                'buy',
+                snapshots,
+                cart,
+                transaction._id.toString(),
+            ).toJSON(),
+        )
     },
 })

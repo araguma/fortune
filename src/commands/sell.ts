@@ -1,127 +1,218 @@
-import { SlashCommandBuilder } from 'discord.js'
+import {
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder
+} from 'discord.js'
 
-import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import { TransactionReply } from '@/libs/reply'
+import { Stock } from '@/types'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('sell')
         .setDescription('Sell shares')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('all')
+                .setDescription('Sell everything'),
         )
-        .addNumberOption((option) =>
-            option
-                .setName('shares')
-                .setDescription('Quantity of shares')
-                .setRequired(false),
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('stock')
+                .setDescription('Sell by stock')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                ),
         )
-        .addNumberOption((option) =>
-            option
-                .setName('dollars')
-                .setDescription('Amount in dollars')
-                .setRequired(false),
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('share')
+                .setDescription('Sell by shares')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                )
+                .addNumberOption((option) =>
+                    option
+                        .setName('shares')
+                        .setDescription('Number of shares')
+                        .setRequired(true),
+                ),
+        )
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('value')
+                .setDescription('Sell by value')
+                .addStringOption((option) =>
+                    option
+                        .setName('symbol')
+                        .setDescription('Stock ticker')
+                        .setRequired(true),
+                )
+                .addNumberOption((option) =>
+                    option
+                        .setName('value')
+                        .setDescription('Total stock value')
+                        .setRequired(true),
+                ),
+        )
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('gain')
+                .setDescription('Sell all stocks with gain')
+                .addStringOption((option) =>
+                    option
+                        .setName('timeframe')
+                        .setDescription('Timeframe to consider')
+                        .addChoices(
+                            {
+                                name: 'Today',
+                                value: 'today',
+                            },
+                            {
+                                name: 'Max',
+                                value: 'max',
+                            },
+                        )
+                        .setRequired(true),
+                ),
+        )
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
+                .setName('loss')
+                .setDescription('Sell all stocks with loss')
+                .addStringOption((option) =>
+                    option
+                        .setName('timeframe')
+                        .setDescription('Timeframe to consider')
+                        .addChoices(
+                            {
+                                name: 'Today',
+                                value: 'today',
+                            },
+                            {
+                                name: 'Max',
+                                value: 'max',
+                            },
+                        )
+                        .setRequired(true),
+                ),
         )
         .toJSON(),
     handler: async (interaction) => {
-        const symbol = (
-            interaction.options.getString('symbol') ??
-            (() => {
-                throw new UserError('Symbol is required')
-            })()
-        ).toUpperCase()
-
-        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
-        if (!snapshot) throw new UserError('Symbol not found')
-        const quote = snapshot.latestTrade.p
-
-        const quantity =
-            interaction.options.getNumber('shares') ??
-            (() => {
-                const dollars =
-                    interaction.options.getNumber('dollars') ??
-                    (() => {
-                        throw new UserError('Shares or Dollars is required')
-                    })()
-                return dollars / quote
-            })()
-        if (quantity <= 0)
-            throw new UserError('Quantity must be greater than 0')
-
-        const total = quote * quantity
-
         const client = await database.getClient(interaction.user.id)
-
-        const share = client.portfolio.get(symbol)
-        if ((share?.quantity ?? 0) < quantity)
-            throw new UserError(
-                `Insufficient shares\nQuantity: ${quantity}\nShares: ${share?.quantity ?? 0}`,
-            )
-
-        client.balance += total
-        if ((share?.quantity ?? 0) - quantity <= 0) {
-            client.portfolio.delete(symbol)
-        } else {
-            client.portfolio.set(symbol, {
-                quantity: (share?.quantity ?? 0) - quantity,
-                seed:
-                    (share?.seed ?? 0) *
-                    (1 - quantity / (share?.quantity ?? 0)),
-            })
-        }
-        await client.save().catch(console.error)
-        const transaction = await database.postTransaction(
-            interaction.user.id,
-            symbol,
-            -quantity,
+        const snapshots = await alpaca.getSnapshots(
+            Array.from(client.portfolio.keys()),
         )
 
-        await interaction.reply({
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '<<<',
-                    },
-                    title: `${symbol} Sold`,
-                    fields: [
-                        {
-                            name: 'Quote',
-                            value: `$${quote}`,
-                            inline: true,
-                        },
-                        {
-                            name: 'Quantity',
-                            value: quantity.toString(),
-                            inline: true,
-                        },
-                        {
-                            name: 'Total',
-                            value: `$${total.toFixed(2)}`,
-                            inline: true,
-                        },
-                    ],
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    footer: {
-                        text: transaction._id.toString().toUpperCase(),
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
+        const cart: Stock[] = []
+        switch (interaction.options.getSubcommand(true)) {
+            case 'all': {
+                client.portfolio.forEach((stock, symbol) => {
+                    cart.push({ symbol, shares: stock.shares })
+                })
+                break
+            }
+            case 'stock': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const current =
+                    client.portfolio.get(symbol) ??
+                    UserError.throw('Stock not owned')
+                cart.push({ symbol, shares: current.shares })
+                break
+            }
+            case 'share': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const shares = interaction.options.getNumber('shares', true)
+                const current = client.portfolio.get(symbol)
+                if (!current) UserError.throw('Stock not owned')
+                cart.push({ symbol, shares })
+                break
+            }
+            case 'value': {
+                const symbol = interaction.options
+                    .getString('symbol', true)
+                    .toUpperCase()
+                const value = interaction.options.getNumber('value', true)
+                const snapshot = snapshots[symbol]
+                if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
+                const current = client.portfolio.get(symbol)
+                if (!current) UserError.throw('Stock not owned')
+                const shares = value / snapshot.latestTrade.p
+                cart.push({ symbol, shares })
+                break
+            }
+            case 'gain': {
+                client.portfolio.forEach((stock, symbol) => {
+                    const snapshot = snapshots[symbol]
+                    if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
+                    if (stock.shares * snapshot.latestTrade.p > stock.seed)
+                        cart.push({ symbol, shares: stock.shares })
+                })
+                break
+            }
+            case 'loss': {
+                client.portfolio.forEach((stock, symbol) => {
+                    const snapshot = snapshots[symbol]
+                    if (!snapshot) UserError.throw('Failed to get snapshot')
+                    if (stock.shares * snapshot.latestTrade.p < stock.seed)
+                        cart.push({ symbol, shares: stock.shares })
+                })
+                break
+            }
+            default: {
+                UserError.throw('Invalid subcommand')
+            }
+        }
+
+        cart.forEach((stock) => {
+            if (stock.shares <= 0) UserError.throw('Invalid shares')
+
+            const snapshot = snapshots[stock.symbol]
+            if (!snapshot) UserError.throw('Failed to get snapshot')
+            const current = client.portfolio.get(stock.symbol)
+            if (!current) UserError.throw('Stock not owned')
+
+            if (current.shares === stock.shares) {
+                client.portfolio.delete(stock.symbol)
+            } else if (current.shares > stock.shares) {
+                client.portfolio.set(stock.symbol, {
+                    shares: current.shares - stock.shares,
+                    seed: current.seed,
+                })
+            } else {
+                UserError.throw('Insufficient shares')
+            }
+            client.balance += stock.shares * snapshot.latestTrade.p
         })
+        await client.save().catch(console.error)
+        const transaction = await database.postTransaction(
+            client.clientId,
+            cart.map((stock) => ({
+                symbol: stock.symbol,
+                shares: -stock.shares,
+            })),
+        )
+
+        await interaction.reply(
+            new TransactionReply(
+                'sell',
+                snapshots,
+                cart,
+                transaction._id.toString(),
+            ).toJSON(),
+        )
     },
 })
