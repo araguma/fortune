@@ -20,37 +20,37 @@ discord.addCommand({
         const client = await database.getClient(
             interaction.options.getUser('user')?.id ?? interaction.user.id,
         )
-
-        const snapshots = await alpaca.snapshots(
+        const snapshots = await alpaca.getSnapshots(
             Array.from(client.portfolio.keys()),
         )
 
         const { value, delta } = Array.from(client.portfolio.entries()).reduce(
-            (acc, [symbol, share]) => {
+            (acc, [symbol, stock]) => {
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
                 const quote = snapshot.latestTrade.p
                 return {
-                    value: acc.value + quote * (share.quantity ?? 0),
+                    value: acc.value + quote * stock.shares,
                     delta:
                         acc.delta +
-                        (quote - snapshot.dailyBar.o) * (share.quantity ?? 0),
+                        (quote - snapshot.dailyBar.o) * stock.shares,
                 }
             },
             { value: 0, delta: 0 },
         )
         const total = value + client.balance
-        const profit = total - client.seed
+        let profit = total - client.seed
+        if (profit < 0.0000000001) profit = 0
         const description = Array.from(client.portfolio.entries())
-            .map(([symbol, share]) => {
+            .map(([symbol, stock]) => {
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
                 const quote = snapshot.latestTrade.p
-                const total = quote * (share.quantity ?? 0)
+                const total = quote * stock.shares
                 const percent =
                     ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
-                const sign = percent > 0 ? '▴' : percent < 0 ? '▾' : '•'
-                return `${sign} **${symbol}** ${share.quantity ?? 0} ⋅ $${quote} ▸ $${total.toFixed(2)} (${percent.toFixed(2)}%)`
+                const sign = percent >= 0 ? '▴' : '▾'
+                return `${sign} **${symbol}** ${stock.shares} ⋅ $${quote} ▸ $${total.toFixed(2)} (${percent.toFixed(2)}%)`
             })
             .join('\n')
         const embed = {
@@ -59,7 +59,7 @@ discord.addCommand({
                 name: '---',
             },
             title: 'Portfolio',
-            description: description || '> *No shares found*',
+            description: description || '> *No stocks found*',
             fields: [
                 {
                     name: 'Value',

@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 import { ClientModel } from '@/models/client'
 import { TransactionModel } from '@/models/transaction'
+import { Stock } from '@/types'
 
 export class Database {
     constructor(uri: string) {
@@ -27,15 +28,10 @@ export class Database {
         return transactions
     }
 
-    async postTransaction(
-        clientId: string,
-        symbol: string,
-        quantity: number,
-    ) {
+    async postTransaction(clientId: string, shares: Stock[]) {
         const transaction = await TransactionModel.create({
             clientId,
-            symbol,
-            quantity,
+            shares,
         }).catch(console.error)
         if (!transaction) throw new Error('Failed to create transaction')
         return transaction

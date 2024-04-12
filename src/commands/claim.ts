@@ -23,31 +23,35 @@ discord.addCommand({
             const timeLeft = prettyMilliseconds(
                 interval - (Date.now() - lastClaim),
             )
-            throw new UserError(`You can claim again in ${timeLeft}`)
+            UserError.throw(`You can claim again in ${timeLeft}`)
         }
 
         const symbol = symbols[Math.floor(Math.random() * symbols.length)]
         if (!symbol) throw new Error('Failed to get symbol')
 
-        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
+        const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
         if (!snapshot) throw new Error('Failed to get snapshot')
         const quote = snapshot.latestTrade.p
 
-        const quantity = Math.floor(Math.random() * 19 + 1) / 10
-        const total = quote * quantity
-        const share = client.portfolio.get(symbol)
+        const shares = Math.floor(Math.random() * 19 + 1) / 10
+        const total = quote * shares
+        const current = client.portfolio.get(symbol)
 
         client.portfolio.set(symbol, {
-            quantity: (share?.quantity ?? 0) + quantity,
-            seed: (share?.seed ?? 0) + total,
+            shares: (current?.shares ?? 0) + shares,
+            seed: (current?.seed ?? 0) + total,
         })
         client.seed += total
         client.lastClaim = new Date()
         await client.save()
         const transaction = await database.postTransaction(
             interaction.user.id,
-            symbol,
-            quantity,
+            [
+                {
+                    symbol,
+                    shares,
+                },
+            ],
         )
 
         await interaction.reply({
@@ -65,8 +69,8 @@ discord.addCommand({
                             inline: true,
                         },
                         {
-                            name: 'Quantity',
-                            value: quantity.toString(),
+                            name: 'Shares',
+                            value: shares.toString(),
                             inline: true,
                         },
                         {

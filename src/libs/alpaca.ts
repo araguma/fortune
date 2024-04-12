@@ -19,7 +19,7 @@ export class Alpaca {
         })
     }
 
-    async snapshots<A extends string[]>(symbols: A) {
+    async getSnapshots<A extends string[]>(symbols: A) {
         const url = new URL(`${baseUrl}/v2/stocks/snapshots`)
         url.searchParams.append('symbols', symbols.join(','))
         url.searchParams.append('feed', 'iex')
@@ -31,7 +31,7 @@ export class Alpaca {
         return response
     }
 
-    async history<A extends string[]>(
+    async getHistory<A extends string[]>(
         symbols: A,
         timeframe: string,
         start: Date,
@@ -53,7 +53,7 @@ export class Alpaca {
         return response.bars
     }
 
-    async actives(top: number, sortBy: string) {
+    async getActives(top: number, sortBy: string) {
         const url = new URL(`${baseUrl}/v1beta1/screener/stocks/most-actives`)
         url.searchParams.append('top', top.toString())
         url.searchParams.append('by', sortBy.toLowerCase())
@@ -65,7 +65,7 @@ export class Alpaca {
         return response.most_actives
     }
 
-    async movers(top: number) {
+    async getMovers(top: number) {
         const url = new URL(`${baseUrl}/v1beta1/screener/stocks/movers`)
         url.searchParams.append('top', top.toString())
         const response = (await (
@@ -76,7 +76,7 @@ export class Alpaca {
         return response
     }
 
-    async news(symbols: string[], start: Date, end: Date, limit: number) {
+    async getNews(symbols: string[], start: Date, end: Date, limit: number) {
         const url = new URL(`${baseUrl}/v1beta1/news`)
         url.searchParams.append('symbols', symbols.join(','))
         url.searchParams.append('start', start.toISOString())

@@ -31,7 +31,7 @@ discord.addCommand({
                 throw new Error('Type is required')
             })()) as 'Gainers' | 'Losers'
 
-        const movers = await alpaca.movers(10)
+        const movers = await alpaca.getMovers(10)
 
         const sign = type === 'Gainers' ? '▴' : '▾'
         const description = movers[type.toLowerCase() as Lowercase<typeof type>]

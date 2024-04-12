@@ -21,16 +21,16 @@ discord.addCommand({
         const symbol = (
             interaction.options.getString('symbol') ??
             (() => {
-                throw new UserError('Symbol is required')
+                UserError.throw('Symbol is required')
             })()
         ).toUpperCase()
 
-        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
-        if (!snapshot) throw new UserError(`Invalid symbol: ${symbol}`)
+        const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
+        if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
 
         const client = await database.getClient(interaction.user.id)
         if (client.watchlist.includes(symbol))
-            throw new UserError(`${symbol} is already in watchlist`)
+            UserError.throw(`${symbol} is already in watchlist`)
 
         client.watchlist.push(symbol)
         await client.save()

@@ -32,7 +32,7 @@ discord.addCommand({
                 throw new Error('Sort by is required')
             })()
 
-        const actives = await alpaca.actives(10, sortBy)
+        const actives = await alpaca.getActives(10, sortBy)
 
         await interaction.reply({
             embeds: [

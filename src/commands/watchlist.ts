@@ -21,7 +21,7 @@ discord.addCommand({
             interaction.options.getUser('user')?.id ?? interaction.user.id,
         )
 
-        const snapshots = await alpaca.snapshots(client.watchlist)
+        const snapshots = await alpaca.getSnapshots(client.watchlist)
 
         const description = client.watchlist
             .map((symbol) => {
@@ -30,7 +30,7 @@ discord.addCommand({
                 const quote = snapshot.latestTrade.p
                 const percent =
                     ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
-                const sign = percent > 0 ? '▴' : percent < 0 ? '▾' : '•'
+                const sign = percent >= 0 ? '▴' : '▾'
                 return `${sign} **${symbol}** $${quote} (${percent.toFixed(2)}%)`
             })
             .join('\n')

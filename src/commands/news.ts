@@ -40,10 +40,10 @@ discord.addCommand({
         const start = new Date()
         const end = new Date()
         start.setDate(start.getDate() - 7)
-        const news = await alpaca.news(symbols, start, end, 3)
+        const news = await alpaca.getNews(symbols, start, end, 3)
 
         if (news.length === 0)
-            throw new UserError('No news found for ' + symbols.join(', '))
+            UserError.throw('No news found for ' + symbols.join(', '))
 
         await interaction.reply({
             embeds: news.map((article) => {

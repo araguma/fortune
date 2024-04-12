@@ -21,27 +21,27 @@ discord.addCommand({
         const symbol = (
             interaction.options.getString('symbol') ??
             (() => {
-                throw new UserError('Symbol is required')
+                UserError.throw('Symbol is required')
             })()
         ).toUpperCase()
 
-        const snapshot = (await alpaca.snapshots([symbol]))[symbol]
-        if (!snapshot) throw new UserError('Symbol not found')
+        const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
+        if (!snapshot) UserError.throw('Symbol not found')
 
         const start = new Date()
         const end = new Date()
         start.setFullYear(end.getFullYear() - 1)
         const history = (
-            await alpaca.history([symbol], '1Day', start, end, 1000)
+            await alpaca.getHistory([symbol], '1Day', start, end, 1000)
         )[symbol]
-        if (!history) throw new UserError('Failed to get history')
+        if (!history) UserError.throw('Failed to get history')
 
         const client = await database.getClient(interaction.user.id)
-        const quantity = client.portfolio.get(symbol)?.quantity ?? 0
+        const shares = client.portfolio.get(symbol)?.shares ?? 0
 
         const quote = snapshot.latestTrade.p
         const delta = quote - snapshot.dailyBar.o
-        const sign = delta > 0 ? '▴' : delta < 0 ? '▾' : '•'
+        const sign = delta >= 0 ? '▴' : '▾'
 
         await interaction.reply({
             embeds: [
@@ -81,7 +81,7 @@ discord.addCommand({
                         },
                         {
                             name: 'Owned',
-                            value: quantity.toString(),
+                            value: shares.toString(),
                             inline: true,
                         },
                     ],

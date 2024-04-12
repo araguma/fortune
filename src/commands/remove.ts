@@ -20,13 +20,13 @@ discord.addCommand({
         const symbol = (
             interaction.options.getString('symbol') ??
             (() => {
-                throw new UserError('Symbol option is required')
+                UserError.throw('Symbol option is required')
             })()
         ).toUpperCase()
 
         const client = await database.getClient(interaction.user.id)
         if (!client.watchlist.includes(symbol))
-            throw new UserError(`${symbol} is not in watchlist`)
+            UserError.throw(`${symbol} is not in watchlist`)
 
         client.watchlist = client.watchlist.filter((s) => s !== symbol)
         await client.save()

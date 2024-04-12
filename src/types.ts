@@ -8,6 +8,11 @@ export type Command = {
     handler: (interaction: ChatInputCommandInteraction) => Promise<void>
 }
 
+export type Stock = {
+    symbol: string
+    shares: number
+}
+
 export type SnapshotsResponse<T extends string> = Record<T, Snapshot>
 export type HistoricalBarsResponse<T extends string> = {
     bars: Record<T, Bar[]>
