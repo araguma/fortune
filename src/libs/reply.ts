@@ -2,8 +2,8 @@ import { InteractionReplyOptions } from 'discord.js'
 
 import divider from '@/images/divider'
 import { UserError } from '@/libs/error'
-import { SnapshotsResponse, Stock } from '@/types'
 import format from '@/libs/format'
+import { SnapshotsResponse, Stock } from '@/types'
 
 export class TransactionReply {
     constructor(
@@ -53,15 +53,16 @@ export class TransactionReply {
                 },
                 {
                     name: 'Total',
-                    value: '$' + this.stocks
-                        .map((stock) => {
-                            const snapshot = this.snapshots[stock.symbol]
-                            if (!snapshot)
-                                UserError.throw('Failed to get snapshot')
-                            return stock.shares * snapshot.latestTrade.p
-                        })
-                        .reduce((a, b) => a + b, 0)
-                        .toFixed(2),
+                    value: format.currency(
+                        this.stocks
+                            .map((stock) => {
+                                const snapshot = this.snapshots[stock.symbol]
+                                if (!snapshot)
+                                    UserError.throw('Failed to get snapshot')
+                                return stock.shares * snapshot.latestTrade.p
+                            })
+                            .reduce((a, b) => a + b, 0),
+                    ),
                     inline: true,
                 },
             ],
