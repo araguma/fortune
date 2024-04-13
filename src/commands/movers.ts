@@ -40,7 +40,7 @@ discord.addCommand({
                     sign,
                     format.bold(mover.symbol),
                     format.currency(mover.price),
-                    `(${format.percentage(mover.percent_change)})`,
+                    `(${mover.percent_change}%)`,
                 ].join(' ')
             })
             .join('\n')
