@@ -2,7 +2,7 @@ export class Format {
     currencyPrefix = '$'
     currencySuffix = ''
 
-    currency(amount: number)  {
+    currency(amount: number) {
         return (
             this.currencyPrefix +
             parseFloat(amount.toFixed(4)) +
@@ -11,6 +11,7 @@ export class Format {
     }
 
     percentage(decimal: number) {
+        if (Number.isNaN(decimal) || Math.abs(decimal) === Infinity) return '0%'
         return `${parseFloat((decimal * 100).toFixed(2))}%`
     }
 
