@@ -66,7 +66,7 @@ discord.addCommand({
                             inline: true,
                         },
                         {
-                            name: 'Related',
+                            name: 'Symbols',
                             value: article.symbols.join(', '),
                             inline: true,
                         },
