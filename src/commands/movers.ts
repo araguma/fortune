@@ -26,10 +26,9 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const type = (interaction.options.getString('type') ??
-            (() => {
-                throw new Error('Type is required')
-            })()) as 'Gainers' | 'Losers'
+        const type = interaction.options.getString('type', true) as
+            | 'Gainers'
+            | 'Losers'
 
         const movers = await alpaca.getMovers(10)
 

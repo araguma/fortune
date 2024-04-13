@@ -17,12 +17,9 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const symbol = (
-            interaction.options.getString('symbol') ??
-            (() => {
-                UserError.throw('Symbol option is required')
-            })()
-        ).toUpperCase()
+        const symbol = interaction.options
+            .getString('symbol', true)
+            .toUpperCase()
 
         const client = await database.getClient(interaction.user.id)
         if (!client.watchlist.includes(symbol))

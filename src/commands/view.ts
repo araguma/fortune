@@ -18,12 +18,9 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const symbol = (
-            interaction.options.getString('symbol') ??
-            (() => {
-                UserError.throw('Symbol is required')
-            })()
-        ).toUpperCase()
+        const symbol = interaction.options
+            .getString('symbol', true)
+            .toUpperCase()
 
         const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
         if (!snapshot) UserError.throw('Symbol not found')

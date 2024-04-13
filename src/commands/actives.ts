@@ -26,12 +26,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const sortBy =
-            interaction.options.getString('by') ??
-            (() => {
-                throw new Error('Sort by is required')
-            })()
-
+        const sortBy = interaction.options.getString('by', true)
         const actives = await alpaca.getActives(10, sortBy)
 
         await interaction.reply({
