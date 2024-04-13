@@ -185,6 +185,9 @@ discord.addCommand({
             const current = client.portfolio.get(stock.symbol)
             if (!current) UserError.throw('Stock not owned')
 
+            if (current.shares < stock.shares)
+                UserError.throw('Insufficient shares')
+
             if (current.shares === stock.shares) {
                 client.portfolio.delete(stock.symbol)
             } else if (current.shares > stock.shares) {
@@ -192,8 +195,6 @@ discord.addCommand({
                     shares: current.shares - stock.shares,
                     seed: current.seed,
                 })
-            } else {
-                UserError.throw('Insufficient shares')
             }
             client.balance += stock.shares * snapshot.latestTrade.p
         })

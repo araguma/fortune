@@ -7,6 +7,7 @@ import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import format from '@/libs/format'
 
 const interval = 1800000
 
@@ -65,7 +66,7 @@ discord.addCommand({
                     fields: [
                         {
                             name: 'Quote',
-                            value: `$${quote}`,
+                            value: format.currency(quote),
                             inline: true,
                         },
                         {
@@ -75,7 +76,7 @@ discord.addCommand({
                         },
                         {
                             name: 'Total',
-                            value: `$${total.toFixed(2)}`,
+                            value: format.currency(total),
                             inline: true,
                         },
                     ],

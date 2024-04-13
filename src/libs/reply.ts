@@ -3,6 +3,7 @@ import { InteractionReplyOptions } from 'discord.js'
 import divider from '@/images/divider'
 import { UserError } from '@/libs/error'
 import { SnapshotsResponse, Stock } from '@/types'
+import format from '@/libs/format'
 
 export class TransactionReply {
     constructor(
@@ -19,7 +20,14 @@ export class TransactionReply {
                 if (!snapshot) UserError.throw('Failed to get snapshot')
                 const quote = snapshot.latestTrade.p
                 const total = stock.shares * quote
-                return `**${stock.symbol}** ${stock.shares} ⋅ $${quote} ▸ $${total.toFixed(2)}`
+                return [
+                    format.bold(stock.symbol),
+                    stock.shares,
+                    '⋅',
+                    format.currency(quote),
+                    '▸',
+                    format.currency(total),
+                ].join(' ')
             })
             .join('\n')
         const embed = {

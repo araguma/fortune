@@ -5,6 +5,7 @@ import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import format from '@/libs/format'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -49,21 +50,28 @@ discord.addCommand({
                         name: '---',
                     },
                     title: symbol,
-                    description: `# $${quote}\n${sign} ${Math.abs(delta).toFixed(2)} (${(delta / snapshot.dailyBar.o).toFixed(2)}%)`,
+                    description: [
+                        '#',
+                        format.currency(quote),
+                        '\n',
+                        sign,
+                        format.currency(Math.abs(delta)),
+                        `(${format.percentage(delta / snapshot.dailyBar.o)})`,
+                    ].join(' '),
                     fields: [
                         {
                             name: 'Open',
-                            value: `$${snapshot.dailyBar.o.toFixed(2)}`,
+                            value: format.currency(snapshot.dailyBar.o),
                             inline: true,
                         },
                         {
                             name: 'High',
-                            value: `$${snapshot.dailyBar.h.toFixed(2)}`,
+                            value: format.currency(snapshot.dailyBar.h),
                             inline: true,
                         },
                         {
                             name: 'Low',
-                            value: `$${snapshot.dailyBar.l.toFixed(2)}`,
+                            value: format.currency(snapshot.dailyBar.l),
                             inline: true,
                         },
                         {

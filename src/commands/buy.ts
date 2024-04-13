@@ -1,7 +1,4 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandSubcommandBuilder
-} from 'discord.js'
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
@@ -105,16 +102,14 @@ discord.addCommand({
             const snapshot = snapshots[stock.symbol]
             if (!snapshot) throw new Error('Failed to get snapshot')
             const current = client.portfolio.get(stock.symbol)
-            const shares = current?.shares ?? 0
-            const seed = current?.seed ?? 0
 
             const total = snapshot.latestTrade.p * stock.shares
             if (client.balance < total) UserError.throw('Insufficient funds')
 
             client.balance -= total
             client.portfolio.set(stock.symbol, {
-                shares: shares + stock.shares,
-                seed: seed + total,
+                shares: (current?.shares ?? 0) + stock.shares,
+                seed: (current?.seed ?? 0) + total,
             })
         })
         await client.save().catch(console.error)

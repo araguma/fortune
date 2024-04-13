@@ -4,6 +4,7 @@ import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
+import format from '@/libs/format'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -46,11 +47,18 @@ discord.addCommand({
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
                 const quote = snapshot.latestTrade.p
-                const total = quote * stock.shares
                 const percent =
                     ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
-                const sign = percent >= 0 ? '▴' : '▾'
-                return `${sign} **${symbol}** ${stock.shares} ⋅ $${quote} ▸ $${total.toFixed(2)} (${percent.toFixed(2)}%)`
+                return [
+                    percent >= 0 ? '▴' : '▾',
+                    format.bold(symbol),
+                    stock.shares,
+                    '⋅',
+                    format.currency(quote),
+                    '▸',
+                    format.currency(quote * stock.shares),
+                    `(${format.currency(percent)})`,
+                ].join(' ')
             })
             .join('\n')
         const embed = {
@@ -63,32 +71,41 @@ discord.addCommand({
             fields: [
                 {
                     name: 'Value',
-                    value: `$${value.toFixed(2)} (${(value ? (delta / value) * 100 : 0).toFixed(2)}%)`,
+                    value: [
+                        format.currency(value),
+                        `(${format.percentage(delta / value)})`,
+                    ].join(' '),
                     inline: true,
                 },
                 {
                     name: 'Balance',
-                    value: `$${client.balance.toFixed(2)}`,
+                    value: format.currency(client.balance),
                     inline: true,
                 },
                 {
                     name: 'Total',
-                    value: `$${total.toFixed(2)} (${(total ? (delta / total) * 100 : 0).toFixed(2)}%)`,
+                    value: [
+                        format.currency(total),
+                        `(${format.percentage(delta / total)})`,
+                    ].join(' '),
                     inline: true,
                 },
                 {
                     name: 'Delta',
-                    value: `$${delta.toFixed(2)}`,
+                    value: format.currency(delta),
                     inline: true,
                 },
                 {
                     name: 'Seed',
-                    value: `$${client.seed.toFixed(2)}`,
+                    value: format.currency(client.seed),
                     inline: true,
                 },
                 {
                     name: 'Profit',
-                    value: `$${profit.toFixed(2)} (${(profit ? (delta / profit) * 100 : 0).toFixed(2)}%)`,
+                    value: [
+                        format.currency(profit),
+                        `(${format.percentage(delta / profit)})`,
+                    ].join(' '),
                     inline: true,
                 },
             ],

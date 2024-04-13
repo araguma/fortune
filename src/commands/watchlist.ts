@@ -4,6 +4,7 @@ import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
+import format from '@/libs/format'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -30,8 +31,12 @@ discord.addCommand({
                 const quote = snapshot.latestTrade.p
                 const percent =
                     ((quote - snapshot.dailyBar.o) / snapshot.dailyBar.o) * 100
-                const sign = percent >= 0 ? '▴' : '▾'
-                return `${sign} **${symbol}** $${quote} (${percent.toFixed(2)}%)`
+                return [
+                    percent >= 0 ? '▴' : '▾',
+                    format.bold(symbol),
+                    format.currency(quote),
+                    `(${format.percentage(percent)})`,
+                ].join(' ')
             })
             .join('\n')
 

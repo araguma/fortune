@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from 'discord.js'
 import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import discord from '@/libs/discord'
+import format from '@/libs/format'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -35,7 +36,12 @@ discord.addCommand({
         const sign = type === 'Gainers' ? '▴' : '▾'
         const description = movers[type.toLowerCase() as Lowercase<typeof type>]
             .map((mover) => {
-                return `${sign} **${mover.symbol}** $${mover.price} (${mover.percent_change}%)`
+                return [
+                    sign,
+                    format.bold(mover.symbol),
+                    format.currency(mover.price),
+                    `(${format.percentage(mover.percent_change)})`,
+                ].join(' ')
             })
             .join('\n')
 
