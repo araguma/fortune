@@ -40,8 +40,7 @@ discord.addCommand({
             { value: 0, delta: 0 },
         )
         const total = value + client.balance
-        let profit = total - client.seed
-        if (profit < 0.0000000001) profit = 0
+        const profit = parseFloat((total - client.seed).toFixed(4))
         const description = Array.from(client.portfolio.entries())
             .map(([symbol, stock]) => {
                 const snapshot = snapshots[symbol]
