@@ -5,7 +5,7 @@ export class Format {
     currency(amount: number) {
         return (
             this.currencyPrefix +
-            parseFloat(amount.toFixed(4)) +
+            parseFloat(amount.toFixed(5)) +
             this.currencySuffix
         )
     }
