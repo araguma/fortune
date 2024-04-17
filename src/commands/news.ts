@@ -26,9 +26,11 @@ discord.addCommand({
             ? [symbol.toUpperCase()]
             : await (async () => {
                   const symbols = new Set<string>()
-                  const client = await database.getClient(interaction.user.id)
+                  const client = await database.getClientById(
+                      interaction.user.id,
+                  )
                   const watchlist = await database
-                      .getClient(interaction.user.id)
+                      .getClientById(interaction.user.id)
                       .then((client) => client.watchlist)
                   Array.from(client.portfolio.keys()).forEach((symbol) =>
                       symbols.add(symbol),

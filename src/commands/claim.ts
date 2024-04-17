@@ -17,7 +17,7 @@ discord.addCommand({
         .setDescription('Receive a random stock')
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClient(interaction.user.id)
+        const client = await database.getClientById(interaction.user.id)
 
         const lastClaim = client.lastClaim.getTime()
         if (Date.now() - lastClaim < interval) {

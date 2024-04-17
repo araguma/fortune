@@ -1,50 +1,54 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
+import { predictionCache } from '@/libs/cache'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
-        .setName('add')
-        .setDescription('Add stock to watchlist')
+        .setName('close')
+        .setDescription('Close a prediction')
         .addStringOption((option) =>
             option
-                .setName('symbol')
-                .setDescription('Stock ticker')
+                .setName('id')
+                .setDescription('Prediction ID')
                 .setRequired(true),
         )
         .toJSON(),
     handler: async (interaction) => {
-        const symbol = interaction.options
-            .getString('symbol', true)
-            .toUpperCase()
+        const predictionId = interaction.options.getString('id', true)
 
-        const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
-        if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
+        const prediction = await database
+            .getPredictionById(predictionId)
+            .catch(() => UserError.throw('Invalid prediction ID'))
 
-        const client = await database.getClientById(interaction.user.id)
-        if (client.watchlist.includes(symbol))
-            UserError.throw(`${symbol} is already in watchlist`)
+        if (prediction.status !== 'opened')
+            throw new Error('Prediction is not open')
 
-        client.watchlist.push(symbol)
-        await client.save()
+        const cached = predictionCache.get(predictionId)
+        if (!cached) throw new Error('Prediction does not exist')
 
+        prediction.status = 'closed'
+        await prediction.save()
+
+        cached.reply.status = 'closed'
+
+        await cached.interaction.editReply(cached.reply.toJSON())
         await interaction.reply({
             embeds: [
                 {
                     color: 0x3498db,
                     author: {
-                        name: '>>>',
+                        name: '---',
                     },
-                    title: `${symbol} Added to Watchlist`,
+                    title: 'Prediction Closed',
                     image: {
                         url: 'attachment://divider.png',
                     },
                     footer: {
-                        text: client._id.toString().toUpperCase(),
+                        text: predictionId,
                     },
                     timestamp: new Date().toISOString(),
                 },
@@ -55,6 +59,7 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
+            ephemeral: true,
         })
     },
 })

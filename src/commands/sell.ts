@@ -1,7 +1,4 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandSubcommandBuilder
-} from 'discord.js'
+import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
@@ -108,7 +105,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClient(interaction.user.id)
+        const client = await database.getClientById(interaction.user.id)
         const snapshots = await alpaca.getSnapshots(
             Array.from(client.portfolio.keys()),
         )
@@ -198,7 +195,7 @@ discord.addCommand({
             }
             client.balance += stock.shares * snapshot.latestTrade.p
         })
-        await client.save().catch(console.error)
+        await client.save()
         const transaction = await database.postTransaction(
             client.clientId,
             cart.map((stock) => ({
