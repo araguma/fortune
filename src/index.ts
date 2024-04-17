@@ -2,6 +2,7 @@ import 'dotenv/config'
 
 import '@/commands/actives'
 import '@/commands/add'
+import '@/commands/balance'
 import '@/commands/buy'
 import '@/commands/claim'
 import '@/commands/movers'
