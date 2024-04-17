@@ -58,7 +58,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClient(interaction.user.id)
+        const client = await database.getClientById(interaction.user.id)
 
         const cart: Stock[] = []
         switch (interaction.options.getSubcommand()) {
@@ -112,7 +112,7 @@ discord.addCommand({
                 seed: (current?.seed ?? 0) + total,
             })
         })
-        await client.save().catch(console.error)
+        await client.save()
         const transaction = await database.postTransaction(
             client.clientId,
             cart,
