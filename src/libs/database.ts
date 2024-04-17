@@ -1,40 +1,57 @@
 import mongoose from 'mongoose'
 
 import { ClientModel } from '@/models/client'
+import { PredictionModel } from '@/models/prediction'
 import { TransactionModel } from '@/models/transaction'
 import { Stock } from '@/types'
 
 export class Database {
     constructor(uri: string) {
-        mongoose.connect(uri).catch(console.error)
+        void mongoose.connect(uri)
     }
 
-    async getClient(clientId: string) {
+    async getClientById(clientId: string) {
         const client = await ClientModel.findOneAndUpdate(
             { clientId },
             { clientId },
             { upsert: true, new: true },
-        ).catch(console.error)
-        if (!client) throw new Error('Failed to get client')
+        )
         return client
+    }
+
+    async getAllClients() {
+        const clients = await ClientModel.find()
+        return clients
     }
 
     async getTransactionsByDate(clientId: string, start: Date, end: Date) {
         const transactions = await TransactionModel.find({
             clientId,
             date: { $gte: start, $lt: end },
-        }).catch(console.error)
-        if (!transactions) throw new Error('Failed to get transactions')
+        })
         return transactions
+    }
+
+    async getPredictionById(predictionId: string) {
+        const prediction = await PredictionModel.findById(predictionId)
+        if (!prediction) throw new Error('Failed to get prediction')
+        return prediction
     }
 
     async postTransaction(clientId: string, shares: Stock[]) {
         const transaction = await TransactionModel.create({
             clientId,
             shares,
-        }).catch(console.error)
-        if (!transaction) throw new Error('Failed to create transaction')
+        })
         return transaction
+    }
+
+    async postPrediction(question: string, options: string[]) {
+        const prediction = await PredictionModel.create({
+            question,
+            options,
+        })
+        return prediction
     }
 }
 
