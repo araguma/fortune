@@ -18,7 +18,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClient(
+        const client = await database.getClientById(
             interaction.options.getUser('user')?.id ?? interaction.user.id,
         )
         const snapshots = await alpaca.getSnapshots(

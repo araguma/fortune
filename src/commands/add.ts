@@ -25,7 +25,7 @@ discord.addCommand({
         const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
         if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
 
-        const client = await database.getClient(interaction.user.id)
+        const client = await database.getClientById(interaction.user.id)
         if (client.watchlist.includes(symbol))
             UserError.throw(`${symbol} is already in watchlist`)
 

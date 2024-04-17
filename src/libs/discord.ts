@@ -40,6 +40,7 @@ export class Discord extends Client {
                                 color: 0x000000,
                             },
                         ],
+                        ephemeral: true,
                     })
                 } else {
                     console.error(error)
