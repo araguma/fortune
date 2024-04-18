@@ -75,7 +75,7 @@ discord.addCommand({
                         'goes to',
                         winners.length
                             ? winners.map((userId) => `<@${userId}>`).join(', ')
-                            : 'The House',
+                            : '**The House**',
                     ].join(' '),
                     image: {
                         url: 'attachment://divider.png',
