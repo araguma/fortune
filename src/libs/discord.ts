@@ -6,7 +6,10 @@ import {
     Routes,
 } from 'discord.js'
 
+import database from '@/libs/database'
 import { UserError } from '@/libs/error'
+import getGroup from '@/libs/groups'
+import { ErrorReply } from '@/libs/reply/error'
 import { Command } from '@/types'
 
 export class Discord extends Client {
@@ -28,35 +31,44 @@ export class Discord extends Client {
     async handleInteraction(interaction: Interaction) {
         if (!interaction.isChatInputCommand()) return
 
+        if (interaction.guildId && interaction.commandName !== 'whitelist') {
+            const server = await database.getServerByGuildId(
+                interaction.guildId,
+            )
+            const group = getGroup(interaction.commandName)
+            if (!server.channels.get(interaction.channelId)?.[group]) {
+                await interaction.reply(
+                    new ErrorReply(
+                        `This channel is not whitelisted for ${group}`,
+                    ).toJSON(),
+                )
+                return
+            }
+        }
+
         const command = this.commands[interaction.commandName]
         if (command) {
             await command.handler(interaction).catch(async (error) => {
                 if (error instanceof UserError) {
-                    await interaction.reply({
-                        embeds: [
-                            {
-                                title: 'Error',
-                                description: error.message,
-                                color: 0x000000,
-                            },
-                        ],
-                        ephemeral: true,
-                    })
+                    await interaction.reply(
+                        new ErrorReply(error.message).toJSON(),
+                    )
                 } else {
                     console.error(error)
-                    await interaction.reply({
-                        content:
+                    await interaction.reply(
+                        new ErrorReply(
                             'There was an error while executing this command',
-                        ephemeral: true,
-                    })
+                        ).toJSON(),
+                    )
                 }
             })
         } else {
             interaction
-                .reply({
-                    content: 'This command does not exist',
-                    ephemeral: true,
-                })
+                .reply(
+                    new ErrorReply(
+                        'This command does not exist',
+                    ).toJSON(),
+                )
                 .catch(console.error)
         }
     }

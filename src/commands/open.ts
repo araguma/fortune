@@ -3,7 +3,7 @@ import { SlashCommandBuilder } from 'discord.js'
 import { predictionCache } from '@/libs/cache'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
-import { PredictionReply } from '@/libs/reply'
+import { PredictionReply } from '@/libs/reply/prediction'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()

@@ -4,7 +4,7 @@ import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
-import { TransactionReply } from '@/libs/reply'
+import { TransactionReply } from '@/libs/reply/transaction'
 import { Stock } from '@/types'
 
 discord.addCommand({
