@@ -3,7 +3,7 @@ import { InferSchemaType, Schema, model } from 'mongoose'
 export type Transaction = InferSchemaType<typeof TransactionSchema>
 
 export const TransactionSchema = new Schema({
-    clientId: {
+    userId: {
         type: String,
         required: true,
     },

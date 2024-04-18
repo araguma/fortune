@@ -197,7 +197,7 @@ discord.addCommand({
         })
         await client.save()
         const transaction = await database.postTransaction(
-            client.clientId,
+            client.userId,
             cart.map((stock) => ({
                 symbol: stock.symbol,
                 shares: -stock.shares,

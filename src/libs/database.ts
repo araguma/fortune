@@ -10,10 +10,10 @@ export class Database {
         void mongoose.connect(uri)
     }
 
-    async getClientByUserId(clientId: string) {
+    async getClientByUserId(userId: string) {
         const client = await ClientModel.findOneAndUpdate(
-            { clientId },
-            { clientId },
+            { userId },
+            { userId },
             { upsert: true, new: true },
         )
         return client
@@ -24,9 +24,9 @@ export class Database {
         return clients
     }
 
-    async getTransactionsByDate(clientId: string, start: Date, end: Date) {
+    async getTransactionsByDate(userId: string, start: Date, end: Date) {
         const transactions = await TransactionModel.find({
-            clientId,
+            userId,
             date: { $gte: start, $lt: end },
         })
         return transactions
@@ -38,9 +38,9 @@ export class Database {
         return prediction
     }
 
-    async postTransaction(clientId: string, shares: Stock[]) {
+    async postTransaction(userId: string, shares: Stock[]) {
         const transaction = await TransactionModel.create({
-            clientId,
+            userId,
             shares,
         })
         return transaction

@@ -3,7 +3,7 @@ import { InferSchemaType, Schema, model } from 'mongoose'
 export type Client = InferSchemaType<typeof ClientSchema>
 
 export const ClientSchema = new Schema({
-    clientId: {
+    userId: {
         type: String,
         required: true,
     },

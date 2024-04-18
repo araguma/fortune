@@ -48,18 +48,15 @@ discord.addCommand({
             0,
         )
         await Promise.all(
-            Array.from(prediction.bets.entries()).map(
-                async ([clientId, bet]) => {
-                    if (bet.option === option) {
-                        const client =
-                            await database.getClientByUserId(clientId)
-                        client.balance += (bet.amount * pool) / total
-                        await client.save()
+            Array.from(prediction.bets.entries()).map(async ([userId, bet]) => {
+                if (bet.option === option) {
+                    const client = await database.getClientByUserId(userId)
+                    client.balance += (bet.amount * pool) / total
+                    await client.save()
 
-                        winners.push(clientId)
-                    }
-                },
-            ),
+                    winners.push(userId)
+                }
+            }),
         )
 
         prediction.status = 'settled'
@@ -77,9 +74,7 @@ discord.addCommand({
                         format.currency(pool),
                         'goes to',
                         winners.length
-                            ? winners
-                                  .map((clientId) => `<@${clientId}>`)
-                                  .join(', ')
+                            ? winners.map((userId) => `<@${userId}>`).join(', ')
                             : 'The House',
                     ].join(' '),
                     image: {

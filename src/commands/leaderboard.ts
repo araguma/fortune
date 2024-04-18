@@ -22,7 +22,7 @@ discord.addCommand({
         for (let i = 0; i < limit; i++) {
             const client = clients[i]
             if (!client) break
-            const user = await discord.getUserById(client.clientId)
+            const user = await discord.getUserById(client.userId)
             name += `${i + 1}) ${user.displayName}\n`
             profit += `${format.currency(client.profit)}\n`
         }
