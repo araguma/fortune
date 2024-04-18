@@ -10,10 +10,13 @@ export const ServerSchema = new Schema({
     channels: {
         type: Map,
         of: {
+            trades: {
+                type: Boolean,
+            },
             predictions: {
                 type: Boolean,
             },
-            trades: {
+            admin: {
                 type: Boolean,
             },
         },

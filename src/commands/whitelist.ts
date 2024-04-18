@@ -4,25 +4,22 @@ import {
     SlashCommandSubcommandBuilder,
 } from 'discord.js'
 
+import { groups } from '@/data/groups'
 import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 
+const displayGroups = groups.filter((group) => group !== 'admin')
+const choices = displayGroups.map((group) => ({
+    name: (group[0] ?? '').toUpperCase() + group.slice(1),
+    value: group,
+}))
 const groupOption = (option: SlashCommandStringOption) =>
     option
         .setName('group')
         .setDescription('Command group')
-        .addChoices(
-            {
-                name: 'Predictions',
-                value: 'predictions',
-            },
-            {
-                name: 'Trades',
-                value: 'trades',
-            },
-        )
+        .addChoices(...choices)
         .setRequired(true)
 
 discord.addCommand({
@@ -58,20 +55,26 @@ discord.addCommand({
             case 'remove': {
                 const group = interaction.options.getString('group', true)
                 const channel = server.channels.get(interaction.channelId)
-                server.channels.set(interaction.channelId, {
-                    predictions: channel?.predictions ?? null,
-                    trades: channel?.trades ?? null,
-                    [group]: subcommand === 'add',
-                })
+                const whitelist = Object.fromEntries(
+                    displayGroups.map((group) => [group, channel?.[group] ?? false]),
+                )
+                whitelist[group] = subcommand === 'add'
+                server.channels.set(interaction.channelId, whitelist)
                 await server.save()
             }
         }
 
-        let predictions = ''
-        let trades = ''
-        server.channels.forEach((channel, id) => {
-            if (channel.predictions) predictions += `<#${id}>\n`
-            if (channel.trades) trades += `<#${id}>\n`
+        const fields = displayGroups.map((group) => {
+            let value = ''
+            server.channels.forEach((channel, id) => {
+                if (channel[group]) value += `<#${id}>\n`
+            })
+
+            return {
+                name: (group[0] ?? '').toUpperCase() + group.slice(1),
+                value,
+                inline: true,
+            }
         })
 
         await interaction.reply({
@@ -82,18 +85,7 @@ discord.addCommand({
                         name: '---',
                     },
                     title: 'Whitelist',
-                    fields: [
-                        {
-                            name: 'Predictions',
-                            value: predictions || 'None',
-                            inline: true,
-                        },
-                        {
-                            name: 'Trades',
-                            value: trades || 'None',
-                            inline: true,
-                        },
-                    ],
+                    fields,
                     image: {
                         url: 'attachment://divider.png',
                     },
