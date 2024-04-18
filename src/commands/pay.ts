@@ -29,8 +29,8 @@ discord.addCommand({
 
         if (amount <= 0) UserError.throw('Invalid amount')
 
-        const client = await database.getClientById(interaction.user.id)
-        const target = await database.getClientById(user.id)
+        const client = await database.getClientByUserId(interaction.user.id)
+        const target = await database.getClientByUserId(user.id)
 
         if (client.balance < amount) UserError.throw('Insufficient funds')
 

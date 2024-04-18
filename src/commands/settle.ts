@@ -51,7 +51,8 @@ discord.addCommand({
             Array.from(prediction.bets.entries()).map(
                 async ([clientId, bet]) => {
                     if (bet.option === option) {
-                        const client = await database.getClientById(clientId)
+                        const client =
+                            await database.getClientByUserId(clientId)
                         client.balance += (bet.amount * pool) / total
                         await client.save()
 

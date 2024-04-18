@@ -31,7 +31,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClientById(interaction.user.id)
+        const client = await database.getClientByUserId(interaction.user.id)
         const predictionId = interaction.options.getString('id', true)
         const option = interaction.options.getInteger('option', true) - 1
         const amount = interaction.options.getNumber('amount', true)

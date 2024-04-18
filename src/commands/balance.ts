@@ -17,7 +17,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClientById(
+        const client = await database.getClientByUserId(
             interaction.options.getUser('user')?.id ?? interaction.user.id,
         )
         await interaction.reply({

@@ -21,7 +21,7 @@ discord.addCommand({
             .getString('symbol', true)
             .toUpperCase()
 
-        const client = await database.getClientById(interaction.user.id)
+        const client = await database.getClientByUserId(interaction.user.id)
         if (!client.watchlist.includes(symbol))
             UserError.throw(`${symbol} is not in watchlist`)
 

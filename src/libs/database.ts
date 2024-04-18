@@ -10,7 +10,7 @@ export class Database {
         void mongoose.connect(uri)
     }
 
-    async getClientById(clientId: string) {
+    async getClientByUserId(clientId: string) {
         const client = await ClientModel.findOneAndUpdate(
             { clientId },
             { clientId },

@@ -34,7 +34,7 @@ discord.addCommand({
         )[symbol]
         if (!history) UserError.throw('Failed to get history')
 
-        const client = await database.getClientById(interaction.user.id)
+        const client = await database.getClientByUserId(interaction.user.id)
         const shares = client.portfolio.get(symbol)?.shares ?? 0
 
         const quote = snapshot.latestTrade.p

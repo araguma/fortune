@@ -105,7 +105,7 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClientById(interaction.user.id)
+        const client = await database.getClientByUserId(interaction.user.id)
         const snapshots = await alpaca.getSnapshots(
             Array.from(client.portfolio.keys()),
         )
