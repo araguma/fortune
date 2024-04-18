@@ -112,7 +112,7 @@ export class PredictionReply {
                 ...this.options.map((option, index) => {
                     const percentage =
                         pool === 0 ? 0 : (this.pool[index] ?? 0) / pool
-                    return `> ${index + 1}. ${option}\n> ${'>'.repeat(percentage * 32)}[${format.percentage(percentage)}]\n`
+                    return `> ${index + 1}. ${option}\n> ${'I'.repeat(percentage * 64)}[${format.percentage(percentage)}]\n`
                 }),
                 this.status === 'opened'
                     ? 'Use **/predict** to place your bets'
