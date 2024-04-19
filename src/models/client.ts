@@ -48,6 +48,11 @@ export const ClientSchema = new Schema({
         required: true,
         default: new Date(0),
     },
+    claims: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
 })
 
 export const ClientModel = model('client', ClientSchema)

@@ -20,7 +20,9 @@ discord.addCommand({
         const client = await database.getClientByUserId(interaction.user.id)
 
         const lastClaim = client.lastClaim.getTime()
-        if (Date.now() - lastClaim < interval) {
+        if (Date.now() - lastClaim > interval) client.claims++
+
+        if (client.claims <= 0) {
             const timeLeft = prettyMilliseconds(
                 interval - (Date.now() - lastClaim),
             )
@@ -44,6 +46,7 @@ discord.addCommand({
         })
         client.seed += total
         client.lastClaim = new Date()
+        client.claims -= 1
         await client.save()
         const transaction = await database.postTransaction(
             interaction.user.id,
@@ -84,7 +87,9 @@ discord.addCommand({
                         url: 'attachment://divider.png',
                     },
                     footer: {
-                        text: transaction._id.toString().toUpperCase(),
+                        text:
+                            `${client.claims} Claims Left  •  ` +
+                            transaction._id.toString().toUpperCase(),
                     },
                     timestamp: new Date().toISOString(),
                 },
