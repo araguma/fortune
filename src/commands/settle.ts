@@ -58,6 +58,11 @@ discord.addCommand({
                 }
             }),
         )
+        if (winners.length === 0 && discord.user?.id) {
+            const self = await database.getClientByUserId(discord.user.id)
+            self.balance += pool
+            await self.save()
+        }
 
         prediction.status = 'settled'
         await prediction.save()
