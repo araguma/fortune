@@ -36,7 +36,6 @@ export class Alpaca {
         timeframe: string,
         start: Date,
         end: Date,
-        limit: number,
     ) {
         const url = new URL(`${baseUrl}/v2/stocks/bars`)
         url.searchParams.append('symbols', symbols.join(','))
@@ -44,7 +43,7 @@ export class Alpaca {
         url.searchParams.append('start', start.toISOString())
         url.searchParams.append('end', end.toISOString())
         url.searchParams.append('feed', 'iex')
-        url.searchParams.append('limit', limit.toString())
+        url.searchParams.append('limit', '1000')
         const response = (await (
             await fetch(url, {
                 headers: this.headers,
@@ -76,13 +75,13 @@ export class Alpaca {
         return response
     }
 
-    async getNews(symbols: string[], start: Date, end: Date, limit: number) {
+    async getNews(symbols: string[], start: Date, end: Date) {
         const url = new URL(`${baseUrl}/v1beta1/news`)
         url.searchParams.append('symbols', symbols.join(','))
         url.searchParams.append('start', start.toISOString())
         url.searchParams.append('end', end.toISOString())
         url.searchParams.append('sort', 'desc')
-        url.searchParams.append('limit', limit.toString())
+        url.searchParams.append('limit', '5')
         const response = (await (
             await fetch(url, {
                 headers: this.headers,

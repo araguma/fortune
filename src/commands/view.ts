@@ -30,7 +30,7 @@ discord.addCommand({
         const end = new Date()
         start.setFullYear(end.getFullYear() - 1)
         const history = (
-            await alpaca.getHistory([symbol], '1Day', start, end, 1000)
+            await alpaca.getHistory([symbol], '1Day', start, end)
         )[symbol]
         if (!history) UserError.throw('Failed to get history')
 
