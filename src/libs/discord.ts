@@ -17,10 +17,9 @@ export class Discord extends Client {
 
     constructor(token: string, options: ClientOptions) {
         super(options)
-        this.on('ready', this.handleReady.bind(this))
+        void this.on('ready', this.handleReady.bind(this))
             .on('interactionCreate', this.handleInteraction.bind(this))
             .login(token)
-            .catch(console.error)
     }
 
     handleReady(client: Client<true>) {
@@ -31,15 +30,14 @@ export class Discord extends Client {
     async handleInteraction(interaction: Interaction) {
         if (!interaction.isChatInputCommand()) return
 
-        const group = commandGroupMap[interaction.commandName]
-        if (!group) UserError.throw('This command does not exist')
-
         try {
+            const group = commandGroupMap[interaction.commandName]
+            if (!group) UserError.throw('This command does not exist')
+
             if (interaction.guildId && group !== 'admin') {
                 const server = await database.getServerByGuildId(
                     interaction.guildId,
                 )
-
                 if (!server.channels.get(interaction.channelId)?.[group])
                     UserError.throw(
                         `This channel is not whitelisted for ${group}`,
@@ -52,14 +50,18 @@ export class Discord extends Client {
             await command.handler(interaction)
         } catch (error) {
             if (error instanceof UserError) {
-                await interaction.reply(new ErrorReply(error.message).toJSON())
+                await interaction
+                    .reply(new ErrorReply(error.message).toJSON())
+                    .catch(console.error)
             } else {
                 console.error(error)
-                await interaction.reply(
-                    new ErrorReply(
-                        'There was an error while executing this command',
-                    ).toJSON(),
-                )
+                await interaction
+                    .reply(
+                        new ErrorReply(
+                            'There was an error while executing this command',
+                        ).toJSON(),
+                    )
+                    .catch(console.error)
             }
         }
     }
