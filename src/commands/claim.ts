@@ -88,8 +88,8 @@ discord.addCommand({
                     },
                     footer: {
                         text:
-                            `${client.claims} Claims Left  •  ` +
-                            transaction._id.toString().toUpperCase(),
+                            transaction._id.toString().toUpperCase() +
+                            `  •  ${client.claims} Claims Left`,
                     },
                     timestamp: new Date().toISOString(),
                 },

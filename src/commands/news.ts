@@ -74,7 +74,7 @@ discord.addCommand({
                         },
                     ],
                     footer: {
-                        text: `${article.source}  •  ${article.id}`,
+                        text: `${article.id}  •  ${article.source}`,
                     },
                     timestamp: new Date(article.updated_at).toISOString(),
                 }
