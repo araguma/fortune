@@ -76,7 +76,7 @@ discord.addCommand({
                     name: 'Value',
                     value: [
                         format.currency(value),
-                        `(${format.percentage(delta / value)})`,
+                        `(${format.percentage(delta / Math.abs(value))})`,
                     ].join(' '),
                     inline: true,
                 },
@@ -89,7 +89,7 @@ discord.addCommand({
                     name: 'Total',
                     value: [
                         format.currency(total),
-                        `(${format.percentage(delta / total)})`,
+                        `(${format.percentage(delta / Math.abs(total))})`,
                     ].join(' '),
                     inline: true,
                 },
@@ -107,7 +107,7 @@ discord.addCommand({
                     name: 'Profit',
                     value: [
                         format.currency(profit),
-                        `(${format.percentage(delta / profit)})`,
+                        `(${format.percentage(delta / Math.abs(profit))})`,
                     ].join(' '),
                     inline: true,
                 },
