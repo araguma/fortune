@@ -81,10 +81,6 @@ export class Discord extends Client {
             })
             .catch(console.error)
     }
-
-    async getUserById(id: string) {
-        return await this.users.fetch(id)
-    }
 }
 
 if (!process.env['DISCORD_TOKEN']) throw new Error('DISCORD_TOKEN not set')

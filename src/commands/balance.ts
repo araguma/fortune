@@ -17,9 +17,11 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const client = await database.getClientByUserId(
-            interaction.options.getUser('user')?.id ?? interaction.user.id,
-        )
+        const userId =
+            interaction.options.getUser('user')?.id ?? interaction.user.id
+        const user = await discord.users.fetch(userId)
+        const client = await database.getClientByUserId(userId)
+
         await interaction.reply({
             embeds: [
                 {
@@ -34,6 +36,7 @@ discord.addCommand({
                     },
                     footer: {
                         text: client._id.toString().toUpperCase(),
+                        icon_url: user.displayAvatarURL(),
                     },
                     timestamp: new Date().toISOString(),
                 },
