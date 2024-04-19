@@ -56,10 +56,11 @@ export class Database {
         return transaction
     }
 
-    async postPrediction(question: string, options: string[]) {
+    async postPrediction(question: string, options: string[], minimum: number) {
         const prediction = await PredictionModel.create({
             question,
             options,
+            minimum,
         })
         return prediction
     }

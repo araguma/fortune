@@ -40,7 +40,10 @@ discord.addCommand({
             .getPredictionById(predictionId)
             .catch(() => UserError.throw('Invalid prediction ID'))
 
-        if (amount <= 0) UserError.throw('Invalid amount')
+        if (amount < prediction.minimum)
+            UserError.throw(
+                `Minimum bet is ${format.currency(prediction.minimum)}`,
+            )
         if (option < 0 || option >= prediction.options.length)
             UserError.throw('Invalid option')
         if (prediction.status !== 'opened')

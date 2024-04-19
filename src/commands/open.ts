@@ -21,17 +21,35 @@ discord.addCommand({
                 .setDescription('Options seperated by |')
                 .setRequired(true),
         )
+        .addNumberOption((option) =>
+            option
+                .setName('minimum')
+                .setDescription('Minimum bet')
+                .setRequired(false),
+        )
         .toJSON(),
     handler: async (interaction) => {
         const question = interaction.options.getString('question', true)
         const options = interaction.options
             .getString('options', true)
             .split('|')
+        const minimum = interaction.options.getNumber('minimum') ?? 0
 
-        const prediction = await database.postPrediction(question, options)
+        if (minimum < 0) throw new Error('Minimum bet must be positive')
+
+        const prediction = await database.postPrediction(
+            question,
+            options,
+            minimum,
+        )
         const predictionId = prediction._id.toString().toUpperCase()
 
-        const reply = new PredictionReply(predictionId, question, options)
+        const reply = new PredictionReply(
+            predictionId,
+            question,
+            options,
+            minimum,
+        )
         predictionCache.set(predictionId, {
             interaction,
             reply,

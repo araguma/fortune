@@ -13,12 +13,13 @@ export class PredictionReply {
         public id: string,
         public question: string,
         public options: string[],
+        public minimum: number,
     ) {}
 
     toJSON(): InteractionReplyOptions {
         const pool = this.pool.reduce((a, b) => a + b, 0)
         const embed = {
-            color: 0x3498db,
+            color: this.status === 'opened' ? 0x3498db : 0x9b59b6,
             author: {
                 name: '---',
             },
@@ -40,10 +41,8 @@ export class PredictionReply {
             ].join('\n'),
             fields: [
                 {
-                    name: 'Status',
-                    value:
-                        this.status.charAt(0).toUpperCase() +
-                        this.status.slice(1),
+                    name: 'Minimum',
+                    value: format.currency(this.minimum),
                     inline: true,
                 },
                 {

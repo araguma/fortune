@@ -30,6 +30,10 @@ export const PredictionSchema = new Schema({
         },
         default: {},
     },
+    minimum: {
+        type: Number,
+        default: 0,
+    },
 })
 
 export const PredictionModel = model('prediction', PredictionSchema)
