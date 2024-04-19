@@ -7,6 +7,33 @@ import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
 
+const timeframes = {
+    '1D': {
+        interval: '2T',
+        duration: 1,
+    },
+    '7D': {
+        interval: '1H',
+        duration: 7,
+    },
+    '1M': {
+        interval: '4H',
+        duration: 30,
+    },
+    '6M': {
+        interval: '1D',
+        duration: 180,
+    },
+    '1Y': {
+        interval: '1D',
+        duration: 365,
+    },
+    '5Y': {
+        interval: '1W',
+        duration: 365 * 5,
+    },
+}
+
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('view')
@@ -17,20 +44,38 @@ discord.addCommand({
                 .setDescription('Stock ticker')
                 .setRequired(true),
         )
+        .addStringOption((option) =>
+            option
+                .setName('timeframe')
+                .setDescription('Timeframe')
+                .addChoices(
+                    ...Object.keys(timeframes).map((timeframe) => ({
+                        name: timeframe,
+                        value: timeframe,
+                    })),
+                )
+                .setRequired(true),
+        )
         .toJSON(),
     handler: async (interaction) => {
         const symbol = interaction.options
             .getString('symbol', true)
             .toUpperCase()
+        const timeframe = interaction.options.getString(
+            'timeframe',
+            true,
+        ) as keyof typeof timeframes
+        const interval = timeframes[timeframe].interval
+        const duration = timeframes[timeframe].duration
 
         const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
         if (!snapshot) UserError.throw('Symbol not found')
 
         const start = new Date()
         const end = new Date()
-        start.setFullYear(end.getFullYear() - 1)
+        start.setDate(end.getDate() - duration)
         const history = (
-            await alpaca.getHistory([symbol], '1Day', start, end)
+            await alpaca.getHistory([symbol], interval, start, end)
         )[symbol]
         if (!history) UserError.throw('Failed to get history')
 
@@ -94,7 +139,7 @@ discord.addCommand({
                         url: 'attachment://graph.png',
                     },
                     footer: {
-                        text: '1Y',
+                        text: `${timeframe}  •  ${history.length} Data Points`,
                     },
                 },
             ],
