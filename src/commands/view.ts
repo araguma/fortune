@@ -13,19 +13,19 @@ const timeframes = {
         duration: 1,
     },
     '7D': {
-        interval: '1H',
+        interval: '15T',
         duration: 7,
     },
     '1M': {
-        interval: '4H',
+        interval: '1H',
         duration: 30,
     },
     '6M': {
-        interval: '1D',
+        interval: '6H',
         duration: 180,
     },
     '1Y': {
-        interval: '1D',
+        interval: '12H',
         duration: 365,
     },
     '5Y': {
