@@ -98,6 +98,7 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
+            ephemeral: true,
         })
     },
 })
