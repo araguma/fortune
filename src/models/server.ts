@@ -16,6 +16,9 @@ export const ServerSchema = new Schema({
             predictions: {
                 type: Boolean,
             },
+            threads: {
+                type: Boolean,
+            },
             admin: {
                 type: Boolean,
             },

@@ -1,7 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import { predictionCache } from '@/libs/cache'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
@@ -11,12 +10,6 @@ discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('settle')
         .setDescription('Settle a prediction')
-        .addStringOption((option) =>
-            option
-                .setName('id')
-                .setDescription('Prediction ID')
-                .setRequired(true),
-        )
         .addIntegerOption((option) =>
             option
                 .setName('option')
@@ -25,24 +18,23 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const predictionId = interaction.options.getString('id', true)
         const option = interaction.options.getInteger('option', true) - 1
+        const thread = interaction.channel
+
+        if (!thread?.isThread())
+            UserError.throw('Command can only be used in threads')
 
         const prediction = await database
-            .getPredictionById(predictionId)
-            .catch(() => UserError.throw('Invalid prediction ID'))
+            .getPredictionByThreadId(thread.id)
+            .catch(() => UserError.throw('Failed to fetch prediction'))
 
         if (option < 0 || option >= prediction.options.length)
             UserError.throw('Invalid option')
         if (prediction.status !== 'closed')
             UserError.throw('Prediction is not closed')
 
-        const cached = predictionCache.get(predictionId)
-        predictionCache.delete(predictionId)
-        if (!cached) UserError.throw('Prediction does not exist')
-
         const winners: string[] = []
-        const pool = cached.reply.pool.reduce((a, b) => a + b, 0)
+        const pool = prediction.pool.reduce((a, b) => a + b, 0)
         const total = Array.from(prediction.bets.values()).reduce(
             (acc, bet) => (bet.option === option ? acc + bet.amount : acc),
             0,
@@ -63,8 +55,8 @@ discord.addCommand({
             self.balance += pool
             await self.save()
         }
-
         prediction.status = 'settled'
+
         await prediction.save()
 
         await interaction.reply({
@@ -86,7 +78,7 @@ discord.addCommand({
                         url: 'attachment://divider.png',
                     },
                     footer: {
-                        text: predictionId,
+                        text: prediction._id.toString().toUpperCase(),
                     },
                     timestamp: new Date().toISOString(),
                 },

@@ -42,8 +42,10 @@ export class Database {
         return transactions
     }
 
-    async getPredictionById(predictionId: string) {
-        const prediction = await PredictionModel.findById(predictionId)
+    async getPredictionByThreadId(threadId: string) {
+        const prediction = await PredictionModel.findOne({
+            threadId,
+        })
         if (!prediction) throw new Error('Failed to get prediction')
         return prediction
     }
@@ -56,8 +58,14 @@ export class Database {
         return transaction
     }
 
-    async postPrediction(question: string, options: string[], minimum: number) {
+    async postPrediction(
+        threadId: string,
+        question: string,
+        options: string[],
+        minimum: number,
+    ) {
         const prediction = await PredictionModel.create({
+            threadId,
             question,
             options,
             minimum,

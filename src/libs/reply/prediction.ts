@@ -1,53 +1,47 @@
-import { InteractionReplyOptions } from 'discord.js'
+import { MessageCreateOptions } from 'discord.js'
+import { HydratedDocument } from 'mongoose'
 
 import divider from '@/images/divider'
 import format from '@/libs/format'
 import { Prediction } from '@/models/prediction'
 
 export class PredictionReply {
-    status: Prediction['status'] = 'opened'
-    bets = 0
-    pool: number[] = []
+    constructor(public prediction: HydratedDocument<Prediction>) {}
 
-    constructor(
-        public id: string,
-        public question: string,
-        public options: string[],
-        public minimum: number,
-    ) {}
-
-    toJSON(): InteractionReplyOptions {
-        const pool = this.pool.reduce((a, b) => a + b, 0)
+    toJSON(): MessageCreateOptions {
+        const pool = this.prediction.pool.reduce((a, b) => a + b, 0)
         const embed = {
-            color: this.status === 'opened' ? 0x3498db : 0x9b59b6,
+            color: this.prediction.status === 'opened' ? 0x3498db : 0x9b59b6,
             author: {
                 name: '---',
             },
             title: 'Prediction Poll',
             description: [
-                `**${this.question}**\n`,
-                ...this.options.map((option, index) => {
+                `**${this.prediction.question}**\n`,
+                ...this.prediction.options.map((option, index) => {
                     const percentage =
-                        pool === 0 ? 0 : (this.pool[index] ?? 0) / pool
+                        pool === 0
+                            ? 0
+                            : (this.prediction.pool[index] ?? 0) / pool
                     return [
                         `> ${index + 1}) ${option}`,
                         `> ${'I'.repeat(percentage * 64)}[${format.percentage(percentage)}]`,
-                        `> ${format.currency(this.pool[index] ?? 0)}\n`,
+                        `> ${format.currency(this.prediction.pool[index] ?? 0)}\n`,
                     ].join('\n')
                 }),
-                this.status === 'opened'
+                this.prediction.status === 'opened'
                     ? 'Use **/predict** to place your bets'
                     : '',
             ].join('\n'),
             fields: [
                 {
                     name: 'Minimum',
-                    value: format.currency(this.minimum),
+                    value: format.currency(this.prediction.minimum),
                     inline: true,
                 },
                 {
                     name: 'Bets',
-                    value: this.bets.toString(),
+                    value: this.prediction.bets.size.toString(),
                     inline: true,
                 },
                 {
@@ -60,7 +54,7 @@ export class PredictionReply {
                 url: 'attachment://divider.png',
             },
             footer: {
-                text: this.id,
+                text: this.prediction._id.toString().toUpperCase(),
             },
             timestamp: new Date().toISOString(),
         }

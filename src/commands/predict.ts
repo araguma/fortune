@@ -1,22 +1,16 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import { predictionCache } from '@/libs/cache'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
+import { PredictionReply } from '@/libs/reply/prediction'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('predict')
         .setDescription('Bet on an outcome')
-        .addStringOption((option) =>
-            option
-                .setName('id')
-                .setDescription('Prediction ID')
-                .setRequired(true),
-        )
         .addIntegerOption((option) =>
             option
                 .setName('option')
@@ -32,13 +26,16 @@ discord.addCommand({
         .toJSON(),
     handler: async (interaction) => {
         const client = await database.getClientByUserId(interaction.user.id)
-        const predictionId = interaction.options.getString('id', true)
         const option = interaction.options.getInteger('option', true) - 1
         const amount = interaction.options.getNumber('amount', true)
+        const thread = interaction.channel
+
+        if (!thread?.isThread())
+            UserError.throw('Command can only be used in threads')
 
         const prediction = await database
-            .getPredictionById(predictionId)
-            .catch(() => UserError.throw('Invalid prediction ID'))
+            .getPredictionByThreadId(thread.id)
+            .catch(() => UserError.throw('Failed to fetch prediction'))
 
         if (amount < prediction.minimum)
             UserError.throw(
@@ -49,29 +46,33 @@ discord.addCommand({
         if (prediction.status !== 'opened')
             UserError.throw('Prediction is not open')
 
-        const cached = predictionCache.get(predictionId)
-        if (!cached) UserError.throw('Prediction does not exist')
-
         const bet = prediction.bets.get(interaction.user.id)
 
         client.balance -= amount - (bet?.amount ?? 0)
         if (client.balance < 0) UserError.throw('Insufficient balance')
+        await client.save()
 
         if (bet) {
-            cached.reply.pool[bet.option] =
-                (cached.reply.pool[bet.option] ?? 0) - bet.amount
+            prediction.pool[bet.option] =
+                (prediction.pool[bet.option] ?? 0) - bet.amount
         }
-        cached.reply.pool[option] = (cached.reply.pool[option] ?? 0) + amount
+        prediction.pool[option] = (prediction.pool[option] ?? 0) + amount
         prediction.bets.set(interaction.user.id, {
             option,
             amount,
         })
-        cached.reply.bets = prediction.bets.size
 
-        await client.save()
+        const lastMessage = await interaction.channel?.messages.fetch(
+            prediction.lastMessageId ?? '',
+        )
+        await lastMessage?.delete().catch(() => {})
+
+        const message = await thread.send(
+            new PredictionReply(prediction).toJSON(),
+        )
+        prediction.lastMessageId = message.id
         await prediction.save()
 
-        await cached.interaction.editReply(cached.reply.toJSON())
         await interaction.reply({
             embeds: [
                 {
@@ -103,7 +104,7 @@ discord.addCommand({
                         url: 'attachment://divider.png',
                     },
                     footer: {
-                        text: predictionId,
+                        text: prediction._id.toString().toUpperCase(),
                     },
                     timestamp: new Date().toISOString(),
                 },

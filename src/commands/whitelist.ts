@@ -10,7 +10,9 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 
-const displayGroups = groups.filter((group) => group !== 'admin')
+const displayGroups = groups.filter(
+    (group) => group !== 'admin' && group !== 'threads',
+)
 const choices = displayGroups.map((group) => ({
     name: (group[0] ?? '').toUpperCase() + group.slice(1),
     value: group,
@@ -56,7 +58,10 @@ discord.addCommand({
                 const group = interaction.options.getString('group', true)
                 const channel = server.channels.get(interaction.channelId)
                 const whitelist = Object.fromEntries(
-                    displayGroups.map((group) => [group, channel?.[group] ?? false]),
+                    displayGroups.map((group) => [
+                        group,
+                        channel?.[group] ?? false,
+                    ]),
                 )
                 whitelist[group] = subcommand === 'add'
                 server.channels.set(interaction.channelId, whitelist)

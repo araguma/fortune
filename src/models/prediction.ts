@@ -3,6 +3,13 @@ import { InferSchemaType, Schema, model } from 'mongoose'
 export type Prediction = InferSchemaType<typeof PredictionSchema>
 
 export const PredictionSchema = new Schema({
+    threadId: {
+        type: String,
+        required: true,
+    },
+    lastMessageId: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ['opened', 'closed', 'settled'],
@@ -15,6 +22,14 @@ export const PredictionSchema = new Schema({
     options: {
         type: [String],
         default: [],
+    },
+    pool: {
+        type: [Number],
+        default: [],
+    },
+    minimum: {
+        type: Number,
+        default: 0,
     },
     bets: {
         type: Map,
@@ -29,10 +44,6 @@ export const PredictionSchema = new Schema({
             },
         },
         default: {},
-    },
-    minimum: {
-        type: Number,
-        default: 0,
     },
 })
 

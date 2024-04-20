@@ -34,7 +34,11 @@ export class Discord extends Client {
             const group = commandGroupMap[interaction.commandName]
             if (!group) UserError.throw('This command does not exist')
 
-            if (interaction.guildId && group !== 'admin') {
+            if (
+                interaction.guildId &&
+                group !== 'admin' &&
+                group !== 'threads'
+            ) {
                 const server = await database.getServerByGuildId(
                     interaction.guildId,
                 )

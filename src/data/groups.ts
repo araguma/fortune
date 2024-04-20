@@ -1,23 +1,23 @@
 export type Group = (typeof groups)[number]
 
-export const groups = ['trades', 'predictions', 'admin'] as const
+export const groups = ['trades', 'predictions', 'threads', 'admin'] as const
 const commandGroupMap: Record<string, Group> = {
     actives: 'trades',
     add: 'trades',
     balance: 'trades',
     buy: 'trades',
     claim: 'trades',
-    close: 'predictions',
+    close: 'threads',
     leaderboard: 'trades',
     movers: 'trades',
     news: 'trades',
     open: 'predictions',
     pay: 'trades',
     portfolio: 'trades',
-    predict: 'predictions',
+    predict: 'threads',
     remove: 'trades',
     sell: 'trades',
-    settle: 'predictions',
+    settle: 'threads',
     view: 'trades',
     watchlist: 'trades',
     whitelist: 'admin',

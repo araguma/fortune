@@ -1,8 +1,10 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { BaseGuildTextChannel, SlashCommandBuilder } from 'discord.js'
 
-import { predictionCache } from '@/libs/cache'
+import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
+import { UserError } from '@/libs/error'
+import format from '@/libs/format'
 import { PredictionReply } from '@/libs/reply/prediction'
 
 discord.addCommand({
@@ -34,27 +36,68 @@ discord.addCommand({
             .getString('options', true)
             .split('|')
         const minimum = interaction.options.getNumber('minimum') ?? 0
+        const channel = interaction.channel
 
         if (minimum < 0) throw new Error('Minimum bet must be positive')
+        if (!(channel instanceof BaseGuildTextChannel))
+            UserError.throw('Unable to create threads in DMs')
 
-        const prediction = await database.postPrediction(
-            question,
-            options,
-            minimum,
-        )
-        const predictionId = prediction._id.toString().toUpperCase()
-
-        const reply = new PredictionReply(
-            predictionId,
-            question,
-            options,
-            minimum,
-        )
-        predictionCache.set(predictionId, {
-            interaction,
-            reply,
+        const thread = await channel.threads.create({
+            name: question,
         })
+        const prediction = await database.postPrediction(
+            thread.id,
+            question,
+            options,
+            minimum,
+        )
 
-        await interaction.reply(reply.toJSON())
+        const message = await thread.send(
+            new PredictionReply(prediction).toJSON(),
+        )
+        prediction.lastMessageId = message.id
+        await prediction.save()
+
+        await interaction.reply({
+            embeds: [
+                {
+                    color: 0x3498db,
+                    author: {
+                        name: '---',
+                    },
+                    title: question,
+                    fields: [
+                        {
+                            name: 'Options',
+                            value: options.length.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Minimum',
+                            value: format.currency(minimum),
+                            inline: true,
+                        },
+                        {
+                            name: 'Thread',
+                            value: `<#${thread.id}>`,
+                            inline: true,
+                        },
+                    ],
+                    image: {
+                        url: 'attachment://divider.png',
+                    },
+                    footer: {
+                        text: prediction._id.toString().toUpperCase(),
+                    },
+                    timestamp: new Date().toISOString(),
+                },
+            ],
+            files: [
+                {
+                    attachment: divider(),
+                    name: 'divider.png',
+                },
+            ],
+        })
     },
 })
