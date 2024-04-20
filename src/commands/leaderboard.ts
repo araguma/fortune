@@ -5,7 +5,7 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
 
-const limit = 10
+const limit = 20
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
