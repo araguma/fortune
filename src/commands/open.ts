@@ -43,7 +43,7 @@ discord.addCommand({
             UserError.throw('Unable to create threads in DMs')
 
         const thread = await channel.threads.create({
-            name: question,
+            name: `[OPEN] ${question}`,
         })
         const prediction = await database.postPrediction(
             thread.id,

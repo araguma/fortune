@@ -32,6 +32,9 @@ discord.addCommand({
         )
         await lastMessage?.delete().catch(() => {})
 
+        await thread.setName(
+            `[CLOSED] ${prediction.question}`,
+        )
         await thread.send(new PredictionReply(prediction).toJSON())
         await interaction.reply({
             embeds: [
