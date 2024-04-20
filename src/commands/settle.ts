@@ -60,7 +60,6 @@ discord.addCommand({
         await prediction.save()
 
         await thread.setName(`[SETTLED: ${prediction.options[option]}] ${prediction.question}`)
-        await thread.setArchived(true)
         await interaction.reply({
             embeds: [
                 {
