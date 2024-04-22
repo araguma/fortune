@@ -147,8 +147,7 @@ discord.addCommand({
                 if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
                 const current = client.portfolio.get(symbol)
                 if (!current) UserError.throw('Stock not owned')
-                const shares =
-                    value / snapshot.latestQuote.ap || snapshot.latestTrade.p
+                const shares = value / snapshot.latestTrade.p
                 cart.push({ symbol, shares })
                 break
             }
@@ -200,8 +199,7 @@ discord.addCommand({
                     seed: current.seed,
                 })
             }
-            client.balance +=
-                stock.shares * snapshot.latestQuote.ap || snapshot.latestTrade.p
+            client.balance += stock.shares * snapshot.latestTrade.p
         })
         await client.save()
         const transaction = await database.postTransaction(

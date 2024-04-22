@@ -82,7 +82,7 @@ discord.addCommand({
         const client = await database.getClientByUserId(interaction.user.id)
         const shares = client.portfolio.get(symbol)?.shares ?? 0
 
-        const quote = snapshot.latestQuote.ap || snapshot.latestTrade.p
+        const quote = snapshot.latestTrade.p
         const delta = quote - snapshot.dailyBar.o
         const sign = delta >= 0 ? '▴' : '▾'
 
