@@ -147,7 +147,8 @@ discord.addCommand({
                 if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
                 const current = client.portfolio.get(symbol)
                 if (!current) UserError.throw('Stock not owned')
-                const shares = value / snapshot.latestTrade.p
+                const shares =
+                    value / snapshot.latestQuote.ap || snapshot.latestTrade.p
                 cart.push({ symbol, shares })
                 break
             }
@@ -155,7 +156,10 @@ discord.addCommand({
                 client.portfolio.forEach((stock, symbol) => {
                     const snapshot = snapshots[symbol]
                     if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
-                    if (stock.shares * snapshot.latestTrade.p > stock.seed)
+                    if (
+                        stock.shares * snapshot.latestQuote.ap ||
+                        snapshot.latestTrade.p > stock.seed
+                    )
                         cart.push({ symbol, shares: stock.shares })
                 })
                 break
@@ -164,7 +168,10 @@ discord.addCommand({
                 client.portfolio.forEach((stock, symbol) => {
                     const snapshot = snapshots[symbol]
                     if (!snapshot) UserError.throw('Failed to get snapshot')
-                    if (stock.shares * snapshot.latestTrade.p < stock.seed)
+                    if (
+                        stock.shares * snapshot.latestQuote.ap ||
+                        snapshot.latestTrade.p < stock.seed
+                    )
                         cart.push({ symbol, shares: stock.shares })
                 })
                 break
@@ -193,7 +200,8 @@ discord.addCommand({
                     seed: current.seed,
                 })
             }
-            client.balance += stock.shares * snapshot.latestTrade.p
+            client.balance +=
+                stock.shares * snapshot.latestQuote.ap || snapshot.latestTrade.p
         })
         await client.save()
         const transaction = await database.postTransaction(
