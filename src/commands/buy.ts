@@ -68,9 +68,7 @@ discord.addCommand({
                     .toUpperCase()
                 const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
                 if (!snapshot) UserError.throw('Failed to get snapshot')
-                const shares =
-                    client.balance /
-                    (snapshot.latestQuote.ap || snapshot.latestTrade.p)
+                const shares = client.balance / snapshot.latestTrade.p
                 cart.push({ symbol, shares })
                 break
             }
@@ -89,8 +87,7 @@ discord.addCommand({
                 const value = interaction.options.getNumber('value', true)
                 const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
                 if (!snapshot) UserError.throw('Failed to get snapshot')
-                const shares =
-                    value / (snapshot.latestQuote.ap || snapshot.latestTrade.p)
+                const shares = value / snapshot.latestTrade.p
                 cart.push({ symbol, shares })
                 break
             }
@@ -106,9 +103,7 @@ discord.addCommand({
             if (!snapshot) throw new Error('Failed to get snapshot')
             const current = client.portfolio.get(stock.symbol)
 
-            const total =
-                (snapshot.latestQuote.ap || snapshot.latestTrade.p) *
-                stock.shares
+            const total = snapshot.latestTrade.p * stock.shares
             if (client.balance < total) UserError.throw('Insufficient funds')
 
             client.balance -= total
