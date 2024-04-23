@@ -51,15 +51,17 @@ discord.addCommand({
                 if (!snapshot) throw new Error('Failed to get snapshot')
                 const quote = snapshot.latestTrade?.p || NaN
                 const open = snapshot.dailyBar?.o || NaN
+                const delta = (quote - open) * stock.shares
+                const value = quote * stock.shares
                 return [
-                    quote - open >= 0 ? '▴' : '▾',
+                    delta >= 0 ? '▴' : '▾',
                     format.bold(symbol),
                     stock.shares,
                     '⋅',
                     format.currency(quote),
                     '▸',
-                    format.currency(quote * stock.shares),
-                    `(${format.percentage((quote - open) / open)})`,
+                    format.currency(value),
+                    `(${format.percentage(delta / value)})`,
                 ].join(' ')
             })
             .join('\n')
