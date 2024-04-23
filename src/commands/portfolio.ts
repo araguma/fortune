@@ -71,7 +71,8 @@ discord.addCommand({
                 name: '---',
             },
             title: 'Portfolio',
-            description: description || '> *No stocks found*',
+            description:
+                description.substring(0, 4096) || '> *No stocks found*',
             fields: [
                 {
                     name: 'Value',

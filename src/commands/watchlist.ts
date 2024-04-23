@@ -48,7 +48,8 @@ discord.addCommand({
                         name: '---',
                     },
                     title: 'Watchlist',
-                    description: description || '> *No stocks found*',
+                    description:
+                        description.substring(0, 4096) || '> *No stocks found*',
                     image: {
                         url: 'attachment://divider.png',
                     },
