@@ -82,8 +82,9 @@ discord.addCommand({
         const client = await database.getClientByUserId(interaction.user.id)
         const shares = client.portfolio.get(symbol)?.shares ?? 0
 
-        const quote = snapshot.latestTrade.p
-        const delta = quote - snapshot.dailyBar.o
+        const quote = snapshot.latestTrade?.p || NaN
+        const open = snapshot.dailyBar?.o || NaN
+        const delta = quote - open
         const sign = delta >= 0 ? '▴' : '▾'
 
         await interaction.reply({
@@ -101,32 +102,32 @@ discord.addCommand({
                         '\n',
                         sign,
                         format.currency(Math.abs(delta)),
-                        `(${format.percentage(delta / snapshot.dailyBar.o)})`,
+                        `(${format.percentage(delta / open)})`,
                     ].join(' '),
                     fields: [
                         {
                             name: 'Open',
-                            value: format.currency(snapshot.dailyBar.o),
+                            value: format.currency(open),
                             inline: true,
                         },
                         {
                             name: 'High',
-                            value: format.currency(snapshot.dailyBar.h),
+                            value: format.currency(snapshot.dailyBar?.h),
                             inline: true,
                         },
                         {
                             name: 'Low',
-                            value: format.currency(snapshot.dailyBar.l),
+                            value: format.currency(snapshot.dailyBar?.l),
                             inline: true,
                         },
                         {
                             name: 'Volume',
-                            value: snapshot.dailyBar.v.toString(),
+                            value: format.number(snapshot.dailyBar?.v),
                             inline: true,
                         },
                         {
                             name: 'Trades',
-                            value: snapshot.dailyBar.n.toString(),
+                            value: format.number(snapshot.dailyBar?.n),
                             inline: true,
                         },
                         {

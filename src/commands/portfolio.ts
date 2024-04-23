@@ -30,12 +30,11 @@ discord.addCommand({
             (acc, [symbol, stock]) => {
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote = snapshot.latestTrade.p
+                const quote = snapshot.latestTrade?.p || NaN
+                const open = snapshot.dailyBar?.o || NaN
                 return {
                     value: acc.value + quote * stock.shares,
-                    delta:
-                        acc.delta +
-                        (quote - snapshot.dailyBar.o) * stock.shares,
+                    delta: acc.delta + (quote - open) * stock.shares,
                 }
             },
             { value: 0, delta: 0 },
@@ -50,8 +49,8 @@ discord.addCommand({
             .map(([symbol, stock]) => {
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote = snapshot.latestTrade.p
-                const open = snapshot.dailyBar.o
+                const quote = snapshot.latestTrade?.p || NaN
+                const open = snapshot.dailyBar?.o || NaN
                 return [
                     quote - open >= 0 ? '▴' : '▾',
                     format.bold(symbol),

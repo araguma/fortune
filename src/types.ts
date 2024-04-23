@@ -34,11 +34,11 @@ export type NewsResponse = {
 }
 
 export type Snapshot = {
-    dailyBar: Bar
-    latestQuote: LatestQuote
-    latestTrade: LatestTrade
-    minuteBar: Bar
-    prevDailyBar: Bar
+    dailyBar?: Bar
+    latestQuote?: LatestQuote
+    latestTrade?: LatestTrade
+    minuteBar?: Bar
+    prevDailyBar?: Bar
 }
 
 export type Bar = {

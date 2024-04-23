@@ -29,8 +29,8 @@ discord.addCommand({
             .map((symbol) => {
                 const snapshot = snapshots[symbol]
                 if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote = snapshot.latestTrade.p
-                const open = snapshot.dailyBar.o
+                const quote = snapshot.latestTrade?.p || NaN
+                const open = snapshot.dailyBar?.o || NaN
                 return [
                     quote - open >= 0 ? '▴' : '▾',
                     format.bold(symbol),
