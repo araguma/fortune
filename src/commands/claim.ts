@@ -34,7 +34,7 @@ discord.addCommand({
 
         const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
         if (!snapshot) throw new Error('Failed to get snapshot')
-        const quote = snapshot.latestTrade.p
+        const quote = snapshot.latestQuote.ap || snapshot.latestTrade.p
 
         const shares = Math.floor(Math.random() * 19 + 1) / 10
         const total = quote * shares
