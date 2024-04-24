@@ -63,6 +63,17 @@ discord.addCommand({
         )
         .addSubcommand(
             new SlashCommandSubcommandBuilder()
+                .setName('last')
+                .setDescription('Sell last n stocks in portfolio')
+                .addIntegerOption((option) =>
+                    option
+                        .setName('count')
+                        .setDescription('Number of stocks to sell')
+                        .setRequired(true),
+                ),
+        )
+        .addSubcommand(
+            new SlashCommandSubcommandBuilder()
                 .setName('gain')
                 .setDescription('Sell all stocks with gain')
                 .addStringOption((option) =>
@@ -150,6 +161,15 @@ discord.addCommand({
                 const quote = snapshot.latestTrade?.p || NaN
                 const shares = value / quote
                 cart.push({ symbol, shares })
+                break
+            }
+            case 'last': {
+                const count = interaction.options.getInteger('count', true)
+                if (count <= 0) UserError.throw('Invalid count')
+                const stocks = Array.from(client.portfolio.entries())
+                stocks.slice(-count).forEach(([symbol, stock]) => {
+                    cart.push({ symbol, shares: stock.shares })
+                })
                 break
             }
             case 'gain': {
