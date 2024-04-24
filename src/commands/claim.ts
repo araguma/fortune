@@ -11,7 +11,7 @@ import { TransactionReply } from '@/libs/reply/transaction'
 import { Stock } from '@/types'
 
 const interval = 3600000
-const stockpileLimit = 24
+const stockpileLimit = 12
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
