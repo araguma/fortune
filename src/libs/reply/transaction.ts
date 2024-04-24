@@ -47,7 +47,7 @@ export class TransactionReply {
             })
             .join('\n')
         const embed = {
-            color: 0x3498db,
+            color: this.type === 'claim' ? 0x2ecc71 : 0x3498db,
             author: {
                 name: typeEmbedMap[this.type].hint,
             },
