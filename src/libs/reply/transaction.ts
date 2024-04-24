@@ -5,9 +5,24 @@ import { UserError } from '@/libs/error'
 import format from '@/libs/format'
 import { SnapshotsResponse, Stock } from '@/types'
 
+const typeEmbedMap = {
+    claim: {
+        hint: '>>>',
+        title: 'Claim Receipt',
+    },
+    buy: {
+        hint: '>>>',
+        title: 'Buy Receipt',
+    },
+    sell: {
+        hint: '<<<',
+        title: 'Sell Receipt',
+    },
+}
+
 export class TransactionReply {
     constructor(
-        public type: 'buy' | 'sell',
+        public type: 'claim' | 'buy' | 'sell',
         public snapshots: SnapshotsResponse<string>,
         public stocks: Stock[],
         public transactionId: string,
@@ -21,6 +36,7 @@ export class TransactionReply {
                 const quote = snapshot.latestTrade?.p || NaN
                 const total = stock.shares * quote
                 return [
+                    '-',
                     format.bold(stock.symbol),
                     stock.shares,
                     '⋅',
@@ -33,9 +49,9 @@ export class TransactionReply {
         const embed = {
             color: 0x3498db,
             author: {
-                name: this.type === 'buy' ? '>>>' : '<<<',
+                name: typeEmbedMap[this.type].hint,
             },
-            title: this.type === 'buy' ? 'Buy Receipt' : 'Sell Receipt',
+            title: typeEmbedMap[this.type].title,
             description: description || '> *No stocks found*',
             fields: [
                 {
