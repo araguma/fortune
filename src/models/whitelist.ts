@@ -21,4 +21,4 @@ export const WhitelistSchema = new Schema({
     },
 })
 
-export const WhitelistModel = model('server', WhitelistSchema)
+export const WhitelistModel = model('whitelist', WhitelistSchema)
