@@ -32,7 +32,7 @@ discord.addCommand({
         client.watchlist.push(symbol)
         await client.save()
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -55,6 +55,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

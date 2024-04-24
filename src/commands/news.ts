@@ -47,7 +47,7 @@ discord.addCommand({
         if (news.length === 0)
             UserError.throw('No news found for ' + symbols.join(', '))
 
-        await interaction.reply({
+        return {
             embeds: news.map((article) => {
                 const score = sentiment.analyze(
                     article.headline + ' ' + article.summary,
@@ -79,6 +79,6 @@ discord.addCommand({
                     timestamp: new Date(article.updated_at).toISOString(),
                 }
             }),
-        })
+        }
     },
 })

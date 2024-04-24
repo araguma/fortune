@@ -22,7 +22,7 @@ discord.addCommand({
         const user = await discord.users.fetch(userId)
         const client = await database.getClientByUserId(userId)
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -47,6 +47,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

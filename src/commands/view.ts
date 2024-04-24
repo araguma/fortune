@@ -87,7 +87,7 @@ discord.addCommand({
         const delta = quote - open
         const sign = delta >= 0 ? '▴' : '▾'
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color:
@@ -162,6 +162,6 @@ discord.addCommand({
                     name: 'graph.png',
                 },
             ],
-        })
+        }
     },
 })

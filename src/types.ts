@@ -1,11 +1,14 @@
 import {
     ChatInputCommandInteraction,
+    InteractionReplyOptions,
     RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js'
 
 export type Command = {
     descriptor: RESTPostAPIChatInputApplicationCommandsJSONBody
-    handler: (interaction: ChatInputCommandInteraction) => Promise<void>
+    handler: (
+        interaction: ChatInputCommandInteraction,
+    ) => Promise<InteractionReplyOptions>
 }
 
 export type Stock = {

@@ -124,7 +124,7 @@ discord.addCommand({
             timestamp: new Date().toISOString(),
         }
 
-        await interaction.reply({
+        return {
             embeds: [embed],
             files: [
                 {
@@ -132,6 +132,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

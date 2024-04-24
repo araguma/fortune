@@ -29,7 +29,7 @@ discord.addCommand({
         const sortBy = interaction.options.getString('by', true)
         const actives = await alpaca.getActives(10, sortBy)
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -72,6 +72,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

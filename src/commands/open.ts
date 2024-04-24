@@ -58,7 +58,7 @@ discord.addCommand({
         prediction.lastMessageId = message.id
         await prediction.save()
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -98,7 +98,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-            ephemeral: true,
-        })
+        }
     },
 })

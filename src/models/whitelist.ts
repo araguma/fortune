@@ -1,8 +1,8 @@
 import { InferSchemaType, Schema, model } from 'mongoose'
 
-export type Server = InferSchemaType<typeof ServerSchema>
+export type Whitelist = InferSchemaType<typeof WhitelistSchema>
 
-export const ServerSchema = new Schema({
+export const WhitelistSchema = new Schema({
     guildId: {
         type: String,
         required: true,
@@ -16,15 +16,9 @@ export const ServerSchema = new Schema({
             predictions: {
                 type: Boolean,
             },
-            threads: {
-                type: Boolean,
-            },
-            admin: {
-                type: Boolean,
-            },
         },
         default: {},
     },
 })
 
-export const ServerModel = model('server', ServerSchema)
+export const WhitelistModel = model('server', WhitelistSchema)

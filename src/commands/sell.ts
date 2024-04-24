@@ -210,13 +210,11 @@ discord.addCommand({
             })),
         )
 
-        await interaction.reply(
-            new TransactionReply(
-                'sell',
-                snapshots,
-                cart,
-                transaction._id.toString(),
-            ).toJSON(),
-        )
+        return new TransactionReply(
+            'sell',
+            snapshots,
+            cart,
+            transaction._id.toString(),
+        ).toJSON()
     },
 })

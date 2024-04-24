@@ -4,24 +4,22 @@ import {
     SlashCommandSubcommandBuilder,
 } from 'discord.js'
 
-import { groups } from '@/data/groups'
 import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import { groups } from '@/libs/group'
 
-const displayGroups = groups.filter(
-    (group) => group !== 'admin' && group !== 'threads',
-)
-const choices = displayGroups.map((group) => ({
-    name: (group[0] ?? '').toUpperCase() + group.slice(1),
-    value: group,
-}))
-const groupOption = (option: SlashCommandStringOption) =>
+const groupStringOption = (option: SlashCommandStringOption) =>
     option
         .setName('group')
         .setDescription('Command group')
-        .addChoices(...choices)
+        .addChoices(
+            ...groups.map((group) => ({
+                name: (group[0] ?? '').toUpperCase() + group.slice(1),
+                value: group,
+            })),
+        )
         .setRequired(true)
 
 discord.addCommand({
@@ -31,14 +29,26 @@ discord.addCommand({
         .addSubcommand(
             new SlashCommandSubcommandBuilder()
                 .setName('add')
-                .setDescription('Add this channel to the whitelist')
-                .addStringOption(groupOption),
+                .setDescription('Add channel to the whitelist')
+                .addChannelOption((option) =>
+                    option
+                        .setName('channel')
+                        .setDescription('Channel to add')
+                        .setRequired(true),
+                )
+                .addStringOption(groupStringOption),
         )
         .addSubcommand(
             new SlashCommandSubcommandBuilder()
                 .setName('remove')
-                .setDescription('Remove this channel from the whitelist')
-                .addStringOption(groupOption),
+                .setDescription('Remove channel from the whitelist')
+                .addChannelOption((option) =>
+                    option
+                        .setName('channel')
+                        .setDescription('Channel to remove')
+                        .setRequired(true),
+                )
+                .addStringOption(groupStringOption),
         )
         .addSubcommand(
             new SlashCommandSubcommandBuilder()
@@ -50,28 +60,23 @@ discord.addCommand({
         const subcommand = interaction.options.getSubcommand()
 
         if (!interaction.guild) UserError.throw('Failed to get guild')
-        const server = await database.getServerByGuildId(interaction.guild.id)
+        const whitelist = await database.getWhitelistByGuildId(
+            interaction.guild.id,
+        )
 
-        switch (subcommand) {
-            case 'add':
-            case 'remove': {
-                const group = interaction.options.getString('group', true)
-                const channel = server.channels.get(interaction.channelId)
-                const whitelist = Object.fromEntries(
-                    displayGroups.map((group) => [
-                        group,
-                        channel?.[group] ?? false,
-                    ]),
-                )
-                whitelist[group] = subcommand === 'add'
-                server.channels.set(interaction.channelId, whitelist)
-                await server.save()
-            }
+        if (subcommand === 'add' || subcommand === 'remove') {
+            const channel = interaction.options.getChannel('channel', true)
+            const group = interaction.options.getString('group', true)
+            whitelist.channels.set(channel.id, {
+                ...whitelist.channels.get(channel.id),
+                [group]: subcommand === 'add',
+            })
+            await whitelist.save()
         }
 
-        const fields = displayGroups.map((group) => {
+        const fields = groups.map((group) => {
             let value = ''
-            server.channels.forEach((channel, id) => {
+            whitelist.channels.forEach((channel, id) => {
                 if (channel[group]) value += `<#${id}>\n`
             })
 
@@ -82,7 +87,7 @@ discord.addCommand({
             }
         })
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -95,7 +100,7 @@ discord.addCommand({
                         url: 'attachment://divider.png',
                     },
                     footer: {
-                        text: server._id.toString().toUpperCase(),
+                        text: whitelist._id.toString().toUpperCase(),
                     },
                     timestamp: new Date().toISOString(),
                 },
@@ -106,7 +111,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-            ephemeral: true,
-        })
+        }
     },
 })

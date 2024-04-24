@@ -120,13 +120,11 @@ discord.addCommand({
         await client.save()
         const transaction = await database.postTransaction(client.userId, cart)
 
-        await interaction.reply(
-            new TransactionReply(
-                'buy',
-                snapshots,
-                cart,
-                transaction._id.toString(),
-            ).toJSON(),
-        )
+        return new TransactionReply(
+            'buy',
+            snapshots,
+            cart,
+            transaction._id.toString(),
+        ).toJSON()
     },
 })

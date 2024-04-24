@@ -40,7 +40,7 @@ discord.addCommand({
         await client.save()
         await target.save()
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0xe74c3c,
@@ -77,6 +77,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

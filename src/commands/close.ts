@@ -34,7 +34,8 @@ discord.addCommand({
 
         await thread.setName(`[CLOSED] ${prediction.question}`)
         await thread.send(new PredictionReply(prediction).toJSON())
-        await interaction.reply({
+
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -57,7 +58,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-            ephemeral: true,
-        })
+        }
     },
 })

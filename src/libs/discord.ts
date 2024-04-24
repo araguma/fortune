@@ -6,9 +6,9 @@ import {
     Routes,
 } from 'discord.js'
 
-import commandGroupMap from '@/data/groups'
 import database from '@/libs/database'
 import { UserError } from '@/libs/error'
+import getGroup from '@/libs/group'
 import { ErrorReply } from '@/libs/reply/error'
 import { Command } from '@/types'
 
@@ -31,18 +31,16 @@ export class Discord extends Client {
         if (!interaction.isChatInputCommand()) return
 
         try {
-            const group = commandGroupMap[interaction.commandName]
-            if (!group) UserError.throw('This command does not exist')
-
             if (
                 interaction.guildId &&
-                group !== 'admin' &&
-                group !== 'threads'
+                !interaction.channel?.isThread() &&
+                interaction.commandName !== 'whitelist'
             ) {
-                const server = await database.getServerByGuildId(
+                const group = getGroup(interaction.commandName)
+                const whitelist = await database.getWhitelistByGuildId(
                     interaction.guildId,
                 )
-                if (!server.channels.get(interaction.channelId)?.[group])
+                if (!whitelist.channels.get(interaction.channelId)?.[group])
                     UserError.throw(
                         `This channel is not whitelisted for ${group}`,
                     )
@@ -51,7 +49,9 @@ export class Discord extends Client {
             const command = this.commands[interaction.commandName]
             if (!command) UserError.throw('This command does not exist')
 
-            await command.handler(interaction)
+            const reply = await command.handler(interaction)
+            reply.ephemeral = !!interaction.channel?.isThread()
+            await interaction.reply(reply)
         } catch (error) {
             if (error instanceof UserError) {
                 await interaction

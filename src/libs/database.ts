@@ -2,8 +2,8 @@ import mongoose from 'mongoose'
 
 import { ClientModel } from '@/models/client'
 import { PredictionModel } from '@/models/prediction'
-import { ServerModel } from '@/models/server'
 import { TransactionModel } from '@/models/transaction'
+import { WhitelistModel } from '@/models/whitelist'
 import { Stock } from '@/types'
 
 export class Database {
@@ -25,13 +25,13 @@ export class Database {
         return clients
     }
 
-    async getServerByGuildId(guildId: string) {
-        const server = await ServerModel.findOneAndUpdate(
+    async getWhitelistByGuildId(guildId: string) {
+        const whitelist = await WhitelistModel.findOneAndUpdate(
             { guildId },
             { guildId },
             { upsert: true, new: true },
         )
-        return server
+        return whitelist
     }
 
     async getTransactionsByDate(userId: string, start: Date, end: Date) {

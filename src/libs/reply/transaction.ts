@@ -18,7 +18,7 @@ export class TransactionReply {
             .map((stock) => {
                 const snapshot = this.snapshots[stock.symbol]
                 if (!snapshot) UserError.throw('Failed to get snapshot')
-                const quote = snapshot.latestTrade.p
+                const quote = snapshot.latestTrade?.p || NaN
                 const total = stock.shares * quote
                 return [
                     format.bold(stock.symbol),
@@ -59,7 +59,8 @@ export class TransactionReply {
                                 const snapshot = this.snapshots[stock.symbol]
                                 if (!snapshot)
                                     UserError.throw('Failed to get snapshot')
-                                return stock.shares * snapshot.latestTrade.p
+                                const quote = snapshot.latestTrade?.p || NaN
+                                return stock.shares * quote
                             })
                             .reduce((a, b) => a + b, 0),
                     ),

@@ -45,7 +45,7 @@ discord.addCommand({
             })
             .join('\n')
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: type === 'Gainers' ? 0x2ecc71 : 0xe74c3c,
@@ -66,6 +66,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })

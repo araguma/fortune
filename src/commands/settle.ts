@@ -63,7 +63,7 @@ discord.addCommand({
         await thread.setName(
             `[SETTLED - ${prediction.options[option]}] ${prediction.question}`,
         )
-        await interaction.reply({
+        await thread.send({
             embeds: [
                 {
                     color: 0x3498db,
@@ -94,5 +94,30 @@ discord.addCommand({
                 },
             ],
         })
+
+        return {
+            embeds: [
+                {
+                    color: 0x3498db,
+                    author: {
+                        name: '---',
+                    },
+                    title: 'Prediction Settled',
+                    image: {
+                        url: 'attachment://divider.png',
+                    },
+                    footer: {
+                        text: prediction._id.toString().toUpperCase(),
+                    },
+                    timestamp: new Date().toISOString(),
+                },
+            ],
+            files: [
+                {
+                    attachment: divider(),
+                    name: 'divider.png',
+                },
+            ],
+        }
     },
 })

@@ -12,7 +12,7 @@ discord.addCommand({
         .setName('leaderboard')
         .setDescription('Display profit leaderboard')
         .toJSON(),
-    handler: async (interaction) => {
+    handler: async () => {
         const clients = await database.getAllClients()
 
         clients.sort((a, b) => b.profit - a.profit)
@@ -27,7 +27,7 @@ discord.addCommand({
             profit += `${format.currency(client.profit)}\n`
         }
 
-        await interaction.reply({
+        return {
             embeds: [
                 {
                     color: 0x3498db,
@@ -59,6 +59,6 @@ discord.addCommand({
                     name: 'divider.png',
                 },
             ],
-        })
+        }
     },
 })
