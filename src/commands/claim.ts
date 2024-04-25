@@ -39,8 +39,7 @@ discord.addCommand({
         const cart: Stock[] = []
         for (let i = 0; i < client.claims; i++) {
             const symbol = symbols[Math.floor(Math.random() * symbols.length)]
-            if (!symbol)
-                UserError.throw(`Failed to get quote for ${symbol}`)
+            if (!symbol) UserError.throw(`Failed to get quote for ${symbol}`)
             const shares = Math.floor(Math.random() * 19 + 1) / 10
             cart.push({ symbol, shares })
         }
@@ -52,6 +51,8 @@ discord.addCommand({
             if (!quote)
                 UserError.throw(`Failed to get snapshot for ${stock.symbol}`)
             const price = yahoo.getPrice(quote)
+            if (isNaN(price))
+                UserError.throw(`Failed to get price for ${stock.symbol}`)
 
             const value = stock.shares * price
             total += value
