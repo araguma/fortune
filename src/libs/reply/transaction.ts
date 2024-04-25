@@ -36,7 +36,6 @@ export class TransactionReply {
                 const quote = snapshot.latestTrade?.p || NaN
                 const total = stock.shares * quote
                 return [
-                    '-',
                     format.bold(stock.symbol),
                     stock.shares,
                     '⋅',
