@@ -6,6 +6,10 @@ export class Format {
         return text.charAt(0).toUpperCase() + text.slice(1)
     }
 
+    symbol(text?: string) {
+        return text ? this.bold(text) : 'N/A'
+    }
+
     number(value?: number) {
         if (value === undefined || isNaN(value)) return 'N/A'
         return value.toString()
@@ -18,6 +22,7 @@ export class Format {
 
     currency(amount?: number) {
         if (amount === undefined || isNaN(amount)) return 'N/A'
+        if (Math.abs(amount) === Infinity) amount = 0
         return (
             this.currencyPrefix +
             parseFloat(amount.toFixed(5)) +
