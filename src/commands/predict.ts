@@ -61,17 +61,10 @@ discord.addCommand({
             option,
             amount,
         })
-
-        const lastMessage = await interaction.channel?.messages.fetch(
-            prediction.lastMessageId ?? '',
-        )
-        await lastMessage?.delete().catch(() => {})
-
-        const message = await thread.send(
-            new PredictionReply(prediction).toJSON(),
-        )
-        prediction.lastMessageId = message.id
         await prediction.save()
+
+        const message = await thread.messages.fetch(prediction.messageId)
+        await message.edit(new PredictionReply(prediction).toJSON())
 
         return {
             embeds: [

@@ -66,6 +66,7 @@ export class Database {
     ) {
         const prediction = await PredictionModel.create({
             threadId,
+            messageId: '-1',
             question,
             options,
             minimum,

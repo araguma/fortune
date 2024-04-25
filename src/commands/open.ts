@@ -55,7 +55,7 @@ discord.addCommand({
         const message = await thread.send(
             new PredictionReply(prediction).toJSON(),
         )
-        prediction.lastMessageId = message.id
+        prediction.messageId = message.id
         await prediction.save()
 
         return {

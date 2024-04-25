@@ -1,4 +1,4 @@
-import { MessageCreateOptions } from 'discord.js'
+import { MessageCreateOptions, MessageEditOptions } from 'discord.js'
 import { HydratedDocument } from 'mongoose'
 
 import divider from '@/images/divider'
@@ -8,7 +8,7 @@ import { Prediction } from '@/models/prediction'
 export class PredictionReply {
     constructor(public prediction: HydratedDocument<Prediction>) {}
 
-    toJSON(): MessageCreateOptions {
+    toJSON(): MessageCreateOptions & MessageEditOptions {
         const pool = this.prediction.pool.reduce((a, b) => a + b, 0)
         const embed = {
             color: this.prediction.status === 'opened' ? 0x3498db : 0x9b59b6,

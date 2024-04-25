@@ -27,13 +27,10 @@ discord.addCommand({
         prediction.status = 'closed'
         await prediction.save()
 
-        const lastMessage = await interaction.channel?.messages.fetch(
-            prediction.lastMessageId ?? '',
-        )
-        await lastMessage?.delete().catch(() => {})
-
         await thread.setName(`[CLOSED] ${prediction.question}`)
-        await thread.send(new PredictionReply(prediction).toJSON())
+
+        const message = await thread.messages.fetch(prediction.messageId)
+        await message.edit(new PredictionReply(prediction).toJSON())
 
         return {
             embeds: [

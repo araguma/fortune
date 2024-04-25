@@ -7,8 +7,9 @@ export const PredictionSchema = new Schema({
         type: String,
         required: true,
     },
-    lastMessageId: {
+    messageId: {
         type: String,
+        required: true,
     },
     status: {
         type: String,
