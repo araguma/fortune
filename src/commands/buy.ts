@@ -59,8 +59,7 @@ discord.addCommand({
         .toJSON(),
     handler: async (interaction) => {
         const hour = new Date().getHours()
-
-        if ((hour > 20 && hour < 24) || (hour > 0 && hour < 4))
+        if ((hour >= 20 && hour < 24) || (hour >= 0 && hour < 4))
             UserError.throw('Market closed')
 
         const client = await database.getClientByUserId(interaction.user.id)
