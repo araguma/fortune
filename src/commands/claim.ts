@@ -52,7 +52,8 @@ discord.addCommand({
             const snapshot = snapshots[stock.symbol]
             if (!snapshot)
                 UserError.throw(`Failed to get snapshot for ${stock.symbol}`)
-            const quote = snapshot.latestTrade?.p || NaN
+            const quote =
+                snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
 
             const value = quote * stock.shares
             total += value

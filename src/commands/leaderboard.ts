@@ -53,7 +53,8 @@ discord.addCommand({
                 (acc, [symbol, stock]) => {
                     const snapshot = snapshots[symbol]
                     if (!snapshot) throw new Error('Failed to get snapshot')
-                    const quote = snapshot.latestTrade?.p || NaN
+                    const quote =
+                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
                     return acc + quote * stock.shares
                 },
                 0,

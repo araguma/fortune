@@ -158,7 +158,8 @@ discord.addCommand({
                 if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
                 const current = client.portfolio.get(symbol)
                 if (!current) UserError.throw('Stock not owned')
-                const quote = snapshot.latestTrade?.p || NaN
+                const quote =
+                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
                 const shares = value / quote
                 cart.push({ symbol, shares })
                 break
@@ -176,7 +177,8 @@ discord.addCommand({
                 client.portfolio.forEach((stock, symbol) => {
                     const snapshot = snapshots[symbol]
                     if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
-                    const quote = snapshot.latestTrade?.p || NaN
+                    const quote =
+                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
                     if (stock.shares * quote > stock.seed)
                         cart.push({ symbol, shares: stock.shares })
                 })
@@ -186,7 +188,8 @@ discord.addCommand({
                 client.portfolio.forEach((stock, symbol) => {
                     const snapshot = snapshots[symbol]
                     if (!snapshot) UserError.throw('Failed to get snapshot')
-                    const quote = snapshot.latestTrade?.p || NaN
+                    const quote =
+                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
                     if (stock.shares * quote < stock.seed)
                         cart.push({ symbol, shares: stock.shares })
                 })
@@ -204,7 +207,8 @@ discord.addCommand({
             if (!snapshot) UserError.throw('Failed to get snapshot')
             const current = client.portfolio.get(stock.symbol)
             if (!current) UserError.throw('Stock not owned')
-            const quote = snapshot.latestTrade?.p || NaN
+            const quote =
+                snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
             if (isNaN(quote)) UserError.throw('Failed to get quote')
 
             if (current.shares < stock.shares)
