@@ -215,7 +215,7 @@ discord.addCommand({
             } else if (current.shares > stock.shares) {
                 client.portfolio.set(stock.symbol, {
                     shares: current.shares - stock.shares,
-                    seed: current.seed,
+                    seed: current.seed - stock.shares * price,
                 })
             }
 
