@@ -40,21 +40,34 @@ discord.addCommand({
             Array.from(client.portfolio.keys()),
         )
 
+        let topGain = { symbol: '', delta: -Infinity }
+        let topLoss = { symbol: '', delta: Infinity }
         const { value, delta } = Array.from(client.portfolio.entries()).reduce(
             (acc, [symbol, stock]) => {
                 const quote = quotes[symbol]
                 if (!quote) UserError.throw(`Failed to get quote for ${symbol}`)
                 const price = yahoo.getPrice(quote)
                 const open = quote.regularMarketOpen || NaN
+
+                const delta = (price - open) * stock.shares
+                if (delta > topGain.delta) {
+                    topGain = { symbol, delta }
+                }
+                if (delta < topLoss.delta) {
+                    topLoss = { symbol, delta }
+                }
+
                 return {
                     value: acc.value + price * stock.shares,
-                    delta: acc.delta + (price - open) * stock.shares,
+                    delta: acc.delta + delta,
                 }
             },
             { value: 0, delta: 0 },
         )
         const total = value + client.balance
         const profit = parseFloat((total - client.seed).toFixed(5))
+        if (topGain.delta < 0) topGain = { symbol: '', delta: 0 }
+        if (topLoss.delta > 0) topLoss = { symbol: '', delta: 0 }
 
         await client.save()
 
@@ -121,6 +134,22 @@ discord.addCommand({
                     inline: true,
                 },
                 {
+                    name: 'Top Gain',
+                    value: [
+                        format.currency(topGain.delta),
+                        `(${format.symbol(topGain.symbol)})`,
+                    ].join(' '),
+                    inline: true,
+                },
+                {
+                    name: 'Top Loss',
+                    value: [
+                        format.currency(topLoss.delta),
+                        `(${format.symbol(topLoss.symbol)})`,
+                    ].join(' '),
+                    inline: true,
+                },
+                {
                     name: 'Seed',
                     value: format.currency(client.seed),
                     inline: true,
@@ -135,7 +164,9 @@ discord.addCommand({
                 },
                 {
                     name: 'Showing',
-                    value: `${start}-${start + display.length - 1} of ${client.portfolio.size}`,
+                    value: display.length
+                        ? `${start}-${start + display.length - 1} of ${client.portfolio.size}`
+                        : 'None',
                     inline: true,
                 },
             ],
