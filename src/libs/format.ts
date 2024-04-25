@@ -24,8 +24,9 @@ export class Format {
         if (amount === undefined || isNaN(amount)) return 'N/A'
         if (Math.abs(amount) === Infinity) amount = 0
         return (
+            (amount < 0 ? '-' : '') +
             this.currencyPrefix +
-            parseFloat(amount.toFixed(5)) +
+            parseFloat(Math.abs(amount).toFixed(5)) +
             this.currencySuffix
         )
     }
