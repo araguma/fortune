@@ -8,6 +8,7 @@ import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
+import format from '@/libs/format'
 import { groups } from '@/libs/group'
 
 const groupStringOption = (option: SlashCommandStringOption) =>
@@ -16,7 +17,7 @@ const groupStringOption = (option: SlashCommandStringOption) =>
         .setDescription('Command group')
         .addChoices(
             ...groups.map((group) => ({
-                name: (group[0] ?? '').toUpperCase() + group.slice(1),
+                name: format.capitalize(group),
                 value: group,
             })),
         )
@@ -83,7 +84,7 @@ discord.addCommand({
             })
 
             return {
-                name: (group[0] ?? '').toUpperCase() + group.slice(1),
+                name: format.capitalize(group),
                 value,
                 inline: true,
             }
