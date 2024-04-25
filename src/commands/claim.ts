@@ -22,6 +22,7 @@ discord.addCommand({
         const client = await database.getClientByUserId(interaction.user.id)
 
         const lastClaim = client.lastClaim.getTime()
+        const offset = (Date.now() - lastClaim) % interval
         client.claims += clamp(
             Math.floor((Date.now() - lastClaim) / interval),
             0,
@@ -49,7 +50,8 @@ discord.addCommand({
         )
         cart.forEach((stock) => {
             const snapshot = snapshots[stock.symbol]
-            if (!snapshot) UserError.throw(`Failed to get snapshot for ${stock.symbol}`)
+            if (!snapshot)
+                UserError.throw(`Failed to get snapshot for ${stock.symbol}`)
             const quote = snapshot.latestTrade?.p || NaN
 
             const value = quote * stock.shares
@@ -63,7 +65,7 @@ discord.addCommand({
         })
         client.seed += total
         client.claims = 0
-        client.lastClaim = new Date()
+        client.lastClaim = new Date(Date.now() - offset)
         await client.save()
         const transaction = await database.postTransaction(client.userId, cart)
 
