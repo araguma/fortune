@@ -109,7 +109,8 @@ discord.addCommand({
             if (stock.shares <= 0) UserError.throw('Invalid shares')
 
             const quote = quotes[stock.symbol]
-            if (!quote) throw new Error('Failed to get snapshot')
+            if (!quote)
+                UserError.throw(`Failed to get quote for ${stock.symbol}`)
             const price = yahoo.getPrice(quote)
 
             const total = price * stock.shares

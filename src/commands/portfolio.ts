@@ -3,6 +3,7 @@ import { SlashCommandBuilder } from 'discord.js'
 import divider from '@/images/divider'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
+import { UserError } from '@/libs/error'
 import format from '@/libs/format'
 import yahoo from '@/libs/yahoo'
 
@@ -29,7 +30,7 @@ discord.addCommand({
         const { value, delta } = Array.from(client.portfolio.entries()).reduce(
             (acc, [symbol, stock]) => {
                 const quote = quotes[symbol]
-                if (!quote) throw new Error('Failed to get snapshot')
+                if (!quote) UserError.throw(`Failed to get quote for ${symbol}`)
                 const price = yahoo.getPrice(quote)
                 const open = quote.regularMarketOpen || NaN
                 return {
@@ -48,7 +49,7 @@ discord.addCommand({
         const description = Array.from(client.portfolio.entries())
             .map(([symbol, stock], index) => {
                 const quote = quotes[symbol]
-                if (!quote) throw new Error('Failed to get snapshot')
+                if (!quote) UserError.throw(`Failed to get quote for ${symbol}`)
                 const price = yahoo.getPrice(quote)
                 const open = quote.regularMarketOpen || NaN
                 const delta = (price - open) * stock.shares

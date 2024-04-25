@@ -5,6 +5,7 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
 import yahoo from '@/libs/yahoo'
+import { UserError } from '@/libs/error'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -28,7 +29,8 @@ discord.addCommand({
         const description = client.watchlist
             .map((symbol) => {
                 const quote = quotes[symbol]
-                if (!quote) throw new Error('Failed to get snapshot')
+                if (!quote)
+                    UserError.throw(`Failed to get quote for ${symbol}`)
                 const price = yahoo.getPrice(quote)
                 const open = quote.regularMarketOpen || NaN
                 return [

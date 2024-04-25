@@ -39,7 +39,8 @@ discord.addCommand({
         const cart: Stock[] = []
         for (let i = 0; i < client.claims; i++) {
             const symbol = symbols[Math.floor(Math.random() * symbols.length)]
-            if (!symbol) throw new Error('Failed to get symbol')
+            if (!symbol)
+                UserError.throw(`Failed to get quote for ${symbol}`)
             const shares = Math.floor(Math.random() * 19 + 1) / 10
             cart.push({ symbol, shares })
         }

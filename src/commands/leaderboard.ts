@@ -5,6 +5,7 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
 import yahoo from '@/libs/yahoo'
+import { UserError } from '@/libs/error'
 
 const limit = 20
 const padding = limit.toString().length
@@ -52,7 +53,10 @@ discord.addCommand({
             const value = Array.from(entry.portfolio.entries()).reduce(
                 (acc, [symbol, stock]) => {
                     const quote = quotes[symbol]
-                    if (!quote) throw new Error('Failed to get snapshot')
+                    if (!quote)
+                        UserError.throw(
+                            `Failed to get quote for ${symbol}`,
+                        )
                     const price = yahoo.getPrice(quote)
                     return acc + price * stock.shares
                 },
