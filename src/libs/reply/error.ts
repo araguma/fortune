@@ -12,7 +12,6 @@ export class ErrorReply {
                     color: 0x000000,
                 },
             ],
-            ephemeral: true,
         }
     }
 }

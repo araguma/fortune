@@ -53,7 +53,6 @@ export class Discord extends Client {
             if (!command) UserError.throw('This command does not exist')
 
             const reply = await command.handler(interaction)
-            reply.ephemeral = ephemeral
             await interaction.editReply(reply)
         } catch (error) {
             if (error instanceof UserError) {
