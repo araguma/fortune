@@ -16,6 +16,12 @@ export type Stock = {
     shares: number
 }
 
+export type StockClockResponse = {
+    timestamp: string
+    is_open: boolean
+    next_open: string
+    next_close: string
+}
 export type StockSnapshotsResponse<T extends string> = Record<T, Snapshot>
 export type CryptoSnapshotsResponse<T extends string> = {
     snapshots: Record<T, Snapshot>

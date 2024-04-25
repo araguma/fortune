@@ -5,10 +5,12 @@ import {
     HistoricalBarsResponse,
     MoversResponse,
     NewsResponse,
+    StockClockResponse,
     StockSnapshotsResponse,
 } from '@/types'
 
-const baseUrl = 'https://data.alpaca.markets'
+const paperBaseUrl = 'https://paper-api.alpaca.markets'
+const marketBaseUrl = 'https://data.alpaca.markets'
 
 export class Alpaca {
     headers: Headers
@@ -21,8 +23,18 @@ export class Alpaca {
         })
     }
 
+    async getClock() {
+        const url = new URL(`${paperBaseUrl}/v2/clock`)
+        const response = (await (
+            await fetch(url, {
+                headers: this.headers,
+            })
+        ).json()) as StockClockResponse
+        return response
+    }
+
     async getSnapshots<A extends string[]>(symbols: A) {
-        const stockUrl = new URL(`${baseUrl}/v2/stocks/snapshots`)
+        const stockUrl = new URL(`${marketBaseUrl}/v2/stocks/snapshots`)
         stockUrl.searchParams.append('symbols', filterStocks(symbols).join(','))
         stockUrl.searchParams.append('feed', 'iex')
         const stockResponse = (await (
@@ -31,7 +43,9 @@ export class Alpaca {
             })
         ).json()) as StockSnapshotsResponse<A[number]>
 
-        const cryptoUrl = new URL(`${baseUrl}/v1beta3/crypto/us/snapshots`)
+        const cryptoUrl = new URL(
+            `${marketBaseUrl}/v1beta3/crypto/us/snapshots`,
+        )
         cryptoUrl.searchParams.append(
             'symbols',
             filterCrypto(symbols).join(','),
@@ -54,7 +68,7 @@ export class Alpaca {
         start: Date,
         end: Date,
     ) {
-        const stockUrl = new URL(`${baseUrl}/v2/stocks/bars`)
+        const stockUrl = new URL(`${marketBaseUrl}/v2/stocks/bars`)
         stockUrl.searchParams.append('symbols', filterStocks(symbols).join(','))
         stockUrl.searchParams.append('timeframe', timeframe)
         stockUrl.searchParams.append('start', start.toISOString())
@@ -67,7 +81,7 @@ export class Alpaca {
             })
         ).json()) as HistoricalBarsResponse<A[number]>
 
-        const cryptoUrl = new URL(`${baseUrl}/v1beta3/crypto/us/bars`)
+        const cryptoUrl = new URL(`${marketBaseUrl}/v1beta3/crypto/us/bars`)
         cryptoUrl.searchParams.append(
             'symbols',
             filterCrypto(symbols).join(','),
@@ -89,7 +103,9 @@ export class Alpaca {
     }
 
     async getActives(top: number, sortBy: string) {
-        const url = new URL(`${baseUrl}/v1beta1/screener/stocks/most-actives`)
+        const url = new URL(
+            `${marketBaseUrl}/v1beta1/screener/stocks/most-actives`,
+        )
         url.searchParams.append('top', top.toString())
         url.searchParams.append('by', sortBy.toLowerCase())
         const response = (await (
@@ -101,7 +117,7 @@ export class Alpaca {
     }
 
     async getMovers(top: number) {
-        const url = new URL(`${baseUrl}/v1beta1/screener/stocks/movers`)
+        const url = new URL(`${marketBaseUrl}/v1beta1/screener/stocks/movers`)
         url.searchParams.append('top', top.toString())
         const response = (await (
             await fetch(url, {
@@ -112,7 +128,7 @@ export class Alpaca {
     }
 
     async getNews(symbols: string[], start: Date, end: Date) {
-        const url = new URL(`${baseUrl}/v1beta1/news`)
+        const url = new URL(`${marketBaseUrl}/v1beta1/news`)
         url.searchParams.append('symbols', symbols.join(','))
         url.searchParams.append('start', start.toISOString())
         url.searchParams.append('end', end.toISOString())

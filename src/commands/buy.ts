@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
+import prettyMilliseconds from 'pretty-ms'
 
 import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
@@ -58,11 +59,12 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const start = new Date()
-        start.setHours(0, 0, 0, 0)
-        const msElapsed = new Date().getTime() - start.getTime()
-        if (msElapsed > 16 * 60 * 60 * 1000 || msElapsed < 9.5 * 60 * 60 * 1000)
-            UserError.throw('Market closed')
+        const clock = await alpaca.getClock()
+        if (!clock.is_open) {
+            const nextOpen = new Date(clock.next_open).getTime()
+            const timeLeft = nextOpen - Date.now()
+            UserError.throw(`Market opens in ${prettyMilliseconds(timeLeft)}`)
+        }
 
         const client = await database.getClientByUserId(interaction.user.id)
 
