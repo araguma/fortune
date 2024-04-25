@@ -42,7 +42,6 @@ discord.addCommand({
         const total = value + client.balance
         const profit = parseFloat((total - client.seed).toFixed(5))
 
-        client.profit = profit
         await client.save()
 
         const description = Array.from(client.portfolio.entries())

@@ -2,6 +2,10 @@ export class Format {
     currencyPrefix = '$'
     currencySuffix = ''
 
+    capitalize(text: string) {
+        return text.charAt(0).toUpperCase() + text.slice(1)
+    }
+
     number(value?: number) {
         if (value === undefined || isNaN(value)) return 'N/A'
         return value.toString()

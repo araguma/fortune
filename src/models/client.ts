@@ -33,11 +33,6 @@ export const ClientSchema = new Schema({
         required: true,
         default: 0,
     },
-    profit: {
-        type: Number,
-        required: true,
-        default: 0,
-    },
     watchlist: {
         type: [String],
         required: true,
