@@ -57,6 +57,12 @@ discord.addCommand({
                 )
                 .setRequired(true),
         )
+        .addUserOption((option) =>
+            option
+                .setName('as')
+                .setDescription('View as user')
+                .setRequired(false),
+        )
         .toJSON(),
     handler: async (interaction) => {
         const symbol = interaction.options
@@ -72,8 +78,12 @@ discord.addCommand({
         const quote = (await yahoo.getQuotes([symbol]))[symbol]
         if (!quote) UserError.throw('Symbol not found')
 
-        const client = await database.getClientByUserId(interaction.user.id)
+        const clientId =
+            interaction.options.getUser('as')?.id ?? interaction.user.id
+        const client = await database.getClientByUserId(clientId)
+        const user = await discord.users.fetch(clientId)
         const shares = client.portfolio.get(symbol)?.shares ?? 0
+        const seed = client.portfolio.get(symbol)?.seed ?? 0
 
         const price = yahoo.getPrice(quote)
         const open = quote.regularMarketOpen || NaN
@@ -96,7 +106,9 @@ discord.addCommand({
                     author: {
                         name: '---',
                     },
-                    title: symbol,
+                    title: quote.shortName
+                        ? `${quote.shortName} (${symbol})`
+                        : symbol,
                     description: [
                         '#',
                         format.currency(price),
@@ -122,13 +134,33 @@ discord.addCommand({
                             inline: true,
                         },
                         {
+                            name: 'P/B',
+                            value: format.number(quote.priceToBook),
+                            inline: true,
+                        },
+                        {
                             name: 'Volume',
                             value: format.number(quote.regularMarketVolume),
                             inline: true,
                         },
                         {
+                            name: 'Market Cap',
+                            value: format.currency(quote.marketCap),
+                            inline: true,
+                        },
+                        {
+                            name: 'Seed',
+                            value: format.currency(seed),
+                            inline: true,
+                        },
+                        {
                             name: 'Owned',
                             value: format.shares(shares),
+                            inline: true,
+                        },
+                        {
+                            name: 'Profit',
+                            value: format.currency(shares * price - seed),
                             inline: true,
                         },
                     ],
@@ -137,6 +169,7 @@ discord.addCommand({
                     },
                     footer: {
                         text: `${timeframe}  •  ${history.length} Data Points`,
+                        icon_url: user.displayAvatarURL(),
                     },
                 },
             ],
