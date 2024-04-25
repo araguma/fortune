@@ -33,7 +33,8 @@ function getPrice(quote: Quote) {
             break
         }
     }
-    return price ?? NaN
+    console.log(quote.marketState, new Date())
+    return price ?? quote.regularMarketPrice ?? NaN
 }
 
 const yahoo = {
