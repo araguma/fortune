@@ -59,9 +59,8 @@ discord.addCommand({
         .toJSON(),
     handler: async (interaction) => {
         const start = new Date()
-        const now = new Date()
         start.setHours(0, 0, 0, 0)
-        const msElapsed = now.getTime() - start.getTime()
+        const msElapsed = new Date().getTime() - start.getTime()
         if (msElapsed > 16 * 60 * 60 * 1000 || msElapsed < 9.5 * 60 * 60 * 1000)
             UserError.throw('Market closed')
 
