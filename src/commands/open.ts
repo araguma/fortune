@@ -27,7 +27,7 @@ discord.addCommand({
             option
                 .setName('minimum')
                 .setDescription('Minimum bet')
-                .setRequired(false),
+                .setRequired(true),
         )
         .toJSON(),
     handler: async (interaction) => {
