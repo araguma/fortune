@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
+import yahoo from '@/libs/yahoo'
 
 const limit = 20
 const padding = limit.toString().length
@@ -47,15 +47,14 @@ discord.addCommand({
             client.portfolio.forEach((_, symbol) => symbols.add(symbol))
         })
 
-        const snapshots = await alpaca.getSnapshots(Array.from(symbols))
+        const quotes = await yahoo.getQuotes(Array.from(symbols))
         leaderboard.forEach((entry) => {
             const value = Array.from(entry.portfolio.entries()).reduce(
                 (acc, [symbol, stock]) => {
-                    const snapshot = snapshots[symbol]
-                    if (!snapshot) throw new Error('Failed to get snapshot')
-                    const quote =
-                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                    return acc + quote * stock.shares
+                    const quote = quotes[symbol]
+                    if (!quote) throw new Error('Failed to get snapshot')
+                    const price = yahoo.getPrice(quote)
+                    return acc + price * stock.shares
                 },
                 0,
             )

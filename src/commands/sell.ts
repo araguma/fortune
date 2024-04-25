@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
 
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import { TransactionReply } from '@/libs/reply/transaction'
+import yahoo from '@/libs/yahoo'
 import { Stock } from '@/types'
 
 discord.addCommand({
@@ -117,7 +117,7 @@ discord.addCommand({
         .toJSON(),
     handler: async (interaction) => {
         const client = await database.getClientByUserId(interaction.user.id)
-        const snapshots = await alpaca.getSnapshots(
+        const quotes = await yahoo.getQuotes(
             Array.from(client.portfolio.keys()),
         )
 
@@ -154,13 +154,12 @@ discord.addCommand({
                     .getString('symbol', true)
                     .toUpperCase()
                 const value = interaction.options.getNumber('value', true)
-                const snapshot = snapshots[symbol]
+                const snapshot = quotes[symbol]
                 if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
                 const current = client.portfolio.get(symbol)
                 if (!current) UserError.throw('Stock not owned')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const shares = value / quote
+                const price = yahoo.getPrice(snapshot)
+                const shares = value / price
                 cart.push({ symbol, shares })
                 break
             }
@@ -175,22 +174,20 @@ discord.addCommand({
             }
             case 'gain': {
                 client.portfolio.forEach((stock, symbol) => {
-                    const snapshot = snapshots[symbol]
+                    const snapshot = quotes[symbol]
                     if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
-                    const quote =
-                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                    if (stock.shares * quote > stock.seed)
+                    const price = yahoo.getPrice(snapshot)
+                    if (stock.shares * price > stock.seed)
                         cart.push({ symbol, shares: stock.shares })
                 })
                 break
             }
             case 'loss': {
                 client.portfolio.forEach((stock, symbol) => {
-                    const snapshot = snapshots[symbol]
+                    const snapshot = quotes[symbol]
                     if (!snapshot) UserError.throw('Failed to get snapshot')
-                    const quote =
-                        snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                    if (stock.shares * quote < stock.seed)
+                    const price = yahoo.getPrice(snapshot)
+                    if (stock.shares * price < stock.seed)
                         cart.push({ symbol, shares: stock.shares })
                 })
                 break
@@ -203,13 +200,12 @@ discord.addCommand({
         cart.forEach((stock) => {
             if (stock.shares <= 0) UserError.throw('Invalid shares')
 
-            const snapshot = snapshots[stock.symbol]
-            if (!snapshot) UserError.throw('Failed to get snapshot')
+            const quote = quotes[stock.symbol]
+            if (!quote) UserError.throw('Failed to get snapshot')
             const current = client.portfolio.get(stock.symbol)
             if (!current) UserError.throw('Stock not owned')
-            const quote =
-                snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-            if (isNaN(quote)) UserError.throw('Failed to get quote')
+            const price = yahoo.getPrice(quote)
+            if (isNaN(price)) UserError.throw('Failed to get quote')
 
             if (current.shares < stock.shares)
                 UserError.throw('Insufficient shares')
@@ -223,7 +219,7 @@ discord.addCommand({
                 })
             }
 
-            client.balance += stock.shares * quote
+            client.balance += stock.shares * price
         })
         await client.save()
         const transaction = await database.postTransaction(
@@ -236,7 +232,7 @@ discord.addCommand({
 
         return new TransactionReply(
             'sell',
-            snapshots,
+            quotes,
             cart,
             transaction._id.toString(),
         ).toJSON()

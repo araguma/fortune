@@ -6,6 +6,7 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import { TransactionReply } from '@/libs/reply/transaction'
+import yahoo from '@/libs/yahoo'
 import { Stock } from '@/types'
 
 discord.addCommand({
@@ -74,11 +75,10 @@ discord.addCommand({
                 const symbol = interaction.options
                     .getString('symbol', true)
                     .toUpperCase()
-                const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
-                if (!snapshot) UserError.throw('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const shares = client.balance / quote
+                const quote = (await yahoo.getQuotes([symbol]))[symbol]
+                if (!quote) UserError.throw('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const shares = client.balance / price
                 cart.push({ symbol, shares })
                 break
             }
@@ -95,28 +95,24 @@ discord.addCommand({
                     .getString('symbol', true)
                     .toUpperCase()
                 const value = interaction.options.getNumber('value', true)
-                const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
-                if (!snapshot) UserError.throw('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const shares = value / quote
+                const quote = (await yahoo.getQuotes([symbol]))[symbol]
+                if (!quote) UserError.throw('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const shares = value / price
                 cart.push({ symbol, shares })
                 break
             }
         }
 
-        const snapshots = await alpaca.getSnapshots(
-            cart.map((stock) => stock.symbol),
-        )
+        const quotes = await yahoo.getQuotes(cart.map((stock) => stock.symbol))
         cart.forEach((stock) => {
             if (stock.shares <= 0) UserError.throw('Invalid shares')
 
-            const snapshot = snapshots[stock.symbol]
-            if (!snapshot) throw new Error('Failed to get snapshot')
-            const quote =
-                snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
+            const quote = quotes[stock.symbol]
+            if (!quote) throw new Error('Failed to get snapshot')
+            const price = yahoo.getPrice(quote)
 
-            const total = quote * stock.shares
+            const total = price * stock.shares
             if (isNaN(total)) UserError.throw('Failed to get total')
             if (client.balance < total) UserError.throw('Insufficient funds')
 
@@ -133,7 +129,7 @@ discord.addCommand({
 
         return new TransactionReply(
             'buy',
-            snapshots,
+            quotes,
             cart,
             transaction._id.toString(),
         ).toJSON()

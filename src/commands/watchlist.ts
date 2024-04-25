@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
+import yahoo from '@/libs/yahoo'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -23,20 +23,19 @@ discord.addCommand({
         const user = await discord.users.fetch(userId)
         const client = await database.getClientByUserId(userId)
 
-        const snapshots = await alpaca.getSnapshots(client.watchlist)
+        const quotes = await yahoo.getQuotes(client.watchlist)
 
         const description = client.watchlist
             .map((symbol) => {
-                const snapshot = snapshots[symbol]
-                if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const open = snapshot.dailyBar?.o || NaN
+                const quote = quotes[symbol]
+                if (!quote) throw new Error('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const open = quote.regularMarketOpen || NaN
                 return [
-                    quote - open >= 0 ? '▴' : '▾',
+                    price - open >= 0 ? '▴' : '▾',
                     format.bold(symbol),
-                    format.currency(quote),
-                    `(${format.percentage((quote - open) / open)})`,
+                    format.currency(price),
+                    `(${format.percentage((price - open) / open)})`,
                 ].join(' ')
             })
             .join('\n')

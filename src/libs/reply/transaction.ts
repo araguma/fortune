@@ -1,9 +1,11 @@
 import { InteractionReplyOptions } from 'discord.js'
+import { Quote } from 'yahoo-finance2/dist/esm/src/modules/quote'
 
 import divider from '@/images/divider'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
-import { StockSnapshotsResponse, Stock } from '@/types'
+import yahoo from '@/libs/yahoo'
+import { Stock } from '@/types'
 
 const typeEmbedMap = {
     claim: {
@@ -23,7 +25,7 @@ const typeEmbedMap = {
 export class TransactionReply {
     constructor(
         public type: 'claim' | 'buy' | 'sell',
-        public snapshots: StockSnapshotsResponse<string>,
+        public quotes: Record<string, Quote>,
         public stocks: Stock[],
         public transactionId: string,
     ) {}
@@ -31,16 +33,15 @@ export class TransactionReply {
     toJSON(): InteractionReplyOptions {
         const description = this.stocks
             .map((stock) => {
-                const snapshot = this.snapshots[stock.symbol]
-                if (!snapshot) UserError.throw('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const total = stock.shares * quote
+                const quote = this.quotes[stock.symbol]
+                if (!quote) UserError.throw('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const total = stock.shares * price
                 return [
                     format.bold(stock.symbol),
                     stock.shares,
                     '⋅',
-                    format.currency(quote),
+                    format.currency(price),
                     '▸',
                     format.currency(total),
                 ].join(' ')
@@ -74,14 +75,11 @@ export class TransactionReply {
                     value: format.currency(
                         this.stocks
                             .map((stock) => {
-                                const snapshot = this.snapshots[stock.symbol]
-                                if (!snapshot)
+                                const quote = this.quotes[stock.symbol]
+                                if (!quote)
                                     UserError.throw('Failed to get snapshot')
-                                const quote =
-                                    snapshot.minuteBar?.c ||
-                                    snapshot.latestTrade?.p ||
-                                    NaN
-                                return stock.shares * quote
+                                const price = yahoo.getPrice(quote)
+                                return stock.shares * price
                             })
                             .reduce((a, b) => a + b, 0),
                     ),

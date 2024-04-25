@@ -1,10 +1,10 @@
 import { SlashCommandBuilder } from 'discord.js'
 
 import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
+import yahoo from '@/libs/yahoo'
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -22,20 +22,19 @@ discord.addCommand({
             interaction.options.getUser('user')?.id ?? interaction.user.id
         const user = await discord.users.fetch(userId)
         const client = await database.getClientByUserId(userId)
-        const snapshots = await alpaca.getSnapshots(
+        const quotes = await yahoo.getQuotes(
             Array.from(client.portfolio.keys()),
         )
 
         const { value, delta } = Array.from(client.portfolio.entries()).reduce(
             (acc, [symbol, stock]) => {
-                const snapshot = snapshots[symbol]
-                if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const open = snapshot.dailyBar?.o || NaN
+                const quote = quotes[symbol]
+                if (!quote) throw new Error('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const open = quote.regularMarketOpen || NaN
                 return {
-                    value: acc.value + quote * stock.shares,
-                    delta: acc.delta + (quote - open) * stock.shares,
+                    value: acc.value + price * stock.shares,
+                    delta: acc.delta + (price - open) * stock.shares,
                 }
             },
             { value: 0, delta: 0 },
@@ -47,19 +46,18 @@ discord.addCommand({
 
         const description = Array.from(client.portfolio.entries())
             .map(([symbol, stock]) => {
-                const snapshot = snapshots[symbol]
-                if (!snapshot) throw new Error('Failed to get snapshot')
-                const quote =
-                    snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-                const open = snapshot.dailyBar?.o || NaN
-                const delta = (quote - open) * stock.shares
-                const value = quote * stock.shares
+                const quote = quotes[symbol]
+                if (!quote) throw new Error('Failed to get snapshot')
+                const price = yahoo.getPrice(quote)
+                const open = quote.regularMarketOpen || NaN
+                const delta = (price - open) * stock.shares
+                const value = price * stock.shares
                 return [
                     delta >= 0 ? '▴' : '▾',
                     format.bold(symbol),
                     format.shares(stock.shares),
                     '⋅',
-                    format.currency(quote),
+                    format.currency(price),
                     '▸',
                     format.currency(value),
                     `(${format.percentage(delta / value)})`,

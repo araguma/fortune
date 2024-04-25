@@ -6,6 +6,7 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
+import yahoo from '@/libs/yahoo'
 
 const timeframes = {
     '1D': {
@@ -68,8 +69,16 @@ discord.addCommand({
         const interval = timeframes[timeframe].interval
         const duration = timeframes[timeframe].duration
 
-        const snapshot = (await alpaca.getSnapshots([symbol]))[symbol]
-        if (!snapshot) UserError.throw('Symbol not found')
+        const quote = (await yahoo.getQuotes([symbol]))[symbol]
+        if (!quote) UserError.throw('Symbol not found')
+
+        const client = await database.getClientByUserId(interaction.user.id)
+        const shares = client.portfolio.get(symbol)?.shares ?? 0
+
+        const price = yahoo.getPrice(quote)
+        const open = quote.regularMarketOpen || NaN
+        const delta = price - open
+        const sign = delta >= 0 ? '▴' : '▾'
 
         const start = new Date()
         const end = new Date()
@@ -78,14 +87,6 @@ discord.addCommand({
             await alpaca.getHistory([symbol], interval, start, end)
         )[symbol]
         if (!history) UserError.throw('Failed to get history')
-
-        const client = await database.getClientByUserId(interaction.user.id)
-        const shares = client.portfolio.get(symbol)?.shares ?? 0
-
-        const quote = snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
-        const open = snapshot.dailyBar?.o || NaN
-        const delta = quote - open
-        const sign = delta >= 0 ? '▴' : '▾'
 
         return {
             embeds: [
@@ -98,7 +99,7 @@ discord.addCommand({
                     title: symbol,
                     description: [
                         '#',
-                        format.currency(quote),
+                        format.currency(price),
                         '\n',
                         sign,
                         format.currency(Math.abs(delta)),
@@ -112,22 +113,17 @@ discord.addCommand({
                         },
                         {
                             name: 'High',
-                            value: format.currency(snapshot.dailyBar?.h),
+                            value: format.currency(quote.regularMarketDayHigh),
                             inline: true,
                         },
                         {
                             name: 'Low',
-                            value: format.currency(snapshot.dailyBar?.l),
+                            value: format.currency(quote.regularMarketDayLow),
                             inline: true,
                         },
                         {
                             name: 'Volume',
-                            value: format.number(snapshot.dailyBar?.v),
-                            inline: true,
-                        },
-                        {
-                            name: 'Trades',
-                            value: format.number(snapshot.dailyBar?.n),
+                            value: format.number(quote.regularMarketVolume),
                             inline: true,
                         },
                         {

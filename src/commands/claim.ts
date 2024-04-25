@@ -2,12 +2,12 @@ import { SlashCommandBuilder } from 'discord.js'
 import prettyMilliseconds from 'pretty-ms'
 
 import symbols from '@/data/symbols'
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import { clamp } from '@/libs/number'
 import { TransactionReply } from '@/libs/reply/transaction'
+import yahoo from '@/libs/yahoo'
 import { Stock } from '@/types'
 
 const interval = 3600000
@@ -45,17 +45,14 @@ discord.addCommand({
         }
 
         let total = 0
-        const snapshots = await alpaca.getSnapshots(
-            cart.map((stock) => stock.symbol),
-        )
+        const quotes = await yahoo.getQuotes(cart.map((stock) => stock.symbol))
         cart.forEach((stock) => {
-            const snapshot = snapshots[stock.symbol]
-            if (!snapshot)
+            const quote = quotes[stock.symbol]
+            if (!quote)
                 UserError.throw(`Failed to get snapshot for ${stock.symbol}`)
-            const quote =
-                snapshot.minuteBar?.c || snapshot.latestTrade?.p || NaN
+            const price = yahoo.getPrice(quote)
 
-            const value = quote * stock.shares
+            const value = stock.shares * price
             total += value
 
             const current = client.portfolio.get(stock.symbol)
@@ -72,7 +69,7 @@ discord.addCommand({
 
         return new TransactionReply(
             'claim',
-            snapshots,
+            quotes,
             cart,
             transaction._id.toString(),
         ).toJSON()
