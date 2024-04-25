@@ -24,14 +24,8 @@ export default function graph(data: Point[], color: string) {
             }
         },
         {
-            x: {
-                min: Infinity,
-                max: -Infinity,
-            },
-            y: {
-                min: Infinity,
-                max: -Infinity,
-            },
+            x: { min: Infinity, max: -Infinity },
+            y: { min: Infinity, max: -Infinity },
         },
     )
 
