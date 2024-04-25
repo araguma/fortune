@@ -7,7 +7,7 @@ import discord from '@/libs/discord'
 import format from '@/libs/format'
 
 const limit = 20
-const padding = 2
+const padding = limit.toString().length
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
