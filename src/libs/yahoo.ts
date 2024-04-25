@@ -22,10 +22,12 @@ function getPrice(quote: Quote) {
             price = quote.regularMarketPrice
             break
         }
+        case 'PREPRE':
         case 'PRE': {
             price = quote.preMarketPrice
             break
         }
+        case 'POSTPOST':
         case 'POST': {
             price = quote.postMarketPrice
             break
