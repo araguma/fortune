@@ -98,7 +98,7 @@ discord.addCommand({
                             value: leaderboard
                                 .map(
                                     (entry, index) =>
-                                        `\`${(index + 1).toString().padStart(padding)})\` <@${entry.userId}>`,
+                                        `\`${(index + 1).toString().padStart(padding)}\` <@${entry.userId}>`,
                                 )
                                 .join('\n'),
                             inline: true,
