@@ -38,8 +38,8 @@ export class TransactionReply {
                 const price = yahoo.getPrice(quote)
                 const total = stock.shares * price
                 return [
-                    format.bold(stock.symbol),
-                    stock.shares,
+                    format.symbol(stock.symbol),
+                    format.shares(stock.shares),
                     '⋅',
                     format.currency(price),
                     '▸',
