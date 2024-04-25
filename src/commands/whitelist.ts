@@ -67,10 +67,12 @@ discord.addCommand({
         if (subcommand === 'add' || subcommand === 'remove') {
             const channel = interaction.options.getChannel('channel', true)
             const group = interaction.options.getString('group', true)
-            whitelist.channels.set(channel.id, {
-                ...whitelist.channels.get(channel.id),
-                [group]: subcommand === 'add',
-            })
+            const current = whitelist.channels.get(channel.id)
+            const settings = Object.fromEntries(
+                groups.map((key) => [key, current?.[key] ?? false]),
+            )
+            settings[group] = subcommand === 'add'
+            whitelist.channels.set(channel.id, settings)
             await whitelist.save()
         }
 
