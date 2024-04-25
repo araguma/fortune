@@ -97,7 +97,7 @@ discord.addCommand({
                     author: {
                         name: '---',
                     },
-                    title: 'Whitelist',
+                    title: 'Whitelisted Channels',
                     fields,
                     image: {
                         url: 'attachment://divider.png',
