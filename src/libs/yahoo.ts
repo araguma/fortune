@@ -6,7 +6,9 @@ async function getQuotes(symbols: string[]) {
     await Promise.all(
         symbols.map(async (symbol) => {
             symbol = symbol.toUpperCase()
-            const quote = await yahooFinance.quoteCombine(symbol)
+            const quote = await yahooFinance.quoteCombine(
+                symbol.replace(/\//g, '-'),
+            )
             quotes[symbol] = quote
         }),
     )
