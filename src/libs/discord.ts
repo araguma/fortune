@@ -30,9 +30,6 @@ export class Discord extends Client {
     async handleInteraction(interaction: Interaction) {
         if (!interaction.isChatInputCommand()) return
 
-        const ephemeral = !!interaction.channel?.isThread()
-        await interaction.deferReply({ ephemeral })
-
         try {
             if (
                 interaction.guildId &&
@@ -53,16 +50,17 @@ export class Discord extends Client {
             if (!command) UserError.throw('This command does not exist')
 
             const reply = await command.handler(interaction)
-            await interaction.editReply(reply)
+            reply.ephemeral = !!interaction.channel?.isThread()
+            await interaction.reply(reply)
         } catch (error) {
             if (error instanceof UserError) {
                 await interaction
-                    .editReply(new ErrorReply(error.message).toJSON())
+                    .reply(new ErrorReply(error.message).toJSON())
                     .catch(console.error)
             } else {
                 console.error(error)
                 await interaction
-                    .editReply(
+                    .reply(
                         new ErrorReply(
                             'There was an error while executing this command',
                         ).toJSON(),
