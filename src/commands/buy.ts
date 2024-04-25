@@ -1,7 +1,5 @@
 import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
-import prettyMilliseconds from 'pretty-ms'
 
-import alpaca from '@/libs/alpaca'
 import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
@@ -60,13 +58,6 @@ discord.addCommand({
         )
         .toJSON(),
     handler: async (interaction) => {
-        const clock = await alpaca.getClock()
-        if (!clock.is_open) {
-            const nextOpen = new Date(clock.next_open).getTime()
-            const timeLeft = nextOpen - Date.now()
-            UserError.throw(`Market opens in ${prettyMilliseconds(timeLeft)}`)
-        }
-
         const client = await database.getClientByUserId(interaction.user.id)
 
         const cart: Stock[] = []
@@ -112,9 +103,10 @@ discord.addCommand({
             if (!quote)
                 UserError.throw(`Failed to get quote for ${stock.symbol}`)
             const price = yahoo.getPrice(quote)
+            if (isNaN(price))
+                UserError.throw(`Failed to get price for ${stock.symbol}`)
 
             const total = price * stock.shares
-            if (isNaN(total)) UserError.throw('Failed to get total')
             if (client.balance < total) UserError.throw('Insufficient funds')
 
             const current = client.portfolio.get(stock.symbol)
