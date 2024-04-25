@@ -1,9 +1,11 @@
+import { filterCrypto, filterStocks } from '@/libs/filter'
 import {
     ActivesResponse,
-    HistoricalBarsResponse as HistoryResponse,
+    CryptoSnapshotsResponse,
+    HistoricalBarsResponse,
     MoversResponse,
     NewsResponse,
-    SnapshotsResponse,
+    StockSnapshotsResponse,
 } from '@/types'
 
 const baseUrl = 'https://data.alpaca.markets'
@@ -20,15 +22,30 @@ export class Alpaca {
     }
 
     async getSnapshots<A extends string[]>(symbols: A) {
-        const url = new URL(`${baseUrl}/v2/stocks/snapshots`)
-        url.searchParams.append('symbols', symbols.join(','))
-        url.searchParams.append('feed', 'iex')
-        const response = (await (
-            await fetch(url, {
+        const stockUrl = new URL(`${baseUrl}/v2/stocks/snapshots`)
+        stockUrl.searchParams.append('symbols', filterStocks(symbols).join(','))
+        stockUrl.searchParams.append('feed', 'iex')
+        const stockResponse = (await (
+            await fetch(stockUrl, {
                 headers: this.headers,
             })
-        ).json()) as SnapshotsResponse<A[number]>
-        return response
+        ).json()) as StockSnapshotsResponse<A[number]>
+
+        const cryptoUrl = new URL(`${baseUrl}/v1beta3/crypto/us/snapshots`)
+        cryptoUrl.searchParams.append(
+            'symbols',
+            filterCrypto(symbols).join(','),
+        )
+        const cryptoResponse = (await (
+            await fetch(cryptoUrl, {
+                headers: this.headers,
+            })
+        ).json()) as CryptoSnapshotsResponse<A[number]>
+
+        return {
+            ...stockResponse,
+            ...cryptoResponse.snapshots,
+        }
     }
 
     async getHistory<A extends string[]>(
@@ -37,19 +54,38 @@ export class Alpaca {
         start: Date,
         end: Date,
     ) {
-        const url = new URL(`${baseUrl}/v2/stocks/bars`)
-        url.searchParams.append('symbols', symbols.join(','))
-        url.searchParams.append('timeframe', timeframe)
-        url.searchParams.append('start', start.toISOString())
-        url.searchParams.append('end', end.toISOString())
-        url.searchParams.append('feed', 'iex')
-        url.searchParams.append('limit', '1000')
-        const response = (await (
-            await fetch(url, {
+        const stockUrl = new URL(`${baseUrl}/v2/stocks/bars`)
+        stockUrl.searchParams.append('symbols', filterStocks(symbols).join(','))
+        stockUrl.searchParams.append('timeframe', timeframe)
+        stockUrl.searchParams.append('start', start.toISOString())
+        stockUrl.searchParams.append('end', end.toISOString())
+        stockUrl.searchParams.append('feed', 'iex')
+        stockUrl.searchParams.append('limit', '1000')
+        const stockResponse = (await (
+            await fetch(stockUrl, {
                 headers: this.headers,
             })
-        ).json()) as HistoryResponse<A[number]>
-        return response.bars
+        ).json()) as HistoricalBarsResponse<A[number]>
+
+        const cryptoUrl = new URL(`${baseUrl}/v1beta3/crypto/us/bars`)
+        cryptoUrl.searchParams.append(
+            'symbols',
+            filterCrypto(symbols).join(','),
+        )
+        cryptoUrl.searchParams.append('timeframe', timeframe)
+        cryptoUrl.searchParams.append('start', start.toISOString())
+        cryptoUrl.searchParams.append('end', end.toISOString())
+        cryptoUrl.searchParams.append('limit', '1000')
+        const cryptoResponse = (await (
+            await fetch(cryptoUrl, {
+                headers: this.headers,
+            })
+        ).json()) as HistoricalBarsResponse<A[number]>
+
+        return {
+            ...stockResponse.bars,
+            ...cryptoResponse.bars,
+        }
     }
 
     async getActives(top: number, sortBy: string) {

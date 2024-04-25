@@ -16,7 +16,10 @@ export type Stock = {
     shares: number
 }
 
-export type SnapshotsResponse<T extends string> = Record<T, Snapshot>
+export type StockSnapshotsResponse<T extends string> = Record<T, Snapshot>
+export type CryptoSnapshotsResponse<T extends string> = {
+    snapshots: Record<T, Snapshot>
+}
 export type HistoricalBarsResponse<T extends string> = {
     bars: Record<T, Bar[]>
     next_page_token: string | null

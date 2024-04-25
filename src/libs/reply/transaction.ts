@@ -3,7 +3,7 @@ import { InteractionReplyOptions } from 'discord.js'
 import divider from '@/images/divider'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
-import { SnapshotsResponse, Stock } from '@/types'
+import { StockSnapshotsResponse, Stock } from '@/types'
 
 const typeEmbedMap = {
     claim: {
@@ -23,7 +23,7 @@ const typeEmbedMap = {
 export class TransactionReply {
     constructor(
         public type: 'claim' | 'buy' | 'sell',
-        public snapshots: SnapshotsResponse<string>,
+        public snapshots: StockSnapshotsResponse<string>,
         public stocks: Stock[],
         public transactionId: string,
     ) {}
