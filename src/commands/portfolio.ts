@@ -44,8 +44,9 @@ discord.addCommand({
 
         await client.save()
 
+        const padding = client.portfolio.size.toString().length
         const description = Array.from(client.portfolio.entries())
-            .map(([symbol, stock]) => {
+            .map(([symbol, stock], index) => {
                 const quote = quotes[symbol]
                 if (!quote) throw new Error('Failed to get snapshot')
                 const price = yahoo.getPrice(quote)
@@ -53,6 +54,7 @@ discord.addCommand({
                 const delta = (price - open) * stock.shares
                 const value = price * stock.shares
                 return [
+                    `\`${(client.portfolio.size - index).toString().padStart(padding)}\``,
                     delta >= 0 ? '▴' : '▾',
                     format.bold(symbol),
                     format.shares(stock.shares),
