@@ -11,6 +11,11 @@ export class Format {
         return value.toString()
     }
 
+    shares(amount?: number) {
+        if (amount === undefined || isNaN(amount)) return 'N/A'
+        return parseFloat(amount.toFixed(5)).toString()
+    }
+
     currency(amount?: number) {
         if (amount === undefined || isNaN(amount)) return 'N/A'
         return (

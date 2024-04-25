@@ -132,7 +132,7 @@ discord.addCommand({
                         },
                         {
                             name: 'Owned',
-                            value: shares.toString(),
+                            value: format.shares(shares),
                             inline: true,
                         },
                     ],

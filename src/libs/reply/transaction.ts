@@ -61,10 +61,11 @@ export class TransactionReply {
                 },
                 {
                     name: 'Shares',
-                    value: this.stocks
-                        .map((stock) => stock.shares)
-                        .reduce((a, b) => a + b, 0)
-                        .toString(),
+                    value: format.shares(
+                        this.stocks
+                            .map((stock) => stock.shares)
+                            .reduce((a, b) => a + b, 0),
+                    ),
                     inline: true,
                 },
                 {

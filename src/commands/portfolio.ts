@@ -55,7 +55,7 @@ discord.addCommand({
                 return [
                     delta >= 0 ? '▴' : '▾',
                     format.bold(symbol),
-                    stock.shares,
+                    format.shares(stock.shares),
                     '⋅',
                     format.currency(quote),
                     '▸',
