@@ -4,6 +4,8 @@ import divider from '@/images/divider'
 import alpaca from '@/libs/alpaca'
 import discord from '@/libs/discord'
 
+const limit = 20
+
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('actives')
@@ -27,7 +29,7 @@ discord.addCommand({
         .toJSON(),
     handler: async (interaction) => {
         const sortBy = interaction.options.getString('by', true)
-        const actives = await alpaca.getActives(10, sortBy)
+        const actives = await alpaca.getActives(limit, sortBy)
 
         return {
             embeds: [

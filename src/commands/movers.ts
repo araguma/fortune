@@ -5,6 +5,8 @@ import alpaca from '@/libs/alpaca'
 import discord from '@/libs/discord'
 import format from '@/libs/format'
 
+const limit = 20
+
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
         .setName('movers')
@@ -31,7 +33,7 @@ discord.addCommand({
             | 'Gainers'
             | 'Losers'
 
-        const movers = await alpaca.getMovers(10)
+        const movers = await alpaca.getMovers(limit)
 
         const sign = type === 'Gainers' ? '▴' : '▾'
         const description = movers[type.toLowerCase() as Lowercase<typeof type>]
