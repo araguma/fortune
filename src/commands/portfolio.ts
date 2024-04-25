@@ -5,7 +5,10 @@ import database from '@/libs/database'
 import discord from '@/libs/discord'
 import { UserError } from '@/libs/error'
 import format from '@/libs/format'
+import { clamp } from '@/libs/number'
 import yahoo from '@/libs/yahoo'
+
+const limit = 64
 
 discord.addCommand({
     descriptor: new SlashCommandBuilder()
@@ -17,10 +20,20 @@ discord.addCommand({
                 .setDescription('Target user')
                 .setRequired(false),
         )
+        .addIntegerOption((option) =>
+            option
+                .setName('start')
+                .setDescription('Start index')
+                .setRequired(false),
+        )
         .toJSON(),
     handler: async (interaction) => {
         const userId =
             interaction.options.getUser('user')?.id ?? interaction.user.id
+        const start = interaction.options.getInteger('start') ?? 1
+
+        if (start < 1) UserError.throw('Invalid start index')
+
         const user = await discord.users.fetch(userId)
         const client = await database.getClientByUserId(userId)
         const quotes = await yahoo.getQuotes(
@@ -45,8 +58,13 @@ discord.addCommand({
 
         await client.save()
 
+        const end = client.portfolio.size - start
         const padding = client.portfolio.size.toString().length
-        const description = Array.from(client.portfolio.entries())
+        const display = Array.from(client.portfolio.entries()).slice(
+            clamp(end - limit + 1, 0, client.portfolio.size),
+            clamp(end + 1, 0, client.portfolio.size),
+        )
+        const description = display
             .map(([symbol, stock], index) => {
                 const quote = quotes[symbol]
                 if (!quote) UserError.throw(`Failed to get quote for ${symbol}`)
@@ -55,7 +73,7 @@ discord.addCommand({
                 const delta = (price - open) * stock.shares
                 const value = price * stock.shares
                 return [
-                    `\`${(client.portfolio.size - index).toString().padStart(padding)}\``,
+                    `\`${(display.length - index + start - 1).toString().padStart(padding)}\``,
                     delta >= 0 ? '▴' : '▾',
                     format.bold(symbol),
                     format.shares(stock.shares),
@@ -113,6 +131,11 @@ discord.addCommand({
                         format.currency(profit),
                         `(${format.percentage(delta / Math.abs(profit))})`,
                     ].join(' '),
+                    inline: true,
+                },
+                {
+                    name: 'Showing',
+                    value: `${start}-${start + display.length - 1} of ${client.portfolio.size}`,
                     inline: true,
                 },
             ],
