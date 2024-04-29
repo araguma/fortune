@@ -20,7 +20,7 @@ discord.addCommand({
         const prediction = await database.getPredictionByThreadId(thread.id)
 
         const previous = await thread.messages.fetch(prediction.messageId)
-        await previous.delete()
+        await previous.delete().catch(() => {})
 
         const message = await thread.send(
             new PredictionReply(prediction).toJSON(),
