@@ -72,48 +72,6 @@ discord.addCommand({
                         .setRequired(true),
                 ),
         )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('gain')
-                .setDescription('Sell all stocks with gain')
-                .addStringOption((option) =>
-                    option
-                        .setName('timeframe')
-                        .setDescription('Timeframe to consider')
-                        .addChoices(
-                            {
-                                name: 'Today',
-                                value: 'today',
-                            },
-                            {
-                                name: 'Max',
-                                value: 'max',
-                            },
-                        )
-                        .setRequired(true),
-                ),
-        )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('loss')
-                .setDescription('Sell all stocks with loss')
-                .addStringOption((option) =>
-                    option
-                        .setName('timeframe')
-                        .setDescription('Timeframe to consider')
-                        .addChoices(
-                            {
-                                name: 'Today',
-                                value: 'today',
-                            },
-                            {
-                                name: 'Max',
-                                value: 'max',
-                            },
-                        )
-                        .setRequired(true),
-                ),
-        )
         .toJSON(),
     handler: async (interaction) => {
         const client = await database.getClientByUserId(interaction.user.id)
@@ -169,26 +127,6 @@ discord.addCommand({
                 const stocks = Array.from(client.portfolio.entries())
                 stocks.slice(-count).forEach(([symbol, stock]) => {
                     cart.push({ symbol, shares: stock.shares })
-                })
-                break
-            }
-            case 'gain': {
-                client.portfolio.forEach((stock, symbol) => {
-                    const snapshot = quotes[symbol]
-                    if (!snapshot) UserError.throw(`Invalid symbol: ${symbol}`)
-                    const price = yahoo.getPrice(snapshot)
-                    if (stock.shares * price > stock.seed)
-                        cart.push({ symbol, shares: stock.shares })
-                })
-                break
-            }
-            case 'loss': {
-                client.portfolio.forEach((stock, symbol) => {
-                    const snapshot = quotes[symbol]
-                    if (!snapshot) UserError.throw('Failed to get snapshot')
-                    const price = yahoo.getPrice(snapshot)
-                    if (stock.shares * price < stock.seed)
-                        cart.push({ symbol, shares: stock.shares })
                 })
                 break
             }
