@@ -69,7 +69,7 @@ discord.addCommand({
                     option
                         .setName('count')
                         .setDescription('Number of stocks to sell')
-                        .setRequired(true),
+                        .setRequired(false),
                 ),
         )
         .toJSON(),
@@ -122,7 +122,7 @@ discord.addCommand({
                 break
             }
             case 'last': {
-                const count = interaction.options.getInteger('count', true)
+                const count = interaction.options.getInteger('count') ?? 1
                 if (count <= 0) UserError.throw('Invalid count')
                 const stocks = Array.from(client.portfolio.entries())
                 stocks.slice(-count).forEach(([symbol, stock]) => {
