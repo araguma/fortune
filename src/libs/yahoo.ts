@@ -27,6 +27,7 @@ function getPrice(quote: Quote) {
             price = quote.preMarketPrice
             break
         }
+        case 'CLOSED':
         case 'POSTPOST':
         case 'POST': {
             price = quote.postMarketPrice
