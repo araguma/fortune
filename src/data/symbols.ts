@@ -10455,6 +10455,6 @@ const symbols = [
     'ZYME',
     'ZYXI',
     'ZZZ',
-]
+] as const
 
 export default symbols

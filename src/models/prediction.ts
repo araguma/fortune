@@ -1,36 +1,32 @@
-import { InferSchemaType, Schema, model } from 'mongoose'
+import { InferSchemaType, Schema } from 'mongoose'
 
-export type Prediction = InferSchemaType<typeof PredictionSchema>
+import database from '@/services/database'
 
 export const PredictionSchema = new Schema({
-    threadId: {
-        type: String,
-        required: true,
-    },
-    messageId: {
-        type: String,
-        required: true,
-    },
     status: {
         type: String,
         enum: ['opened', 'closed', 'settled'],
         default: 'opened',
+        required: true,
     },
-    question: {
+    prompt: {
         type: String,
         required: true,
     },
     options: {
         type: [String],
         default: [],
+        required: true,
     },
     pool: {
         type: [Number],
         default: [],
+        required: true,
     },
     minimum: {
         type: Number,
         default: 0,
+        required: true,
     },
     bets: {
         type: Map,
@@ -45,7 +41,18 @@ export const PredictionSchema = new Schema({
             },
         },
         default: {},
+        required: true,
+    },
+    result: {
+        type: Number,
+        default: -1,
+        required: true,
     },
 })
 
-export const PredictionModel = model('prediction', PredictionSchema)
+export const PredictionModel = database.connection.model(
+    'prediction',
+    PredictionSchema,
+)
+
+export type PredictionType = InferSchemaType<typeof PredictionSchema>

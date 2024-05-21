@@ -1,82 +1,40 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { Group } from '@/enums'
+import Command from '@/libs/command'
+import Client from '@/services/client'
+import discord from '@/services/discord'
+import { PayReply } from '@/views/pay'
 
-import divider from '@/images/divider'
-import database from '@/libs/database'
-import discord from '@/libs/discord'
-import { UserError } from '@/libs/error'
-import format from '@/libs/format'
+const command = new Command()
+    .setName('pay')
+    .setDescription('Pay a user')
+    .setGroup(Group.Trade)
 
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('pay')
-        .setDescription('Pay a user')
-        .addUserOption((option) =>
-            option
-                .setName('user')
-                .setDescription('Target user')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option
-                .setName('amount')
-                .setDescription('Amount to pay')
-                .setRequired(true),
-        )
-        .toJSON(),
-    handler: async (interaction) => {
-        const user = interaction.options.getUser('user', true)
-        const amount = interaction.options.getNumber('amount', true)
+command
+    .addUserOption((option) =>
+        option.setName('user').setDescription('Target user').setRequired(true),
+    )
+    .addNumberOption((option) =>
+        option
+            .setName('amount')
+            .setDescription('Amount to pay')
+            .setRequired(true),
+    )
 
-        if (amount <= 0) UserError.throw('Invalid amount')
+command.setChatInputCommandHandler(async (interaction) => {
+    const userId = interaction.user.id
+    const targetUserId = interaction.options.getUser('user', true).id
+    const amount = interaction.options.getNumber('amount', true)
 
-        const client = await database.getClientByUserId(interaction.user.id)
-        const target = await database.getClientByUserId(user.id)
+    const client = await Client.getClientByUserId(userId)
+    const target = await Client.getClientByUserId(targetUserId)
 
-        if (client.balance < amount) UserError.throw('Insufficient funds')
+    client.pay(target.model, amount)
 
-        client.balance -= amount
-        target.balance += amount
+    await client.save()
+    await target.save()
 
-        await client.save()
-        await target.save()
-
-        return {
-            embeds: [
-                {
-                    color: 0xe74c3c,
-                    author: {
-                        name: '---',
-                    },
-                    title: `Target Paid`,
-                    fields: [
-                        {
-                            name: 'Sender',
-                            value: `<@${interaction.user.id}>`,
-                            inline: true,
-                        },
-                        {
-                            name: 'Target',
-                            value: `<@${user.id}>`,
-                            inline: true,
-                        },
-                        {
-                            name: 'Amount',
-                            value: format.currency(amount),
-                            inline: true,
-                        },
-                    ],
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
-        }
-    },
+    const reply = new PayReply({ userId, targetUserId, amount })
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)

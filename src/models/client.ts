@@ -1,6 +1,6 @@
-import { InferSchemaType, Schema, model } from 'mongoose'
+import { InferSchemaType, Schema } from 'mongoose'
 
-export type Client = InferSchemaType<typeof ClientSchema>
+import database from '@/services/database'
 
 export const ClientSchema = new Schema({
     userId: {
@@ -12,42 +12,45 @@ export const ClientSchema = new Schema({
         of: {
             shares: {
                 type: Number,
-                required: true,
                 default: 0,
+                required: true,
             },
             seed: {
                 type: Number,
-                required: true,
                 default: 0,
+                required: true,
             },
         },
         default: {},
-    },
-    seed: {
-        type: Number,
         required: true,
-        default: 0,
-    },
-    balance: {
-        type: Number,
-        required: true,
-        default: 0,
     },
     watchlist: {
         type: [String],
-        required: true,
         default: [],
+        required: true,
+    },
+    seed: {
+        type: Number,
+        default: 0,
+        required: true,
+    },
+    balance: {
+        type: Number,
+        default: 0,
+        required: true,
     },
     lastClaim: {
         type: Date,
-        required: true,
         default: new Date(0),
+        required: true,
     },
     claims: {
         type: Number,
-        required: true,
         default: 0,
+        required: true,
     },
 })
 
-export const ClientModel = model('client', ClientSchema)
+export const ClientModel = database.connection.model('client', ClientSchema)
+
+export type ClientType = InferSchemaType<typeof ClientSchema>

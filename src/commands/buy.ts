@@ -1,130 +1,101 @@
-import { SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js'
+import { SlashCommandSubcommandBuilder } from 'discord.js'
 
-import database from '@/libs/database'
-import discord from '@/libs/discord'
-import { UserError } from '@/libs/error'
-import { TransactionReply } from '@/libs/reply/transaction'
-import yahoo from '@/libs/yahoo'
-import { Stock } from '@/types'
+import { Group } from '@/enums'
+import UserError from '@/errors/user'
+import Command from '@/libs/command'
+import {
+    generateTransactionReply,
+    handleTransactionStringSelectMenu,
+} from '@/libs/transaction'
+import Client from '@/services/client'
+import discord from '@/services/discord'
 
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('buy')
-        .setDescription('Purchase stocks')
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('max')
-                .setDescription('Exhaust balance')
-                .addStringOption((option) =>
-                    option
-                        .setName('symbol')
-                        .setDescription('Stock ticker')
-                        .setRequired(true),
-                ),
+const command = new Command()
+    .setName('buy')
+    .setDescription('Buy shares')
+    .setGroup(Group.Trade)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('max')
+        .setDescription('Exhaust balance')
+        .addStringOption((option) =>
+            option
+                .setName('symbol')
+                .setDescription('Stock ticker')
+                .setRequired(true),
+        ),
+)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('share')
+        .setDescription('Purchase by shares')
+        .addStringOption((option) =>
+            option
+                .setName('symbol')
+                .setDescription('Stock ticker')
+                .setRequired(true),
         )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('share')
-                .setDescription('Purchase by shares')
-                .addStringOption((option) =>
-                    option
-                        .setName('symbol')
-                        .setDescription('Stock ticker')
-                        .setRequired(true),
-                )
-                .addNumberOption((option) =>
-                    option
-                        .setName('shares')
-                        .setDescription('Number of shares')
-                        .setRequired(true),
-                ),
+        .addNumberOption((option) =>
+            option
+                .setName('shares')
+                .setDescription('Number of shares')
+                .setRequired(true),
+        ),
+)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('value')
+        .setDescription('Purchase by value')
+        .addStringOption((option) =>
+            option
+                .setName('symbol')
+                .setDescription('Stock ticker')
+                .setRequired(true),
         )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
+        .addNumberOption((option) =>
+            option
                 .setName('value')
-                .setDescription('Purchase by value')
-                .addStringOption((option) =>
-                    option
-                        .setName('symbol')
-                        .setDescription('Stock ticker')
-                        .setRequired(true),
-                )
-                .addNumberOption((option) =>
-                    option
-                        .setName('value')
-                        .setDescription('Total stock value')
-                        .setRequired(true),
-                ),
-        )
-        .toJSON(),
-    handler: async (interaction) => {
-        const client = await database.getClientByUserId(interaction.user.id)
+                .setDescription('Total stock value')
+                .setRequired(true),
+        ),
+)
 
-        const cart: Stock[] = []
-        switch (interaction.options.getSubcommand()) {
+command.setChatInputCommandHandler(async (interaction) => {
+    const client = await Client.getClientByUserId(interaction.user.id)
+
+    const subcommand = interaction.options.getSubcommand()
+    const transaction = await (async () => {
+        switch (subcommand) {
             case 'max': {
-                const symbol = interaction.options
-                    .getString('symbol', true)
-                    .toUpperCase()
-                const quote = (await yahoo.getQuotes([symbol]))[symbol]
-                if (!quote) UserError.throw('Failed to get snapshot')
-                const price = yahoo.getPrice(quote)
-                const shares = client.balance / price
-                cart.push({ symbol, shares })
-                break
+                const symbol = interaction.options.getString('symbol', true)
+                return client.buyMax(symbol)
             }
             case 'share': {
-                const symbol = interaction.options
-                    .getString('symbol', true)
-                    .toUpperCase()
+                const symbol = interaction.options.getString('symbol', true)
                 const shares = interaction.options.getNumber('shares', true)
-                cart.push({ symbol, shares })
-                break
+                return client.buyShares(symbol, shares)
             }
             case 'value': {
-                const symbol = interaction.options
-                    .getString('symbol', true)
-                    .toUpperCase()
+                const symbol = interaction.options.getString('symbol', true)
                 const value = interaction.options.getNumber('value', true)
-                const quote = (await yahoo.getQuotes([symbol]))[symbol]
-                if (!quote) UserError.throw('Failed to get snapshot')
-                const price = yahoo.getPrice(quote)
-                const shares = value / price
-                cart.push({ symbol, shares })
-                break
+                return client.buyValue(symbol, value)
+            }
+            default: {
+                UserError.invalidSubcommand(subcommand)
             }
         }
+    })()
 
-        const quotes = await yahoo.getQuotes(cart.map((stock) => stock.symbol))
-        cart.forEach((stock) => {
-            if (stock.shares <= 0) UserError.throw('Invalid shares')
+    await client.save()
+    await transaction.save()
 
-            const quote = quotes[stock.symbol]
-            if (!quote)
-                UserError.throw(`Failed to get quote for ${stock.symbol}`)
-            const price = yahoo.getPrice(quote)
-            if (isNaN(price))
-                UserError.throw(`Failed to get price for ${stock.symbol}`)
-
-            const total = price * stock.shares
-            if (client.balance < total) UserError.throw('Insufficient funds')
-
-            const current = client.portfolio.get(stock.symbol)
-
-            client.balance -= total
-            client.portfolio.set(stock.symbol, {
-                shares: (current?.shares ?? 0) + stock.shares,
-                seed: (current?.seed ?? 0) + total,
-            })
-        })
-        await client.save()
-        const transaction = await database.postTransaction(client.userId, cart)
-
-        return new TransactionReply(
-            'buy',
-            quotes,
-            cart,
-            transaction._id.toString(),
-        ).toJSON()
-    },
+    const reply = await generateTransactionReply(transaction.getId(), 1)
+    await interaction.reply(reply)
 })
+
+command.setStringSelectMenuHandler(handleTransactionStringSelectMenu)
+
+discord.addCommand(command)

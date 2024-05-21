@@ -1,73 +1,44 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { Group } from '@/enums'
+import Command from '@/libs/command'
+import { getEnvironmentVariable } from '@/libs/env'
+import alpaca from '@/services/alpaca'
+import discord from '@/services/discord'
+import { MoversReply } from '@/views/movers'
 
-import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
-import discord from '@/libs/discord'
-import format from '@/libs/format'
+const FIELD_LINE_LIMIT = parseInt(getEnvironmentVariable('FIELD_LINE_LIMIT'))
 
-const limit = 20
+const command = new Command()
+    .setName('movers')
+    .setDescription('List top movers')
+    .setGroup(Group.Trade)
 
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('movers')
-        .setDescription('List top movers')
-        .addStringOption((option) =>
-            option
-                .setName('type')
-                .setDescription('Type of movers')
-                .addChoices(
-                    {
-                        name: 'Gainers',
-                        value: 'Gainers',
-                    },
-                    {
-                        name: 'Losers',
-                        value: 'Losers',
-                    },
-                )
-                .setRequired(true),
+command.addStringOption((option) =>
+    option
+        .setName('by')
+        .setDescription('Mover type')
+        .addChoices(
+            {
+                name: 'Gainers',
+                value: 'gainers',
+            },
+            {
+                name: 'Losers',
+                value: 'losers',
+            },
         )
-        .toJSON(),
-    handler: async (interaction) => {
-        const type = interaction.options.getString('type', true) as
-            | 'Gainers'
-            | 'Losers'
+        .setRequired(true),
+)
 
-        const movers = await alpaca.getMovers(limit)
+command.setChatInputCommandHandler(async (interaction) => {
+    const by = interaction.options.getString('by', true) as 'gainers' | 'losers'
 
-        const sign = type === 'Gainers' ? '▴' : '▾'
-        const description = movers[type.toLowerCase() as Lowercase<typeof type>]
-            .map((mover) => {
-                return [
-                    sign,
-                    format.bold(mover.symbol),
-                    format.currency(mover.price),
-                    `(${mover.percent_change}%)`,
-                ].join(' ')
-            })
-            .join('\n')
+    const movers = await alpaca.getMovers(FIELD_LINE_LIMIT, 'stocks')
 
-        return {
-            embeds: [
-                {
-                    color: type === 'Gainers' ? 0x2ecc71 : 0xe74c3c,
-                    author: {
-                        name: '---',
-                    },
-                    title: `Top ${type} Today`,
-                    description: description || '> *No stocks found*',
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
-        }
-    },
+    const reply = new MoversReply({
+        by,
+        movers: movers[by],
+    })
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)

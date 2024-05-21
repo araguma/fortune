@@ -1,47 +1,75 @@
-export class Format {
-    currencyPrefix = '$'
-    currencySuffix = ''
+import { getEnvironmentVariable } from '@/libs/env'
 
-    capitalize(text: string) {
-        return text.charAt(0).toUpperCase() + text.slice(1)
-    }
+const BASE_CURRENCY = getEnvironmentVariable('BASE_CURRENCY')
 
-    symbol(text?: string) {
-        return text ? this.bold(text) : 'N/A'
-    }
-
-    number(value?: number) {
-        if (value === undefined || isNaN(value)) return 'N/A'
-        return value.toString()
-    }
-
-    shares(amount?: number) {
-        if (amount === undefined || isNaN(amount)) return 'N/A'
-        return parseFloat(amount.toFixed(5)).toString()
-    }
-
-    currency(amount?: number) {
-        if (amount === undefined || isNaN(amount)) return 'N/A'
-        if (Math.abs(amount) === Infinity) amount = 0
-        return (
-            (amount < 0 ? '-' : '') +
-            this.currencyPrefix +
-            parseFloat(Math.abs(amount).toFixed(5)) +
-            this.currencySuffix
-        )
-    }
-
-    percentage(decimal?: number) {
-        if (decimal === undefined || isNaN(decimal)) return 'N/A'
-        if (Math.abs(decimal) === Infinity) return '0%'
-        return `${parseFloat((decimal * 100).toFixed(2))}%`
-    }
-
-    bold(text: string) {
-        return `**${text}**`
-    }
+function number(number: number | undefined) {
+    if (number === undefined || isNaN(number)) return 'N/A'
+    return number.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5,
+    })
 }
 
-const format = new Format()
+function capitalize(text: string | undefined) {
+    if (!text) return 'N/A'
+    return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function symbol(symbol: string | undefined) {
+    return symbol ? `**${symbol}**` : 'N/A'
+}
+
+function shares(shares?: number) {
+    if (shares === undefined || isNaN(shares)) return 'N/A'
+    return parseFloat(shares.toFixed(5)).toString()
+}
+
+function value(amount?: number) {
+    if (amount === undefined || isNaN(amount)) return 'N/A'
+    if (Math.abs(amount) === Infinity) amount = 0
+    return amount.toLocaleString('en-US', {
+        style: 'currency',
+        currency: BASE_CURRENCY,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 5,
+    })
+}
+
+function percentage(decimal?: number) {
+    if (decimal === undefined || isNaN(decimal)) return 'N/A'
+    if (Math.abs(decimal) === Infinity) decimal = 0
+    return decimal.toLocaleString('en-US', {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    })
+}
+
+function abbreviation(text: string) {
+    return text.slice(0, 3).toUpperCase()
+}
+
+function stockName(shortName: string | undefined, symbol: string | undefined) {
+    if (!symbol && !shortName) return 'N/A'
+    if (!shortName && symbol) return symbol
+    if (!symbol && shortName) return shortName
+    return `${shortName} (${symbol})`
+}
+
+function valueSymbol(delta: number, symbol: string) {
+    return `${value(delta)} (${format.symbol(symbol)})`
+}
+
+const format = {
+    number,
+    capitalize,
+    symbol,
+    shares,
+    value,
+    percentage,
+    abbreviation,
+    stockName,
+    valueSymbol,
+}
 
 export default format

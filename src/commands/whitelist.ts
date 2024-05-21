@@ -1,119 +1,102 @@
-import {
-    SlashCommandBuilder,
-    SlashCommandStringOption,
-    SlashCommandSubcommandBuilder,
-} from 'discord.js'
+import { SlashCommandSubcommandBuilder } from 'discord.js'
 
-import divider from '@/images/divider'
-import database from '@/libs/database'
-import discord from '@/libs/discord'
-import { UserError } from '@/libs/error'
-import format from '@/libs/format'
-import { groups } from '@/libs/group'
+import { Group } from '@/enums'
+import UserError from '@/errors/user'
+import Command from '@/libs/command'
+import discord from '@/services/discord'
+import Server from '@/services/server'
+import { WhitelistReply } from '@/views/whitelist'
 
-const groupStringOption = (option: SlashCommandStringOption) =>
-    option
-        .setName('group')
-        .setDescription('Command group')
-        .addChoices(
-            ...groups.map((group) => ({
-                name: format.capitalize(group),
-                value: group,
-            })),
+const groups = Object.values(Group).filter((group) => group !== Group.Admin)
+
+const command = new Command()
+    .setName('whitelist')
+    .setDescription('Manage whitelist')
+    .setGroup(Group.Admin)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('add')
+        .setDescription('Add group to channel whitelist')
+        .addChannelOption((option) =>
+            option
+                .setName('channel')
+                .setDescription('Target channel')
+                .setRequired(true),
         )
-        .setRequired(true)
-
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('whitelist')
-        .setDescription('Manage channel whitelist')
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('add')
-                .setDescription('Add channel to the whitelist')
-                .addChannelOption((option) =>
-                    option
-                        .setName('channel')
-                        .setDescription('Channel to add')
-                        .setRequired(true),
+        .addStringOption((option) =>
+            option
+                .setName('group')
+                .setDescription('Target group')
+                .addChoices(
+                    groups.map((group) => ({
+                        name: group,
+                        value: group,
+                    })),
                 )
-                .addStringOption(groupStringOption),
+                .setRequired(true),
+        ),
+)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('remove')
+        .setDescription('Remove group from channel whitelist')
+        .addChannelOption((option) =>
+            option
+                .setName('channel')
+                .setDescription('Target channel')
+                .setRequired(true),
         )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('remove')
-                .setDescription('Remove channel from the whitelist')
-                .addChannelOption((option) =>
-                    option
-                        .setName('channel')
-                        .setDescription('Channel to remove')
-                        .setRequired(true),
+        .addStringOption((option) =>
+            option
+                .setName('group')
+                .setDescription('Target group')
+                .addChoices(
+                    groups.map((group) => ({
+                        name: group,
+                        value: group,
+                    })),
                 )
-                .addStringOption(groupStringOption),
-        )
-        .addSubcommand(
-            new SlashCommandSubcommandBuilder()
-                .setName('list')
-                .setDescription('List whitelisted channels'),
-        )
-        .toJSON(),
-    handler: async (interaction) => {
-        const subcommand = interaction.options.getSubcommand()
+                .setRequired(true),
+        ),
+)
 
-        if (!interaction.guild) UserError.throw('Failed to get guild')
-        const whitelist = await database.getWhitelistByGuildId(
-            interaction.guild.id,
-        )
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('show')
+        .setDescription('Display whitelist'),
+)
 
-        if (subcommand === 'add' || subcommand === 'remove') {
-            const channel = interaction.options.getChannel('channel', true)
-            const group = interaction.options.getString('group', true)
-            const current = whitelist.channels.get(channel.id)
-            const settings = Object.fromEntries(
-                groups.map((key) => [key, current?.[key] ?? false]),
-            )
-            settings[group] = subcommand === 'add'
-            whitelist.channels.set(channel.id, settings)
-            await whitelist.save()
-        }
+command.setChatInputCommandHandler(async (interaction) => {
+    if (!interaction.inGuild()) UserError.guildOnly()
 
-        const fields = groups.map((group) => {
-            let value = ''
-            whitelist.channels.forEach((channel, id) => {
-                if (channel[group]) value += `<#${id}>\n`
-            })
+    const subcommand = interaction.options.getSubcommand()
+    const server = await Server.getServerByGuildId(interaction.guildId)
 
-            return {
-                name: format.capitalize(group),
-                value,
-                inline: true,
+    if (subcommand === 'add' || subcommand === 'remove') {
+        const channel = interaction.options.getChannel('channel', true)
+        const group = interaction.options.getString('group', true) as Group
+
+        switch (subcommand) {
+            case 'add': {
+                server.addToWhitelist(channel.id, group)
+                break
             }
-        })
-
-        return {
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '---',
-                    },
-                    title: 'Whitelisted Channels',
-                    fields,
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    footer: {
-                        text: whitelist._id.toString().toUpperCase(),
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
+            case 'remove': {
+                server.removeFromWhitelist(channel.id, group)
+                break
+            }
         }
-    },
+    }
+    await server.save()
+
+    const reply = new WhitelistReply({
+        whitelists: server.model.whitelists,
+        serverId: server.getId(),
+    })
+
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)

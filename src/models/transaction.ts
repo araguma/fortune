@@ -1,10 +1,15 @@
-import { InferSchemaType, Schema, model } from 'mongoose'
+import { InferSchemaType, Schema } from 'mongoose'
 
-export type Transaction = InferSchemaType<typeof TransactionSchema>
+import database from '@/services/database'
 
 export const TransactionSchema = new Schema({
     userId: {
         type: String,
+        required: true,
+    },
+    type: {
+        type: String,
+        enum: ['claim', 'buy', 'sell'],
         required: true,
     },
     stocks: {
@@ -17,17 +22,26 @@ export const TransactionSchema = new Schema({
                 shares: {
                     type: Number,
                     required: true,
-                    default: 0,
+                },
+                price: {
+                    type: Number,
+                    required: true,
                 },
             },
         ],
         default: [],
+        required: true,
     },
     date: {
         type: Date,
-        required: true,
         default: Date.now,
+        required: true,
     },
 })
 
-export const TransactionModel = model('transaction', TransactionSchema)
+export const TransactionModel = database.connection.model(
+    'transaction',
+    TransactionSchema,
+)
+
+export type TransactionType = InferSchemaType<typeof TransactionSchema>

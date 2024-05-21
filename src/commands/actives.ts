@@ -1,79 +1,44 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { Group } from '@/enums'
+import Command from '@/libs/command'
+import { getEnvironmentVariable } from '@/libs/env'
+import alpaca from '@/services/alpaca'
+import discord from '@/services/discord'
+import { ActivesReply } from '@/views/actives'
 
-import divider from '@/images/divider'
-import alpaca from '@/libs/alpaca'
-import discord from '@/libs/discord'
+const FIELD_LINE_LIMIT = parseInt(getEnvironmentVariable('FIELD_LINE_LIMIT'))
 
-const limit = 20
+const command = new Command()
+    .setName('actives')
+    .setDescription('List active stocks')
+    .setGroup(Group.Trade)
 
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('actives')
-        .setDescription('List most active stocks')
-        .addStringOption((option) =>
-            option
-                .setName('by')
-                .setDescription('Sort by')
-                .addChoices(
-                    {
-                        name: 'Volume',
-                        value: 'Volume',
-                    },
-                    {
-                        name: 'Trades',
-                        value: 'Trades',
-                    },
-                )
-                .setRequired(true),
+command.addStringOption((option) =>
+    option
+        .setName('by')
+        .setDescription('Sort by')
+        .addChoices(
+            {
+                name: 'Volume',
+                value: 'volume',
+            },
+            {
+                name: 'Trades',
+                value: 'trades',
+            },
         )
-        .toJSON(),
-    handler: async (interaction) => {
-        const sortBy = interaction.options.getString('by', true)
-        const actives = await alpaca.getActives(limit, sortBy)
+        .setRequired(true),
+)
 
-        return {
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '---',
-                    },
-                    title: `Active Stocks by ${sortBy}`,
-                    fields: [
-                        {
-                            name: 'Symbol',
-                            value: actives
-                                .map((active) => active.symbol)
-                                .join('\n'),
-                            inline: true,
-                        },
-                        {
-                            name: 'Trades',
-                            value: actives
-                                .map((active) => active.trade_count)
-                                .join('\n'),
-                            inline: true,
-                        },
-                        {
-                            name: 'Volume',
-                            value: actives
-                                .map((active) => active.volume)
-                                .join('\n'),
-                            inline: true,
-                        },
-                    ],
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
-        }
-    },
+command.setChatInputCommandHandler(async (interaction) => {
+    const by = interaction.options.getString('by', true) as 'volume' | 'trades'
+
+    const actives = await alpaca.getActives(FIELD_LINE_LIMIT, by)
+
+    const reply = new ActivesReply({
+        by,
+        actives,
+    })
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)

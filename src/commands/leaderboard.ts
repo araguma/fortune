@@ -1,130 +1,63 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { Group } from '@/enums'
+import UserError from '@/errors/user'
+import Command from '@/libs/command'
+import Client from '@/services/client'
+import discord from '@/services/discord'
+import { LeaderboardReply } from '@/views/leaderboard'
 
-import divider from '@/images/divider'
-import database from '@/libs/database'
-import discord from '@/libs/discord'
-import format from '@/libs/format'
-import yahoo from '@/libs/yahoo'
-import { UserError } from '@/libs/error'
+const command = new Command()
+    .setName('leaderboard')
+    .setDescription('Display leaderboard')
+    .setGroup(Group.Trade)
 
-const limit = 20
-const padding = limit.toString().length
-
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('leaderboard')
-        .setDescription('Display leaderboard')
-        .addStringOption((option) =>
-            option
-                .setName('metric')
-                .setDescription('Metric to use')
-                .addChoices(
-                    {
-                        name: 'Profit',
-                        value: 'profit',
-                    },
-                    {
-                        name: 'Total',
-                        value: 'total',
-                    },
-                )
-                .setRequired(true),
+command.addStringOption((option) =>
+    option
+        .setName('type')
+        .setDescription('Leaderboard type')
+        .addChoices(
+            {
+                name: 'Profit',
+                value: 'profit',
+            },
+            {
+                name: 'Total',
+                value: 'total',
+            },
         )
-        .toJSON(),
-    handler: async (interaction) => {
-        const metric = interaction.options.getString('metric', true)
+        .setRequired(true),
+)
 
-        const clients = await database.getAllClients()
-        const leaderboard = clients.map((client) => ({
-            userId: client.userId,
-            portfolio: client.portfolio,
-            balance: client.balance,
-            seed: client.seed,
-            metric: 0,
-        }))
+command.setChatInputCommandHandler(async (interaction) => {
+    const type = interaction.options.getString('type', true)
+    const clients = await Client.getAllClients()
 
-        const symbols = new Set<string>()
-        clients.forEach((client) => {
-            client.portfolio.forEach((_, symbol) => symbols.add(symbol))
-        })
-
-        const quotes = await yahoo.getQuotes(Array.from(symbols))
-        leaderboard.forEach((entry) => {
-            const value = Array.from(entry.portfolio.entries()).reduce(
-                (acc, [symbol, stock]) => {
-                    const quote = quotes[symbol]
-                    if (!quote)
-                        UserError.throw(
-                            `Failed to get quote for ${symbol}`,
-                        )
-                    const price = yahoo.getPrice(quote)
-                    return acc + price * stock.shares
-                },
-                0,
-            )
-            switch (metric) {
-                case 'profit':
-                    entry.metric = value + entry.balance - entry.seed
-                    break
-                case 'total':
-                    entry.metric = value + entry.balance
-                    break
+    const entries = await Promise.all(
+        clients.map(async (client) => {
+            return {
+                userId: client.model.userId,
+                metric: await (async () => {
+                    switch (type) {
+                        case 'profit': {
+                            return await client.getProfit()
+                        }
+                        case 'total': {
+                            return await client.getTotal()
+                        }
+                        default: {
+                            UserError.invalidType(type)
+                        }
+                    }
+                })(),
             }
-        })
+        }),
+    )
 
-        const formatter = (value: number) => {
-            switch (metric) {
-                case 'profit':
-                case 'total':
-                    return format.currency(value)
-                default:
-                    return value
-            }
-        }
-        leaderboard.sort((a, b) => b.metric - a.metric)
-        leaderboard.splice(limit)
-
-        return {
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '---',
-                    },
-                    title: `Leaderboard (${format.capitalize(metric)})`,
-                    fields: [
-                        {
-                            name: 'Name',
-                            value: leaderboard
-                                .map(
-                                    (entry, index) =>
-                                        `\`${(index + 1).toString().padStart(padding)}\` <@${entry.userId}>`,
-                                )
-                                .join('\n'),
-                            inline: true,
-                        },
-                        {
-                            name: format.capitalize(metric),
-                            value: leaderboard
-                                .map(
-                                    (entry) => `\`${formatter(entry.metric)}\``,
-                                )
-                                .join('\n'),
-                            inline: true,
-                        },
-                    ],
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
-        }
-    },
+    const reply = new LeaderboardReply({
+        metric: type,
+        type: 'value',
+        entries,
+    })
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)

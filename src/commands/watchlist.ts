@@ -1,73 +1,76 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { SlashCommandSubcommandBuilder } from 'discord.js'
 
-import divider from '@/images/divider'
-import database from '@/libs/database'
-import discord from '@/libs/discord'
-import format from '@/libs/format'
-import yahoo from '@/libs/yahoo'
-import { UserError } from '@/libs/error'
+import { Group } from '@/enums'
+import Command from '@/libs/command'
+import Client from '@/services/client'
+import discord from '@/services/discord'
+import yahoo from '@/services/yahoo'
+import { WatchlistReply } from '@/views/watchlist'
 
-discord.addCommand({
-    descriptor: new SlashCommandBuilder()
-        .setName('watchlist')
-        .setDescription('View watchlist')
-        .addUserOption((option) =>
+const command = new Command()
+    .setName('watchlist')
+    .setDescription('Manage watchlist')
+    .setGroup(Group.Trade)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('add')
+        .setDescription('Add stock to watchlist')
+        .addStringOption((option) =>
             option
-                .setName('user')
-                .setDescription('Target user')
-                .setRequired(false),
-        )
-        .toJSON(),
-    handler: async (interaction) => {
-        const userId =
-            interaction.options.getUser('user')?.id ?? interaction.user.id
-        const user = await discord.users.fetch(userId)
-        const client = await database.getClientByUserId(userId)
+                .setName('symbol')
+                .setDescription('Stock ticker')
+                .setRequired(true),
+        ),
+)
 
-        const quotes = await yahoo.getQuotes(client.watchlist)
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('remove')
+        .setDescription('Remove stock from watchlist')
+        .addStringOption((option) =>
+            option
+                .setName('symbol')
+                .setDescription('Stock ticker')
+                .setRequired(true),
+        ),
+)
 
-        const description = client.watchlist
-            .map((symbol) => {
-                const quote = quotes[symbol]
-                if (!quote)
-                    UserError.throw(`Failed to get quote for ${symbol}`)
-                const price = yahoo.getPrice(quote)
-                const open = quote.regularMarketOpen || NaN
-                return [
-                    price - open >= 0 ? '▴' : '▾',
-                    format.bold(symbol),
-                    format.currency(price),
-                    `(${format.percentage((price - open) / open)})`,
-                ].join(' ')
-            })
-            .join('\n')
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('show')
+        .setDescription('Display watchlist'),
+)
 
-        return {
-            embeds: [
-                {
-                    color: 0x3498db,
-                    author: {
-                        name: '---',
-                    },
-                    title: 'Watchlist',
-                    description:
-                        description.substring(0, 4096) || '> *No stocks found*',
-                    image: {
-                        url: 'attachment://divider.png',
-                    },
-                    footer: {
-                        text: client._id.toString().toUpperCase(),
-                        icon_url: user.displayAvatarURL(),
-                    },
-                    timestamp: new Date().toISOString(),
-                },
-            ],
-            files: [
-                {
-                    attachment: divider(),
-                    name: 'divider.png',
-                },
-            ],
+command.setChatInputCommandHandler(async (interaction) => {
+    const subcommand = interaction.options.getSubcommand()
+    const client = await Client.getClientByUserId(interaction.user.id)
+
+    switch (subcommand) {
+        case 'add': {
+            const symbol = interaction.options.getString('symbol', true)
+            await yahoo.getQuote(symbol)
+            client.addToWatchlist(symbol)
+            break
         }
-    },
+        case 'remove': {
+            const symbol = interaction.options.getString('symbol', true)
+            await yahoo.getQuote(symbol)
+            client.removeFromWatchlist(symbol)
+            break
+        }
+    }
+
+    await client.save()
+
+    const quotes = await yahoo.getQuotes(client.model.watchlist)
+    const reply = new WatchlistReply({
+        quotes,
+        clientId: client.getId(),
+        client: client.model,
+        userIcon: interaction.user.displayAvatarURL(),
+    })
+    await interaction.reply(reply)
 })
+
+discord.addCommand(command)
