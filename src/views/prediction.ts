@@ -29,7 +29,7 @@ export class PredictionReply extends Reply<PredictionReplyData> {
     }
 
     public override update({ predictionId, prediction }: PredictionReplyData) {
-        const pool = prediction.pool.reduce((a, b) => a + b, 0)
+        const total = prediction.pool.reduce((a, b) => a + b, 0)
 
         this.setCanvas(divider())
         this.setTimestamp()
@@ -40,11 +40,12 @@ export class PredictionReply extends Reply<PredictionReplyData> {
             [
                 `**${prediction.prompt}**\n`,
                 ...prediction.options.map((option, index) => {
-                    const decimal = (prediction.pool[index] ?? 0) / pool
+                    const pool = prediction.pool[index] ?? 0
+                    const decimal = pool / total
                     return [
-                        `> ${index + 1}) ${option}`,
+                        `> ${index + 1}) **${option}**`,
                         `> ${'I'.repeat(decimal * 64)}[${format.percentage(decimal)}]`,
-                        `> ${format.value(prediction.pool[index] ?? 0)}\n`,
+                        `> ${format.value(pool)}\n`,
                     ].join('\n')
                 }),
             ].join('\n'),
@@ -61,8 +62,8 @@ export class PredictionReply extends Reply<PredictionReplyData> {
                 inline: true,
             },
             {
-                name: 'Pool',
-                value: format.value(pool),
+                name: 'Total',
+                value: format.value(total),
                 inline: true,
             },
             {
