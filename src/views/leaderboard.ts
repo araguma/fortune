@@ -5,7 +5,6 @@ import format from '@/libs/format'
 import Reply from '@/libs/reply'
 
 const FIELD_LINE_LIMIT = parseInt(getEnvironmentVariable('FIELD_LINE_LIMIT'))
-const padding = FIELD_LINE_LIMIT.toString().length
 
 export class LeaderboardReply extends Reply<LeaderboardReplyData> {
     public constructor(data: LeaderboardReplyData) {
@@ -19,6 +18,8 @@ export class LeaderboardReply extends Reply<LeaderboardReplyData> {
         metric = format.capitalize(metric)
         entries.sort((a, b) => b.metric - a.metric)
         entries = entries.slice(0, FIELD_LINE_LIMIT)
+
+        const padding = entries.length.toString().length
 
         this.setColor(Color.Blue)
         this.setAuthor({ name: '---' })
