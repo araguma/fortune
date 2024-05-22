@@ -1,4 +1,5 @@
 import { Color } from '@/enums'
+import divider from '@/libs/canvas/divider'
 import format from '@/libs/format'
 import Reply from '@/libs/reply'
 import { AlpacaMover } from '@/services/alpaca'
@@ -38,6 +39,8 @@ export class MoversReply extends Reply<MoversReplyData> {
                 })
                 .join('\n'),
         )
+        this.setCanvas(divider())
+        this.setTimestamp(new Date())
     }
 }
 
