@@ -76,6 +76,7 @@ export default class Prediction {
 
         if (winners.length === 0) {
             self.balance += pool
+            winners.push({ userId: self.userId, amount: pool })
         }
 
         return winners
