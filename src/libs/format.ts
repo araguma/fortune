@@ -19,12 +19,12 @@ function symbol(symbol: string | undefined) {
     return symbol ? `**${symbol}**` : 'N/A'
 }
 
-function shares(shares?: number) {
+function shares(shares: number | undefined) {
     if (shares === undefined || isNaN(shares)) return 'N/A'
     return parseFloat(shares.toFixed(5)).toString()
 }
 
-function value(amount?: number) {
+function value(amount: number | undefined) {
     if (amount === undefined || isNaN(amount)) return 'N/A'
     if (Math.abs(amount) === Infinity) amount = 0
     return amount.toLocaleString('en-US', {
@@ -35,7 +35,7 @@ function value(amount?: number) {
     })
 }
 
-function percentage(decimal?: number) {
+function percentage(decimal: number | undefined) {
     if (decimal === undefined || isNaN(decimal)) return 'N/A'
     if (Math.abs(decimal) === Infinity) decimal = 0
     return decimal.toLocaleString('en-US', {
@@ -45,7 +45,8 @@ function percentage(decimal?: number) {
     })
 }
 
-function abbreviation(text: string) {
+function abbreviation(text: string | undefined) {
+    if (!text) return 'N/A'
     return text.slice(0, 3).toUpperCase()
 }
 
@@ -56,7 +57,7 @@ function stockName(shortName: string | undefined, symbol: string | undefined) {
     return `${shortName} (${symbol})`
 }
 
-function valueSymbol(delta: number, symbol: string) {
+function valueSymbol(delta: number | undefined, symbol: string | undefined) {
     return `${value(delta)} (${format.symbol(symbol)})`
 }
 
