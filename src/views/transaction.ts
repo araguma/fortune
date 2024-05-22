@@ -76,7 +76,7 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         const viewSelect = new StringSelectMenuBuilder()
             .setCustomId(
                 new Tag()
-                    .setCommand('portfolio')
+                    .setCommand(transaction.type)
                     .setAction('view')
                     .setData('userId', transaction.userId)
                     .toCustomId(),
