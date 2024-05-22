@@ -1,12 +1,11 @@
 import { StringSelectMenuInteraction } from 'discord.js'
 
+import UserError from '@/errors/user'
 import Tag from '@/libs/tag'
+import { generateViewReply } from '@/libs/view'
 import discord from '@/services/discord'
 import Transaction from '@/services/transaction'
 import { TransactionReply } from '@/views/transaction'
-import Client from '@/services/client'
-import UserError from '@/errors/user'
-import { generateViewReply } from '@/libs/view'
 
 export async function handleTransactionStringSelectMenu(
     interaction: StringSelectMenuInteraction,
@@ -15,9 +14,8 @@ export async function handleTransactionStringSelectMenu(
 
     switch (tag.getAction(true)) {
         case 'view': {
-            const client = await Client.findById(tag.getData('clientId', true))
+            const userId = tag.getData('userId', true)
             const symbol = interaction.values[0]
-            const userId = client.model.userId
 
             if (!symbol) UserError.missingSymbol()
 
