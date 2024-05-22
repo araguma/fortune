@@ -152,7 +152,8 @@ export default class Client {
         await Promise.all(
             Array.from(this.model.portfolio.entries()).map(
                 async ([symbol, stock]) => {
-                    const price = await yahoo.getPrice(codec.decode(symbol))
+                    symbol = codec.decode(symbol)
+                    const price = await yahoo.getPrice(symbol)
                     transaction.addStock(symbol, stock.shares, price)
                 },
             ),
