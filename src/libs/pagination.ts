@@ -44,7 +44,7 @@ export default class Pagination<T> {
     }
 
     public getPages() {
-        return Math.ceil(this.getLength() / this.max)
+        return Math.max(Math.ceil(this.getLength() / this.max), 1)
     }
 
     public getStart() {
