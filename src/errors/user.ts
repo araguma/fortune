@@ -44,6 +44,14 @@ export default class UserError extends Error {
         throw new UserError(`Invalid type: ${type}`)
     }
 
+    public static invalidAmount(amount: number): never {
+        throw new UserError(`Invalid amount: ${amount}`)
+    }
+
+    public static invalidMinimum(minimum: number): never {
+        throw new UserError(`Invalid minimum: ${minimum}`)
+    }
+
     public static missingSymbol(): never {
         throw new UserError('Missing symbol')
     }

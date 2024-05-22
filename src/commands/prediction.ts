@@ -2,6 +2,7 @@ import { ModalBuilder, TextInputBuilder } from '@discordjs/builders'
 import { ActionRowBuilder, TextInputStyle } from 'discord.js'
 
 import { Group } from '@/enums'
+import UserError from '@/errors/user'
 import Command from '@/libs/command'
 import format from '@/libs/format'
 import Tag from '@/libs/tag'
@@ -40,6 +41,8 @@ command.setChatInputCommandHandler(async (interaction) => {
     const prompt = interaction.options.getString('prompt', true)
     const options = interaction.options.getString('options', true).split('|')
     const minimum = interaction.options.getNumber('minimum', true)
+
+    if (minimum <= 0) UserError.invalidMinimum(minimum)
 
     const prediction = Prediction.create(prompt, options, minimum)
     await prediction.save()
