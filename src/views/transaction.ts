@@ -43,6 +43,7 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         clientIcon,
         page,
     }: TransactionReplyData) {
+        const { author, title } = variant[transaction.type]
         const { description, stocks, total } = transaction.stocks.reduce(
             (accumulator, stock) => {
                 const value = stock.shares * stock.price
@@ -72,6 +73,24 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         const pagination = new Pagination(description, DESCRIPTION_LINE_LIMIT)
         pagination.setPage(page)
 
+        const viewSelect = new StringSelectMenuBuilder()
+            .setCustomId(
+                new Tag()
+                    .setCommand('portfolio')
+                    .setAction('view')
+                    .setData('userId', transaction.userId)
+                    .toCustomId(),
+            )
+            .setPlaceholder('View symbol')
+            .addOptions(
+                transaction.stocks
+                    .map((stock) => stock.symbol)
+                    .slice(pagination.getStart(), pagination.getEnd())
+                    .map((symbol) => ({
+                        label: symbol,
+                        value: symbol,
+                    })),
+            )
         const pageSelect = new StringSelectMenuBuilder()
             .setCustomId(
                 new Tag()
@@ -91,10 +110,18 @@ export class TransactionReply extends Reply<TransactionReplyData> {
             )
         const row1 =
             new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+                viewSelect,
+            )
+        const row2 =
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                 pageSelect,
             )
 
-        const { author, title } = variant[transaction.type]
+        const rows: ActionRowBuilder<
+            StringSelectMenuBuilder | ButtonBuilder
+        >[] = []
+        if (pagination.getLength() >= 1) rows.push(row1)
+        if (pagination.getPages() > 1) rows.push(row2)
 
         this.setCanvas(divider())
         this.setColor(Color.Blue)
@@ -122,11 +149,6 @@ export class TransactionReply extends Reply<TransactionReplyData> {
             text: transactionId.toUpperCase(),
             iconURL: clientIcon,
         })
-
-        const rows: ActionRowBuilder<
-            StringSelectMenuBuilder | ButtonBuilder
-        >[] = []
-        if (pagination.getPages() > 1) rows.push(row1)
         this.setComponents(rows)
     }
 }
