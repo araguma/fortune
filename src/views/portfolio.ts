@@ -34,7 +34,7 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
         userIcon,
         page,
     }: PortfolioReplyData) {
-        const { symbols, description, value, delta, maxDelta, minDelta } =
+        const { symbols, description, value, delta, minDelta, maxDelta } =
             Array.from(client.portfolio.entries()).reduce(
                 (accumulator, [symbol, stock], index) => {
                     symbol = codec.decode(symbol)
@@ -62,34 +62,31 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
 
                     accumulator.symbols.push(symbol)
                     accumulator.description.push(description)
+                    accumulator.value = accumulator.value + value
+                    accumulator.delta = accumulator.delta + delta
+                    accumulator.minDelta =
+                        price < accumulator.minDelta.delta
+                            ? { symbol: quote.symbol, delta: delta }
+                            : accumulator.minDelta
+                    accumulator.maxDelta =
+                        price > accumulator.maxDelta.delta
+                            ? { symbol: quote.symbol, delta: delta }
+                            : accumulator.maxDelta
 
-                    return {
-                        symbols: accumulator.symbols,
-                        description: accumulator.description,
-                        value: accumulator.value + value,
-                        delta: accumulator.delta + delta,
-                        maxDelta:
-                            price > accumulator.maxDelta.delta
-                                ? { symbol: quote.symbol, delta: delta }
-                                : accumulator.maxDelta,
-                        minDelta:
-                            price < accumulator.minDelta.delta
-                                ? { symbol: quote.symbol, delta: delta }
-                                : accumulator.minDelta,
-                    }
+                    return accumulator
                 },
                 {
                     symbols: Array<string>(),
                     description: Array<string>(),
                     value: 0,
                     delta: 0,
-                    maxDelta: {
-                        symbol: '',
-                        delta: -Infinity,
-                    },
                     minDelta: {
                         symbol: '',
                         delta: Infinity,
+                    },
+                    maxDelta: {
+                        symbol: '',
+                        delta: -Infinity,
                     },
                 },
             )
@@ -193,13 +190,13 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
                 inline: true,
             },
             {
-                name: 'Max Delta',
-                value: format.valueSymbol(maxDelta.delta, maxDelta.symbol),
+                name: 'Min Delta',
+                value: format.valueSymbol(minDelta.delta, minDelta.symbol),
                 inline: true,
             },
             {
-                name: 'Min Delta',
-                value: format.valueSymbol(minDelta.delta, minDelta.symbol),
+                name: 'Max Delta',
+                value: format.valueSymbol(maxDelta.delta, maxDelta.symbol),
                 inline: true,
             },
             {
