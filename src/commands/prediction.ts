@@ -9,6 +9,7 @@ import Client from '@/services/client'
 import discord from '@/services/discord'
 import Prediction from '@/services/prediction'
 import { PredictionReply } from '@/views/prediction'
+import ResultReply from '@/views/result'
 
 const command = new Command()
     .setName('prediction')
@@ -172,7 +173,7 @@ command.setModalSubmitHandler(async (interaction) => {
             )
             const option =
                 parseInt(interaction.fields.getTextInputValue('option')) - 1
-            prediction.settle(self.model, clients, option)
+            const winners = prediction.settle(self.model, clients, option)
 
             await self.save()
             await Promise.all(
@@ -182,7 +183,8 @@ command.setModalSubmitHandler(async (interaction) => {
             )
             await prediction.save()
 
-            await interaction.deferUpdate()
+            const reply = new ResultReply({ winners })
+            await interaction.reply(reply)
             break
         }
     }
