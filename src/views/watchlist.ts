@@ -139,7 +139,7 @@ export class WatchlistReply extends Reply<WatchlistReplyData> {
         this.setColor(Color.Blue)
         this.setAuthor({ name: '---' })
         this.setTitle('Watchlist')
-        this.setDescription(pagination.getCurrent().join('\n') || 'None')
+        this.setDescription(pagination.getCurrent().join('\n') || '> *No stocks found*')
         this.setFields(
             {
                 name: 'Max Delta',

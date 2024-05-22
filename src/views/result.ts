@@ -32,7 +32,7 @@ export default class ResultReply extends Reply<ResultReplyData> {
                                 .padStart(padding, ' ')
                             return `\`${rank}\`<@${entry.userId}>`
                         })
-                        .join('\n') || 'None',
+                        .join('\n') || '> *None*',
                 inline: true,
             },
             {
@@ -40,7 +40,7 @@ export default class ResultReply extends Reply<ResultReplyData> {
                 value:
                     winners
                         .map((entry) => `\`${format.value(entry.amount)}\``)
-                        .join('\n') || 'None',
+                        .join('\n') || '> *None*',
                 inline: true,
             },
         )

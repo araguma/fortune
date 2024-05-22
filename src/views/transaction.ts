@@ -127,7 +127,9 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         this.setColor(Color.Blue)
         this.setAuthor({ name: author })
         this.setTitle(title)
-        this.setDescription(pagination.getCurrent().join('\n') || 'None')
+        this.setDescription(
+            pagination.getCurrent().join('\n') || '> *No stocks*',
+        )
         this.setFields(
             {
                 name: 'Stocks',

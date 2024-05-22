@@ -171,7 +171,9 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
         this.setColor(
             delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow,
         )
-        this.setDescription(pagination.getCurrent().join('\n') || 'None')
+        this.setDescription(
+            pagination.getCurrent().join('\n') || '> *No stocks found*',
+        )
         this.setFields(
             {
                 name: 'Value',
