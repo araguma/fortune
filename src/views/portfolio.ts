@@ -19,7 +19,6 @@ import { Quote } from '@/services/yahoo'
 const DESCRIPTION_LINE_LIMIT = parseInt(
     getEnvironmentVariable('DESCRIPTION_LINE_LIMIT'),
 )
-const padStart = DESCRIPTION_LINE_LIMIT.toString().length
 
 export class PortfolioReply extends Reply<PortfolioReplyData> {
     public constructor(data: PortfolioReplyData) {
@@ -34,8 +33,13 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
         userIcon,
         page,
     }: PortfolioReplyData) {
+        const entries = Array.from(client.portfolio.entries())
+        const padding = Math.min(
+            entries.length.toString().length,
+            DESCRIPTION_LINE_LIMIT.toString().length,
+        )
         const { symbols, description, value, delta, minDelta, maxDelta } =
-            Array.from(client.portfolio.entries()).reduce(
+            entries.reduce(
                 (accumulator, [symbol, stock], index) => {
                     symbol = codec.decode(symbol)
                     const quote = quotes[symbol]
@@ -49,7 +53,7 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
                     const number = client.portfolio.size - index
                     const sign = delta >= 0 ? '▴' : '▾'
                     const description = [
-                        `\`${number.toString().padStart(padStart)}\``,
+                        `\`${number.toString().padStart(padding)}\``,
                         sign,
                         format.symbol(symbol),
                         format.shares(stock.shares),
