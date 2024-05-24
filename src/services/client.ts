@@ -204,7 +204,6 @@ export default class Client {
     }
 
     public pay(target: ClientType, amount: number) {
-        if (amount <= 0) UserError.invalid('amount', amount)
         if (this.model.balance < amount) UserError.insufficientBalance()
         this.model.balance -= amount
         target.balance += amount

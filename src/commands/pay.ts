@@ -1,4 +1,5 @@
 import { Group } from '@/enums'
+import UserError from '@/errors/user'
 import Command from '@/libs/command'
 import Client from '@/services/client'
 import discord from '@/services/discord'
@@ -24,6 +25,8 @@ command.setChatInputCommandHandler(async (interaction) => {
     const userId = interaction.user.id
     const targetUserId = interaction.options.getUser('user', true).id
     const amount = interaction.options.getNumber('amount', true)
+
+    if (amount <= 0) UserError.invalid('amount', amount)
 
     const client = await Client.getClientByUserId(userId)
     const target = await Client.getClientByUserId(targetUserId)

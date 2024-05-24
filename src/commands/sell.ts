@@ -97,15 +97,18 @@ command.setChatInputCommandHandler(async (interaction) => {
             case 'share': {
                 const symbol = interaction.options.getString('symbol', true)
                 const shares = interaction.options.getNumber('shares', true)
+                if (shares <= 0) UserError.invalid('shares', shares)
                 return client.sellShares(symbol, shares)
             }
             case 'value': {
                 const symbol = interaction.options.getString('symbol', true)
                 const value = interaction.options.getNumber('value', true)
+                if (value <= 0) UserError.invalid('value', value)
                 return client.sellValue(symbol, value)
             }
             case 'last': {
                 const count = interaction.options.getInteger('count') ?? 1
+                if (count <= 0) UserError.invalid('count', count)
                 return client.sellLast(count)
             }
             default: {
