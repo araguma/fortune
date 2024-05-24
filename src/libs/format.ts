@@ -10,6 +10,10 @@ function number(number: number | undefined) {
     })
 }
 
+function string(text: string | undefined) {
+    return text ? text : 'N/A'
+}
+
 function capitalize(text: string | undefined) {
     if (!text) return 'N/A'
     return text.charAt(0).toUpperCase() + text.slice(1)
@@ -63,6 +67,7 @@ function valueSymbol(delta: number | undefined, symbol: string | undefined) {
 
 const format = {
     number,
+    string,
     capitalize,
     symbol,
     shares,

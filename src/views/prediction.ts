@@ -78,7 +78,7 @@ export class PredictionReply extends Reply<PredictionReplyData> {
             },
             {
                 name: 'Result',
-                value: prediction.result.toString(),
+                value: format.string(prediction.options[prediction.result]),
                 inline: true,
             },
         ).setFooter({
