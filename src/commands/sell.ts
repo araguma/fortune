@@ -109,7 +109,7 @@ command.setChatInputCommandHandler(async (interaction) => {
                 return client.sellLast(count)
             }
             default: {
-                UserError.invalidSubcommand(subcommand)
+                UserError.invalid('subcommand', subcommand)
             }
         }
     })()

@@ -84,7 +84,7 @@ command.setChatInputCommandHandler(async (interaction) => {
                 return client.buyValue(symbol, value)
             }
             default: {
-                UserError.invalidSubcommand(subcommand)
+                UserError.invalid('subcommand', subcommand)
             }
         }
     })()

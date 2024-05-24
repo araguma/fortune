@@ -44,7 +44,7 @@ command.setChatInputCommandHandler(async (interaction) => {
                             return await client.getTotal()
                         }
                         default: {
-                            UserError.invalidType(type)
+                            UserError.invalid('type', type)
                         }
                     }
                 })(),

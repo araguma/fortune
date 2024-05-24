@@ -6,6 +6,10 @@ export default class UserError extends Error {
         this.name = 'ClientError'
     }
 
+    public static invalid(item: string, value: string | number): never {
+        throw new UserError(`Invalid ${item}: ${value}`)
+    }
+
     public static adminOnly(): never {
         throw new UserError('This command is only available to administrators')
     }
@@ -18,38 +22,6 @@ export default class UserError extends Error {
         throw new UserError(
             `**<#${channelId}>** is not whitelisted for **${group}** commands`,
         )
-    }
-
-    public static invalidSymbol(symbol: string): never {
-        throw new UserError(`Invalid symbol: ${symbol}`)
-    }
-
-    public static invalidCurrency(currency: string): never {
-        throw new UserError(`Invalid currency: ${currency}`)
-    }
-
-    public static invalidUserId(userId: string): never {
-        throw new UserError(`Invalid user ID: ${userId}`)
-    }
-
-    public static invalidOption(option: number): never {
-        throw new UserError(`Invalid option: ${option}`)
-    }
-
-    public static invalidSubcommand(subcommand: string): never {
-        throw new UserError(`Invalid subcommand: ${subcommand}`)
-    }
-
-    public static invalidType(type: string): never {
-        throw new UserError(`Invalid type: ${type}`)
-    }
-
-    public static invalidAmount(amount: number): never {
-        throw new UserError(`Invalid amount: ${amount}`)
-    }
-
-    public static invalidMinimum(minimum: number): never {
-        throw new UserError(`Invalid minimum: ${minimum}`)
     }
 
     public static missingSymbol(): never {

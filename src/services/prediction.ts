@@ -26,7 +26,7 @@ export default class Prediction {
         if (amount < this.model.minimum)
             UserError.insufficientBet(this.model.minimum)
         if (option < 0 || option >= this.model.options.length)
-            UserError.invalidOption(option)
+            UserError.invalid('option', option)
 
         const bet = this.model.bets.get(client.userId)
 
@@ -64,7 +64,7 @@ export default class Prediction {
         this.model.bets.forEach((bet, userId) => {
             if (bet.option === option) {
                 const client = clients[userId]
-                if (!client) UserError.invalidUserId(userId)
+                if (!client) UserError.invalid('user ID', userId)
 
                 const ratio = bet.amount / winnerPool
                 const amount = (revert ? -1 : 1) * ratio * pool

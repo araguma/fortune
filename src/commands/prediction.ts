@@ -42,7 +42,7 @@ command.setChatInputCommandHandler(async (interaction) => {
     const options = interaction.options.getString('options', true).split('|')
     const minimum = interaction.options.getNumber('minimum', true)
 
-    if (minimum <= 0) UserError.invalidMinimum(minimum)
+    if (minimum <= 0) UserError.invalid('minimum', minimum)
 
     const prediction = Prediction.create(prompt, options, minimum)
     await prediction.save()

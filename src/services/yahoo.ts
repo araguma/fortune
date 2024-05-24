@@ -45,7 +45,7 @@ async function getQuote(symbol: string) {
     const quote = (await yahooFinance.quoteCombine(symbol)) as
         | YahooQuote
         | undefined
-    if (!quote) UserError.invalidSymbol(symbol)
+    if (!quote) UserError.invalid('symbol', symbol)
     return parseQuote(quote)
 }
 
@@ -76,7 +76,7 @@ async function getHistory(
         period2: end,
         interval,
     })) as ChartResultArray | undefined
-    if (!history) UserError.invalidSymbol(symbol)
+    if (!history) UserError.invalid('symbol', symbol)
     return history
 }
 

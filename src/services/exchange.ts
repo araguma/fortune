@@ -40,8 +40,8 @@ export class Exchange {
     public convert(from: string, to: string, amount: number) {
         const fromRate = this.rates[from]
         const toRate = this.rates[to]
-        if (!fromRate) UserError.invalidCurrency(from)
-        if (!toRate) UserError.invalidCurrency(to)
+        if (!fromRate) UserError.invalid('currency', from)
+        if (!toRate) UserError.invalid('currency', to)
         return (amount / fromRate) * toRate
     }
 }
