@@ -19,7 +19,7 @@ export async function handleTransactionStringSelectMenu(
 
             if (!symbol) UserError.missingSymbol()
 
-            const reply = await generateViewReply(symbol, '5Y', userId)
+            const reply = await generateViewReply(symbol, '1D', userId)
             await interaction.reply(reply)
             break
         }
