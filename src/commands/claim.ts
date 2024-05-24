@@ -14,7 +14,6 @@ const command = new Command()
 
 command.setChatInputCommandHandler(async (interaction) => {
     const client = await Client.getClientByUserId(interaction.user.id)
-
     const transaction = await client.claim()
 
     await client.save()

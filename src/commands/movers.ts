@@ -34,7 +34,6 @@ command.addStringOption((option) =>
 
 command.setChatInputCommandHandler(async (interaction) => {
     const by = interaction.options.getString('by', true) as 'gainers' | 'losers'
-
     const movers = await alpaca.getMovers(FIELD_LINE_LIMIT, 'stocks')
 
     const reply = new MoversReply({

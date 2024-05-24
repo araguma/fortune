@@ -34,7 +34,6 @@ command.addStringOption((option) =>
 
 command.setChatInputCommandHandler(async (interaction) => {
     const by = interaction.options.getString('by', true) as 'volume' | 'trades'
-
     const actives = await alpaca.getActives(FIELD_LINE_LIMIT, by)
 
     const reply = new ActivesReply({
