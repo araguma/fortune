@@ -71,6 +71,7 @@ async function getHistory(
     end: Date,
     interval: NonNullable<ChartOptions['interval']>,
 ) {
+    symbol = symbol.toUpperCase()
     const history = (await yahooFinance.chart(symbol, {
         period1: start,
         period2: end,
