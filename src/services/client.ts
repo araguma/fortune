@@ -46,24 +46,27 @@ export default class Client {
         cost: number,
     ) {
         const key = codec.encode(symbol)
-        const stock = this.model.portfolio.get(key) ?? {
+        const previous = this.model.portfolio.get(key) ?? {
             shares: 0,
             seed: 0,
             lastSplit: new Date(),
         }
 
-        if (-shares > 0 && stock.shares < -shares)
+        if (-shares > 0 && previous.shares < -shares)
             UserError.insufficientShares(symbol)
         if (cost > 0 && this.model.balance < cost)
             UserError.insufficientBalance()
 
-        stock.shares += shares
-        stock.seed += shares * price
+        const current = {
+            shares: previous.shares + shares,
+            seed: previous.seed + shares * price,
+            lastSplit: previous.lastSplit,
+        }
 
-        if (stock.shares === 0) {
+        if (current.shares === 0) {
             this.model.portfolio.delete(key)
         } else {
-            this.model.portfolio.set(key, stock)
+            this.model.portfolio.set(key, current)
         }
         this.model.balance -= cost
     }
