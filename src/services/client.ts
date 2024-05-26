@@ -154,6 +154,7 @@ export default class Client {
             const price = await yahoo.getPrice(symbol)
             if (!price) UserError.noPrice(symbol)
             transaction.addStock(symbol, shares, price)
+            this.model.seed += shares * price
         }
         this.model.claims = 0
         this.model.lastClaim = new Date(Date.now() - offset)
