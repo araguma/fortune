@@ -85,12 +85,16 @@ export default class Client {
                         end,
                         '3mo',
                     )
-                    const split = chart.events?.splits?.[0]
-                    if (split && new Date(split.date) > stock.lastSplit) {
+                    const splits = chart.events?.splits
+                    if (!splits) return
+                    const split = splits[splits.length - 1]
+                    if (!split) return
+                    const splitDate = new Date(split.date)
+                    if (splitDate > stock.lastSplit) {
                         const ratio = split.numerator / split.denominator
                         stock.shares *= ratio
                         stock.seed *= ratio
-                        stock.lastSplit = new Date(split.date)
+                        stock.lastSplit = splitDate
                         this.model.portfolio.set(symbol, stock)
                     }
                 },
