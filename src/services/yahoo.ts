@@ -65,20 +65,20 @@ async function getPrice(symbol: string) {
     return price
 }
 
-async function getHistory(
+async function getChart(
     symbol: string,
     start: Date,
     end: Date,
     interval: NonNullable<ChartOptions['interval']>,
 ) {
     symbol = symbol.toUpperCase()
-    const history = (await yahooFinance.chart(symbol, {
+    const chart = (await yahooFinance.chart(symbol, {
         period1: start,
         period2: end,
         interval,
     })) as ChartResultArray | undefined
-    if (!history) UserError.invalid('symbol', symbol)
-    return history
+    if (!chart) UserError.invalid('symbol', symbol)
+    return chart
 }
 
 function parseQuote(quote: YahooQuote): Quote {
@@ -123,7 +123,7 @@ const yahoo = {
     getQuote,
     getQuotes,
     getPrice,
-    getHistory,
+    getChart: getChart,
 }
 
 export default yahoo

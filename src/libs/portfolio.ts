@@ -7,6 +7,7 @@ export async function generatePortfolioReply(userId: string, page: number) {
     const user = await discord.users.fetch(userId)
     const client = await Client.getClientByUserId(userId)
 
+    await client.updatePortfolio()
     const quotes = await yahoo.getQuotes(client.getPortfolioStocks())
 
     return new PortfolioReply({

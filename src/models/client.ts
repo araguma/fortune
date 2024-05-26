@@ -20,6 +20,11 @@ export const ClientSchema = new Schema({
                 default: 0,
                 required: true,
             },
+            lastSplit: {
+                type: Date,
+                default: Date.now,
+                required: true,
+            },
         },
         default: {},
         required: true,

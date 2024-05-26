@@ -46,30 +46,61 @@ export default class Client {
         cost: number,
     ) {
         const key = codec.encode(symbol)
-        const previous = this.model.portfolio.get(key) ?? {
+        const stock = this.model.portfolio.get(key) ?? {
             shares: 0,
             seed: 0,
+            lastSplit: new Date(),
         }
 
-        if (-shares > 0 && previous.shares < -shares)
+        if (-shares > 0 && stock.shares < -shares)
             UserError.insufficientShares(symbol)
         if (cost > 0 && this.model.balance < cost)
             UserError.insufficientBalance()
 
-        const current = {
-            shares: previous.shares + shares,
-            seed: previous.seed + shares * price,
-        }
+        stock.shares += shares
+        stock.seed += shares * price
 
-        if (current.shares === 0) {
+        if (stock.shares === 0) {
             this.model.portfolio.delete(key)
         } else {
-            this.model.portfolio.set(key, current)
+            this.model.portfolio.set(key, stock)
         }
         this.model.balance -= cost
     }
 
-    public executeTransaction(transaction: TransactionType) {
+    private async splitStocks() {
+        const start = new Date()
+        const end = new Date()
+        start.setDate(end.getDate() - 365 * 5)
+
+        await Promise.all(
+            Array.from(this.model.portfolio.entries()).map(
+                async ([symbol, stock]) => {
+                    const chart = await yahoo.getChart(
+                        codec.decode(symbol),
+                        start,
+                        end,
+                        '3mo',
+                    )
+                    const split = chart.events?.splits?.[0]
+                    if (split && new Date(split.date) > stock.lastSplit) {
+                        const ratio = split.numerator / split.denominator
+                        stock.shares *= ratio
+                        stock.seed *= ratio
+                        stock.lastSplit = new Date(split.date)
+                        this.model.portfolio.set(symbol, stock)
+                    }
+                },
+            ),
+        )
+    }
+
+    public async updatePortfolio() {
+        await this.splitStocks()
+    }
+
+    public async executeTransaction(transaction: TransactionType) {
+        await this.updatePortfolio()
         if (transaction.userId !== this.model.userId)
             throw new Error('Invalid user ID')
 
@@ -117,7 +148,7 @@ export default class Client {
         this.model.claims = 0
         this.model.lastClaim = new Date(Date.now() - offset)
 
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -126,7 +157,7 @@ export default class Client {
         const price = await yahoo.getPrice(symbol)
         const shares = this.model.balance / price
         transaction.addStock(symbol, shares, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -134,7 +165,7 @@ export default class Client {
         const transaction = Transaction.create(this.model.userId, 'buy')
         const price = await yahoo.getPrice(symbol)
         transaction.addStock(symbol, shares, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -143,7 +174,7 @@ export default class Client {
         const price = await yahoo.getPrice(symbol)
         const shares = value / price
         transaction.addStock(symbol, shares, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -158,7 +189,7 @@ export default class Client {
                 },
             ),
         )
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -167,7 +198,7 @@ export default class Client {
         const price = await yahoo.getPrice(symbol)
         const stock = this.model.portfolio.get(codec.encode(symbol))
         transaction.addStock(symbol, stock?.shares ?? 0, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -175,7 +206,7 @@ export default class Client {
         const transaction = Transaction.create(this.model.userId, 'sell')
         const price = await yahoo.getPrice(symbol)
         transaction.addStock(symbol, shares, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -184,7 +215,7 @@ export default class Client {
         const price = await yahoo.getPrice(symbol)
         const shares = value / price
         transaction.addStock(symbol, shares, price)
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 
@@ -199,7 +230,7 @@ export default class Client {
                 transaction.addStock(symbol, stock?.shares ?? 0, price)
             }),
         )
-        this.executeTransaction(transaction.model)
+        await this.executeTransaction(transaction.model)
         return transaction
     }
 

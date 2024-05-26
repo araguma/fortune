@@ -50,7 +50,7 @@ export class ViewReply extends Reply<ViewReplyData> {
 
     public override update({
         quote,
-        history,
+        chart,
         timeframe,
         client,
         userIcon,
@@ -166,7 +166,7 @@ export class ViewReply extends Reply<ViewReplyData> {
         )
         this.setCanvas(
             graph(
-                history.quotes.map((bar) => {
+                chart.quotes.map((bar) => {
                     return {
                         x: bar.date.getTime(),
                         y: bar.close ?? NaN,
@@ -176,7 +176,7 @@ export class ViewReply extends Reply<ViewReplyData> {
             ),
         )
         this.setFooter({
-            text: `${timeframe}  •  ${history.quotes.length} Data Points`,
+            text: `${timeframe}  •  ${chart.quotes.length} Data Points`,
             iconURL: userIcon,
         })
         this.setComponents([row1, row2])
@@ -185,7 +185,7 @@ export class ViewReply extends Reply<ViewReplyData> {
 
 export type ViewReplyData = {
     quote: Quote
-    history: ChartResultArray
+    chart: ChartResultArray
     timeframe: keyof typeof timeframes
     client: ClientType
     userIcon: string

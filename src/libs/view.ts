@@ -17,11 +17,11 @@ export async function generateViewReply(
     start.setDate(end.getDate() - duration)
 
     const quote = await yahoo.getQuote(symbol)
-    const history = await yahoo.getHistory(symbol, start, end, interval)
+    const chart = await yahoo.getChart(symbol, start, end, interval)
 
     return new ViewReply({
         quote,
-        history,
+        chart,
         timeframe,
         client: client.model,
         userIcon: user.displayAvatarURL(),
