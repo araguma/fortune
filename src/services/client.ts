@@ -15,6 +15,9 @@ const CLAIM_INTERVAL = parseInt(getEnvironmentVariable('CLAIM_INTERVAL'))
 const CLAIM_STOCKPILE_LIMIT = parseInt(
     getEnvironmentVariable('CLAIM_STOCKPILE_LIMIT'),
 )
+const FRACTION_DIGITS = parseInt(getEnvironmentVariable('FRACTION_DIGITS'))
+
+const epsilon = Math.pow(10, -(FRACTION_DIGITS + 1))
 
 export default class Client {
     public constructor(public model: HydratedDocument<ClientType>) {}
@@ -162,7 +165,10 @@ export default class Client {
     public async buyMax(symbol: string) {
         const transaction = Transaction.create(this.model.userId, 'buy')
         const price = await yahoo.getPrice(symbol)
-        const shares = this.model.balance / price
+        const shares =
+            this.model.balance > epsilon
+                ? (this.model.balance - epsilon) / price
+                : 0
         transaction.addStock(symbol, shares, price)
         await this.executeTransaction(transaction.model)
         return transaction

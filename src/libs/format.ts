@@ -1,12 +1,13 @@
 import { getEnvironmentVariable } from '@/libs/env'
 
 const BASE_CURRENCY = getEnvironmentVariable('BASE_CURRENCY')
+const FRACTION_DIGITS = parseInt(getEnvironmentVariable('FRACTION_DIGITS'))
 
 function number(number: number | undefined) {
     if (number === undefined || isNaN(number)) return 'N/A'
     return number.toLocaleString('en-US', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 5,
+        maximumFractionDigits: FRACTION_DIGITS,
     })
 }
 
@@ -35,7 +36,7 @@ function value(amount: number | undefined) {
         style: 'currency',
         currency: BASE_CURRENCY,
         minimumFractionDigits: 0,
-        maximumFractionDigits: 5,
+        maximumFractionDigits: FRACTION_DIGITS,
     })
 }
 
