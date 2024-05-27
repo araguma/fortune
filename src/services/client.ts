@@ -5,6 +5,7 @@ import symbols from '@/data/symbols'
 import UserError from '@/errors/user'
 import codec from '@/libs/codec'
 import { getEnvironmentVariable } from '@/libs/env'
+import log from '@/libs/log'
 import random from '@/libs/random'
 import { ClientModel, ClientType } from '@/models/client'
 import { TransactionType } from '@/models/transaction'
@@ -82,23 +83,27 @@ export default class Client {
         await Promise.all(
             Array.from(this.model.portfolio.entries()).map(
                 async ([symbol, stock]) => {
-                    const chart = await yahoo.getChart(
-                        codec.decode(symbol),
-                        start,
-                        end,
-                        '3mo',
-                    )
-                    const splits = chart.events?.splits
-                    if (!splits) return
-                    const split = splits[splits.length - 1]
-                    if (!split) return
-                    const splitDate = new Date(split.date)
-                    if (splitDate > stock.lastSplit) {
-                        const ratio = split.numerator / split.denominator
-                        stock.shares *= ratio
-                        stock.seed *= ratio
-                        stock.lastSplit = splitDate
-                        this.model.portfolio.set(symbol, stock)
+                    try {
+                        const chart = await yahoo.getChart(
+                            codec.decode(symbol),
+                            start,
+                            end,
+                            '3mo',
+                        )
+                        const splits = chart.events?.splits
+                        if (!splits) return
+                        const split = splits[splits.length - 1]
+                        if (!split) return
+                        const splitDate = new Date(split.date)
+                        if (splitDate > stock.lastSplit) {
+                            const ratio = split.numerator / split.denominator
+                            stock.shares *= ratio
+                            stock.seed *= ratio
+                            stock.lastSplit = splitDate
+                            this.model.portfolio.set(symbol, stock)
+                        }
+                    } catch (error) {
+                        log.error(error)
                     }
                 },
             ),
