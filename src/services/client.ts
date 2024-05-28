@@ -115,7 +115,6 @@ export default class Client {
     }
 
     public async executeTransaction(transaction: TransactionType) {
-        await this.updatePortfolio()
         if (transaction.userId !== this.model.userId)
             throw new Error('Invalid user ID')
 
@@ -124,6 +123,7 @@ export default class Client {
                 this.modifyPortfolio(stock.symbol, stock.shares, stock.price, 0)
             })
         } else {
+            await this.updatePortfolio()
             const sign = transaction.type === 'buy' ? 1 : -1
             transaction.stocks.forEach((stock) => {
                 this.modifyPortfolio(
