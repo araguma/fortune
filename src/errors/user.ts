@@ -55,4 +55,8 @@ export default class UserError extends Error {
     public static insufficientBet(minimum: number): never {
         throw new UserError(`Minimum bet is ${minimum}`)
     }
+
+    public static exceedsMaxStocks(max: number): never {
+        throw new UserError(`Portfolio is capped at ${max} stocks`)
+    }
 }

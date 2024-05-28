@@ -17,6 +17,7 @@ const CLAIM_STOCKPILE_LIMIT = parseInt(
     getEnvironmentVariable('CLAIM_STOCKPILE_LIMIT'),
 )
 const FRACTION_DIGITS = parseInt(getEnvironmentVariable('FRACTION_DIGITS'))
+const MAX_STOCKS = parseInt(getEnvironmentVariable('MAX_STOCKS'))
 
 const epsilon = Math.pow(10, -(FRACTION_DIGITS + 1))
 
@@ -117,6 +118,13 @@ export default class Client {
     public async executeTransaction(transaction: TransactionType) {
         if (transaction.userId !== this.model.userId)
             throw new Error('Invalid user ID')
+
+        if (
+            (transaction.type === 'claim' || transaction.type === 'buy') &&
+            this.model.portfolio.size + transaction.stocks.length > MAX_STOCKS
+        ) {
+            UserError.exceedsMaxStocks(MAX_STOCKS)
+        }
 
         if (transaction.type === 'claim') {
             transaction.stocks.forEach((stock) => {
