@@ -69,11 +69,11 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
                     accumulator.value = accumulator.value + value
                     accumulator.delta = accumulator.delta + delta
                     accumulator.minDelta =
-                        price < accumulator.minDelta.delta
+                        delta < accumulator.minDelta.delta
                             ? { symbol: quote.symbol, delta: delta }
                             : accumulator.minDelta
                     accumulator.maxDelta =
-                        price > accumulator.maxDelta.delta
+                        delta > accumulator.maxDelta.delta
                             ? { symbol: quote.symbol, delta: delta }
                             : accumulator.maxDelta
 

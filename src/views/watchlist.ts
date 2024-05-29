@@ -43,11 +43,11 @@ export class WatchlistReply extends Reply<WatchlistReplyData> {
                     ].join(' '),
                 )
                 accumulator.minDelta =
-                    price < accumulator.minDelta.delta
+                    delta < accumulator.minDelta.delta
                         ? { symbol: quote.symbol, delta: delta }
                         : accumulator.minDelta
                 accumulator.maxDelta =
-                    price > accumulator.maxDelta.delta
+                    delta > accumulator.maxDelta.delta
                         ? { symbol: quote.symbol, delta: delta }
                         : accumulator.maxDelta
 
@@ -55,13 +55,13 @@ export class WatchlistReply extends Reply<WatchlistReplyData> {
             },
             {
                 description: Array<string>(),
-                maxDelta: {
-                    symbol: '',
-                    delta: -Infinity,
-                },
                 minDelta: {
                     symbol: '',
                     delta: Infinity,
+                },
+                maxDelta: {
+                    symbol: '',
+                    delta: -Infinity,
                 },
             },
         )
@@ -139,16 +139,18 @@ export class WatchlistReply extends Reply<WatchlistReplyData> {
         this.setColor(Color.Blue)
         this.setAuthor({ name: '---' })
         this.setTitle('Watchlist')
-        this.setDescription(pagination.getCurrent().join('\n') || '> *No stocks found*')
+        this.setDescription(
+            pagination.getCurrent().join('\n') || '> *No stocks found*',
+        )
         this.setFields(
-            {
-                name: 'Max Delta',
-                value: format.valueSymbol(maxDelta.delta, maxDelta.symbol),
-                inline: true,
-            },
             {
                 name: 'Min Delta',
                 value: format.valueSymbol(minDelta.delta, minDelta.symbol),
+                inline: true,
+            },
+            {
+                name: 'Max Delta',
+                value: format.valueSymbol(maxDelta.delta, maxDelta.symbol),
                 inline: true,
             },
             {
