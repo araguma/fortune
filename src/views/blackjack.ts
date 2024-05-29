@@ -25,7 +25,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
         blackjack,
         playerTotal,
         dealerTotal,
-        clientName,
+        dealerId,
         clientIcon,
     }: BlackjackReplyData) {
         this.setColor(
@@ -45,8 +45,8 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
         this.setDescription(
             [
                 [
-                    `> **${clientName}** ▸ ${playerTotal}`,
-                    `> ${blackjack.player
+                    `> <@${blackjack.userId}> ▸ **${playerTotal}**`,
+                    `> └─ ${blackjack.player
                         .map(
                             (card) =>
                                 `\`[${card.rank}${suitSymbols[card.suit]}]\``,
@@ -54,8 +54,8 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                         .join(' ')}`,
                 ].join('\n'),
                 [
-                    `> **Dealer** ▸ ${dealerTotal}`,
-                    `> ${blackjack.dealer
+                    `> <@${dealerId}> ▸ **${dealerTotal}**`,
+                    `> └─ ${blackjack.dealer
                         .map(
                             (card) =>
                                 `\`[${card.rank}${suitSymbols[card.suit]}]\``,
@@ -77,10 +77,16 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
             },
             {
                 name: 'Winner',
-                value:
-                    blackjack.winner === 'player'
-                        ? clientName
-                        : format.capitalize(blackjack.winner),
+                value: (() => {
+                    switch (blackjack.winner) {
+                        case 'player':
+                            return `<@${blackjack.userId}>`
+                        case 'dealer':
+                            return `<@${dealerId}>`
+                        case 'none':
+                            return 'None'
+                    }
+                })(),
                 inline: true,
             },
         )
@@ -134,6 +140,6 @@ export interface BlackjackReplyData {
     blackjack: BlackjackType
     playerTotal: number
     dealerTotal: number
-    clientName: string
     clientIcon: string
+    dealerId: string
 }

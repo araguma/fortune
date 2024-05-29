@@ -35,8 +35,8 @@ command.setChatInputCommandHandler(async (interaction) => {
         blackjack: blackjack.model,
         playerTotal: blackjack.getPlayerTotal(),
         dealerTotal: blackjack.getDealerTotal(),
-        clientName: user.displayName,
         clientIcon: user.displayAvatarURL(),
+        dealerId: discord.getUserId(),
     })
     await interaction.reply(reply)
 })
@@ -78,8 +78,8 @@ command.setButtonHandler(async (interaction) => {
         blackjack: blackjack.model,
         playerTotal: blackjack.getPlayerTotal(),
         dealerTotal: blackjack.getDealerTotal(),
-        clientName: user.displayName,
         clientIcon: user.displayAvatarURL(),
+        dealerId: discord.getUserId(),
     })
     await interaction.update(reply)
 })
