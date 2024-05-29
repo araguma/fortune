@@ -10,7 +10,7 @@ import { BlackjackReply } from '@/views/blackjack'
 const command = new Command()
     .setName('blackjack')
     .setDescription('Start a blackjack game')
-    .setGroup(Group.Game)
+    .setGroup(Group.Casino)
 
 command.addNumberOption((option) =>
     option.setName('bet').setDescription('Bet amount').setRequired(true),

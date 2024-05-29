@@ -11,5 +11,5 @@ export enum Group {
     Admin = 'admin',
     Trade = 'trade',
     Prediction = 'prediction',
-    Game = 'game',
+    Casino = 'casino',
 }
