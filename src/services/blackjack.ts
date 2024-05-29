@@ -57,12 +57,17 @@ export default class Blackjack {
         }
         const playerTotal = calculateTotal(this.model.player)
         const dealerTotal = calculateTotal(this.model.dealer)
-        if (dealerTotal > 21 || dealerTotal < playerTotal) {
+        if (dealerTotal === playerTotal) {
+            this.model.winner = 'none'
+            const refund = this.model.bet * (this.model.double ? 2 : 1)
+            client.balance += refund
+            self.balance -= refund
+        } else if (dealerTotal > 21 || dealerTotal < playerTotal) {
             this.model.winner = 'player'
             const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
             client.balance += cashout
             self.balance -= cashout
-        } else if (dealerTotal === 21 || dealerTotal >= playerTotal) {
+        } else if (dealerTotal === 21 || dealerTotal > playerTotal) {
             this.model.winner = 'dealer'
         }
     }

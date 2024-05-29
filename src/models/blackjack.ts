@@ -10,7 +10,7 @@ export const BlackjackSchema = new Schema({
     },
     winner: {
         type: String,
-        enum: ['tbd', 'player', 'dealer'],
+        enum: ['tbd', 'player', 'dealer', 'none'],
         default: 'tbd',
         required: true,
     },

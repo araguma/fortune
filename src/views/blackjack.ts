@@ -83,6 +83,8 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                             return `<@${blackjack.userId}>`
                         case 'dealer':
                             return `<@${dealerId}>`
+                        case 'none':
+                            return 'None'
                         case 'tbd':
                             return 'TBD'
                     }
