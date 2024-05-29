@@ -41,8 +41,14 @@ command.setChatInputCommandHandler(async (interaction) => {
 command.setButtonHandler(async (interaction) => {
     const tag = new Tag(interaction.customId)
     const blackjack = await Blackjack.findById(tag.getData('blackjackId', true))
-    const client = await Client.getClientByUserId(interaction.user.id)
-    const user = await discord.users.fetch(interaction.user.id)
+
+    if (interaction.user.id !== blackjack.model.userId) {
+        await interaction.deferUpdate()
+        return
+    }
+
+    const client = await Client.getClientByUserId(blackjack.model.userId)
+    const user = await discord.users.fetch(blackjack.model.userId)
 
     switch (tag.getAction(true)) {
         case 'hit': {
