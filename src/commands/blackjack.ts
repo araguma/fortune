@@ -22,11 +22,13 @@ command.setChatInputCommandHandler(async (interaction) => {
 
     const blackjack = Blackjack.create(interaction.user.id, bet)
     const client = await Client.getClientByUserId(interaction.user.id)
+    const self = await Client.getClientByUserId(discord.getUserId())
     const user = await discord.users.fetch(interaction.user.id)
 
-    blackjack.initialize(client.model)
+    blackjack.initialize(self.model, client.model)
     await blackjack.save()
     await client.save()
+    await self.save()
 
     const reply = new BlackjackReply({
         blackjackId: blackjack.getId(),
@@ -49,25 +51,27 @@ command.setButtonHandler(async (interaction) => {
     }
 
     const client = await Client.getClientByUserId(blackjack.model.userId)
+    const self = await Client.getClientByUserId(discord.getUserId())
     const user = await discord.users.fetch(blackjack.model.userId)
 
     switch (tag.getAction(true)) {
         case 'hit': {
-            blackjack.hit(client.model)
+            blackjack.hit(self.model, client.model)
             break
         }
         case 'stand': {
-            blackjack.stand(client.model)
+            blackjack.stand(self.model, client.model)
             break
         }
         case 'double': {
-            blackjack.double(client.model)
+            blackjack.double(self.model, client.model)
             break
         }
     }
 
     await blackjack.save()
     await client.save()
+    await self.save()
 
     const reply = new BlackjackReply({
         blackjackId: blackjack.getId(),

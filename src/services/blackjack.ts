@@ -27,27 +27,30 @@ export default class Blackjack {
         return new Blackjack(model)
     }
 
-    public initialize(client: ClientType) {
-        this.hit(client)
-        this.hit(client)
+    public initialize(self: ClientType, client: ClientType) {
+        this.hit(self, client)
+        this.hit(self, client)
         this.model.dealer.push(random.card())
         client.balance -= this.model.bet
+        self.balance += this.model.bet
         if (client.balance < 0) UserError.insufficientBalance()
     }
 
-    public hit(client: ClientType) {
+    public hit(self: ClientType, client: ClientType) {
         if (this.model.winner !== 'none') return
         this.model.player.push(random.card())
         const playerTotal = calculateTotal(this.model.player)
         if (playerTotal === 21) {
             this.model.winner = 'player'
-            client.balance += this.model.bet * (this.model.double ? 2 : 1) * 2
+            const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
+            client.balance += cashout
+            self.balance -= cashout
         } else if (playerTotal > 21) {
             this.model.winner = 'dealer'
         }
     }
 
-    public stand(client: ClientType) {
+    public stand(self: ClientType, client: ClientType) {
         if (this.model.winner !== 'none') return
         while (calculateTotal(this.model.dealer) < 17) {
             this.model.dealer.push(random.card())
@@ -56,19 +59,22 @@ export default class Blackjack {
         const dealerTotal = calculateTotal(this.model.dealer)
         if (dealerTotal > 21 || dealerTotal < playerTotal) {
             this.model.winner = 'player'
-            client.balance += this.model.bet * (this.model.double ? 2 : 1) * 2
+            const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
+            client.balance += cashout
+            self.balance -= cashout
         } else if (dealerTotal === 21 || dealerTotal >= playerTotal) {
             this.model.winner = 'dealer'
         }
     }
 
-    public double(client: ClientType) {
+    public double(self: ClientType, client: ClientType) {
         if (this.model.double) return
         this.model.double = true
         client.balance -= this.model.bet
+        self.balance += this.model.bet
         if (client.balance < 0) UserError.insufficientBalance()
-        this.hit(client)
-        this.stand(client)
+        this.hit(self, client)
+        this.stand(self, client)
     }
 
     public getPlayerTotal() {
