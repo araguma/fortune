@@ -83,8 +83,8 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                             return `<@${blackjack.userId}>`
                         case 'dealer':
                             return `<@${dealerId}>`
-                        case 'none':
-                            return 'None'
+                        case 'tbd':
+                            return 'TBD'
                     }
                 })(),
                 inline: true,
@@ -96,7 +96,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
             iconURL: clientIcon,
         })
 
-        if (blackjack.winner === 'none') {
+        if (blackjack.winner === 'tbd') {
             const row = new ActionRowBuilder<ButtonBuilder>()
             row.addComponents(
                 new ButtonBuilder()

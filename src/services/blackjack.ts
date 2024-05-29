@@ -37,7 +37,7 @@ export default class Blackjack {
     }
 
     public hit(self: ClientType, client: ClientType) {
-        if (this.model.winner !== 'none') return
+        if (this.model.winner !== 'tbd') return
         this.model.player.push(random.card())
         const playerTotal = calculateTotal(this.model.player)
         if (playerTotal === 21) {
@@ -51,7 +51,7 @@ export default class Blackjack {
     }
 
     public stand(self: ClientType, client: ClientType) {
-        if (this.model.winner !== 'none') return
+        if (this.model.winner !== 'tbd') return
         while (calculateTotal(this.model.dealer) < 17) {
             this.model.dealer.push(random.card())
         }
