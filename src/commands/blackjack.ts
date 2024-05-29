@@ -1,4 +1,5 @@
 import { Group } from '@/enums'
+import UserError from '@/errors/user'
 import Command from '@/libs/command'
 import Tag from '@/libs/tag'
 import Blackjack from '@/services/blackjack'
@@ -16,10 +17,10 @@ command.addNumberOption((option) =>
 )
 
 command.setChatInputCommandHandler(async (interaction) => {
-    const blackjack = Blackjack.create(
-        interaction.user.id,
-        interaction.options.getNumber('bet', true),
-    )
+    const bet = interaction.options.getNumber('bet', true)
+    if (bet <= 0) UserError.invalid('bet', bet)
+
+    const blackjack = Blackjack.create(interaction.user.id, bet)
     const client = await Client.getClientByUserId(interaction.user.id)
     const user = await discord.users.fetch(interaction.user.id)
 
