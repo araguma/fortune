@@ -28,20 +28,14 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
         dealerId,
         clientIcon,
     }: BlackjackReplyData) {
+        const { delta } = blackjack
+
         this.setColor(
-            (() => {
-                switch (blackjack.winner) {
-                    case 'player':
-                        return Color.Green
-                    case 'dealer':
-                        return Color.Red
-                    default:
-                        return Color.Yellow
-                }
-            })(),
+            delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow,
         )
         this.setAuthor({ name: '---' })
         this.setTitle('Blackjack')
+        this.setURL('https://en.wikipedia.org/wiki/Blackjack')
         this.setDescription(
             [
                 [
@@ -67,7 +61,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
         this.setFields(
             {
                 name: 'Bet',
-                value: format.value(blackjack.bet * (blackjack.double ? 2 : 1)),
+                value: format.value(blackjack.bet),
                 inline: true,
             },
             {
@@ -76,19 +70,8 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                 inline: true,
             },
             {
-                name: 'Winner',
-                value: (() => {
-                    switch (blackjack.winner) {
-                        case 'player':
-                            return `<@${blackjack.userId}>`
-                        case 'dealer':
-                            return `<@${dealerId}>`
-                        case 'none':
-                            return 'None'
-                        case 'tbd':
-                            return 'TBD'
-                    }
-                })(),
+                name: 'Delta',
+                value: format.value(delta),
                 inline: true,
             },
         )

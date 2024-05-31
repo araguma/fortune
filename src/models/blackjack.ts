@@ -23,6 +23,11 @@ export const BlackjackSchema = new Schema({
         type: Number,
         required: true,
     },
+    delta: {
+        type: Number,
+        default: 0,
+        required: true,
+    },
     playerCards: {
         type: [CardSchema],
         default: [],

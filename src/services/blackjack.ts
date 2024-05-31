@@ -31,9 +31,7 @@ export default class Blackjack {
         this.hit(self, client)
         this.hit(self, client)
         this.model.dealerCards.push(random.card())
-        client.balance -= this.model.bet
-        self.balance += this.model.bet
-        if (client.balance < 0) UserError.insufficientBalance()
+        this.modifyDelta(self, client, -this.model.bet)
     }
 
     public hit(self: ClientType, client: ClientType) {
@@ -42,9 +40,11 @@ export default class Blackjack {
         const playerTotal = calculateTotal(this.model.playerCards)
         if (playerTotal === 21) {
             this.model.winner = 'player'
-            const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
-            client.balance += cashout
-            self.balance -= cashout
+            this.modifyDelta(
+                self,
+                client,
+                this.model.bet * (this.model.double ? 2 : 1) * 2,
+            )
         } else if (playerTotal > 21) {
             this.model.winner = 'dealer'
         }
@@ -59,14 +59,18 @@ export default class Blackjack {
         const dealerTotal = calculateTotal(this.model.dealerCards)
         if (dealerTotal === playerTotal) {
             this.model.winner = 'none'
-            const refund = this.model.bet * (this.model.double ? 2 : 1)
-            client.balance += refund
-            self.balance -= refund
+            this.modifyDelta(
+                self,
+                client,
+                this.model.bet * (this.model.double ? 2 : 1),
+            )
         } else if (dealerTotal > 21 || dealerTotal < playerTotal) {
             this.model.winner = 'player'
-            const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
-            client.balance += cashout
-            self.balance -= cashout
+            this.modifyDelta(
+                self,
+                client,
+                this.model.bet * (this.model.double ? 2 : 1) * 2,
+            )
         } else if (dealerTotal === 21 || dealerTotal > playerTotal) {
             this.model.winner = 'dealer'
         }
@@ -75,9 +79,7 @@ export default class Blackjack {
     public double(self: ClientType, client: ClientType) {
         if (this.model.winner !== 'tbd' || this.model.double) return
         this.model.double = true
-        client.balance -= this.model.bet
-        self.balance += this.model.bet
-        if (client.balance < 0) UserError.insufficientBalance()
+        this.modifyDelta(self, client, -this.model.bet)
         this.hit(self, client)
         this.stand(self, client)
     }
@@ -88,6 +90,13 @@ export default class Blackjack {
 
     public getDealerTotal() {
         return calculateTotal(this.model.dealerCards)
+    }
+
+    public modifyDelta(self: ClientType, client: ClientType, delta: number) {
+        this.model.delta += delta
+        client.balance += delta
+        self.balance -= delta
+        if (client.balance < 0) UserError.insufficientBalance()
     }
 
     public getId() {
