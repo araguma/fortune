@@ -73,7 +73,7 @@ export default class Blackjack {
     }
 
     public double(self: ClientType, client: ClientType) {
-        if (this.model.double) return
+        if (this.model.winner !== 'tbd' || this.model.double) return
         this.model.double = true
         client.balance -= this.model.bet
         self.balance += this.model.bet
