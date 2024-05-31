@@ -116,11 +116,21 @@ const rankValues: Record<(typeof ranks)[number], number> = {
 }
 
 function calculateTotal(cards: CardType[]) {
-    return cards
-        .map((card) => rankValues[card.rank])
-        .sort((a, b) => b - a)
-        .reduce((acc, value) => {
-            if (value === 1 && acc + 11 <= 21) return acc + 11
-            return acc + value
-        }, 0)
+    const { aces, min } = cards.reduce(
+        (accumulator, { rank }) => {
+            if (rank === 'A') {
+                accumulator.aces++
+            }
+            accumulator.min += rankValues[rank]
+            return accumulator
+        },
+        { aces: 0, min: 0 },
+    )
+    let total = min
+    for (let i = 0; i < aces; i++) {
+        if (total + 10 <= 21) {
+            total += 10
+        }
+    }
+    return total
 }
