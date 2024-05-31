@@ -98,10 +98,10 @@ function parseQuote(quote: YahooQuote): Quote {
                 case 'REGULAR': {
                     return quote.regularMarketPrice
                 }
-                case 'PREPRE':
                 case 'PRE': {
                     return quote.preMarketPrice
                 }
+                case 'PREPRE':
                 case 'POSTPOST':
                 case 'POST':
                 case 'CLOSED': {
