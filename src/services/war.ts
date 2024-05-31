@@ -60,7 +60,7 @@ export default class War {
         const dealerRank = parseRank(dealerCard.rank)
         if (playerRank > dealerRank) {
             this.model.winner = 'player'
-            this.modifyDelta(self, client, this.model.bet * 2)
+            this.modifyDelta(self, client, this.model.bet * 3)
         } else if (playerRank < dealerRank) {
             this.model.winner = 'dealer'
         } else {
