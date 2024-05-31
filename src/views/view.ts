@@ -107,7 +107,7 @@ export class ViewReply extends Reply<ViewReplyData> {
         this.setAuthor({ name: '---' })
         this.setColor(color)
         this.setTitle(format.stockName(quote.shortName, quote.symbol))
-        this.setURL(`https://finance.yahoo.com/quote/${quote.symbol}`)
+        this.setURL(`https://finance.yahoo.com/quote/${quote.symbol}/`)
         this.setDescription(
             [
                 '#',
