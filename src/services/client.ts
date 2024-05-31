@@ -261,6 +261,40 @@ export default class Client {
         return transaction
     }
 
+    public async sellIds(ids: number[]) {
+        const transaction = Transaction.create(this.model.userId, 'sell')
+        const stocks = Array.from(this.model.portfolio.keys())
+        await Promise.all(
+            ids.map(async (id) => {
+                const symbol = codec.decode(stocks[stocks.length - id] ?? '')
+                if (!symbol) UserError.invalid('id', id)
+                const price = await yahoo.getPrice(symbol)
+                const stock = this.model.portfolio.get(codec.encode(symbol))
+                transaction.addStock(symbol, stock?.shares ?? 0, price)
+            }),
+        )
+        await this.executeTransaction(transaction.model)
+        return transaction
+    }
+
+    public async sellRange(start: number, end: number) {
+        const transaction = Transaction.create(this.model.userId, 'sell')
+        const stocks = Array.from(this.model.portfolio.keys()).slice(
+            -end,
+            -start + 1,
+        )
+        await Promise.all(
+            stocks.map(async (symbol) => {
+                symbol = codec.decode(symbol)
+                const price = await yahoo.getPrice(symbol)
+                const stock = this.model.portfolio.get(codec.encode(symbol))
+                transaction.addStock(symbol, stock?.shares ?? 0, price)
+            }),
+        )
+        await this.executeTransaction(transaction.model)
+        return transaction
+    }
+
     public pay(target: ClientType, amount: number) {
         if (this.model.balance < amount) UserError.insufficientBalance()
         this.model.balance -= amount

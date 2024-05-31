@@ -81,6 +81,33 @@ command.addSubcommand(
         ),
 )
 
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('ids')
+        .setDescription('Sell multiple stocks')
+        .addStringOption((option) =>
+            option
+                .setName('ids')
+                .setDescription('IDs seperated by space')
+                .setRequired(true),
+        ),
+)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
+        .setName('range')
+        .setDescription('Sell stocks in an ID range (inclusive)')
+        .addNumberOption((option) =>
+            option
+                .setName('start')
+                .setDescription('Start ID')
+                .setRequired(true),
+        )
+        .addNumberOption((option) =>
+            option.setName('end').setDescription('End ID').setRequired(true),
+        ),
+)
+
 command.setChatInputCommandHandler(async (interaction) => {
     const client = await Client.getClientByUserId(interaction.user.id)
 
@@ -110,6 +137,19 @@ command.setChatInputCommandHandler(async (interaction) => {
                 const count = interaction.options.getInteger('count') ?? 1
                 if (count <= 0) UserError.invalid('count', count)
                 return client.sellLast(count)
+            }
+            case 'ids': {
+                const ids = interaction.options
+                    .getString('ids', true)
+                    .split(' ')
+                    .map(Number)
+                return client.sellIds(ids)
+            }
+            case 'range': {
+                const start = interaction.options.getNumber('start', true)
+                const end = interaction.options.getNumber('end', true)
+                if (start > end) UserError.invalid('range', 'start > end')
+                return client.sellRange(start, end)
             }
             default: {
                 UserError.invalid('subcommand', subcommand)
