@@ -22,7 +22,7 @@ export class WhitelistReply extends Reply<WhitelistReplyData> {
                         `> └─ ${groups.map((group) => `\`${group}\``).join(' ')}`,
                     ].join('\n')
                 })
-                .join('\n\n'),
+                .join('\n\n') || '> *No channels found*',
         )
         this.setFooter({
             text: serverId.toUpperCase(),

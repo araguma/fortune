@@ -64,6 +64,12 @@ command.addSubcommand(
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
+        .setName('clear')
+        .setDescription('Clear whitelist'),
+)
+
+command.addSubcommand(
+    new SlashCommandSubcommandBuilder()
         .setName('show')
         .setDescription('Display whitelist'),
 )
@@ -74,17 +80,22 @@ command.setChatInputCommandHandler(async (interaction) => {
     const subcommand = interaction.options.getSubcommand()
     const server = await Server.getServerByGuildId(interaction.guildId)
 
-    if (subcommand === 'add' || subcommand === 'remove') {
-        const channel = interaction.options.getChannel('channel', true)
-        const group = interaction.options.getString('group', true) as Group
-
+    if (subcommand !== 'show') {
         switch (subcommand) {
-            case 'add': {
-                server.addToWhitelist(channel.id, group)
+            case 'add':
+            case 'remove': {
+                const channel = interaction.options.getChannel('channel', true)
+                const group = interaction.options.getString(
+                    'group',
+                    true,
+                ) as Group
+                subcommand === 'add'
+                    ? server.addToWhitelist(channel.id, group)
+                    : server.removeFromWhitelist(channel.id, group)
                 break
             }
-            case 'remove': {
-                server.removeFromWhitelist(channel.id, group)
+            case 'clear': {
+                server.clearWhitelist()
                 break
             }
         }

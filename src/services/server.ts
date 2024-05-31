@@ -39,6 +39,10 @@ export default class Server {
         }
     }
 
+    public clearWhitelist() {
+        this.model.whitelists.clear()
+    }
+
     public getWhitelist(channelId: string) {
         return this.model.whitelists.get(channelId) ?? []
     }
