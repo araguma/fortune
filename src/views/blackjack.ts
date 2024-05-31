@@ -45,7 +45,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
         this.setDescription(
             [
                 [
-                    `> <@${blackjack.userId}> ▸ **${playerTotal}**`,
+                    `> <@${blackjack.userId}> ▸ **${playerTotal}**${generateHint(playerTotal)}`,
                     `> └─ ${blackjack.player
                         .map(
                             (card) =>
@@ -54,7 +54,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                         .join(' ')}`,
                 ].join('\n'),
                 [
-                    `> <@${dealerId}> ▸ **${dealerTotal}**`,
+                    `> <@${dealerId}> ▸ **${dealerTotal}**${generateHint(dealerTotal)}`,
                     `> └─ ${blackjack.dealer
                         .map(
                             (card) =>
@@ -135,6 +135,12 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
             this.setComponents([row])
         }
     }
+}
+
+function generateHint(total: number) {
+    if (total === 21) return ' | **Blackjack**'
+    if (total > 21) return ' | **Bust**'
+    return ''
 }
 
 export interface BlackjackReplyData {
