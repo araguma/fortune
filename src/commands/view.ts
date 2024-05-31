@@ -26,8 +26,7 @@ command
                     name: timeframe,
                     value: timeframe,
                 })),
-            )
-            .setRequired(true),
+            ),
     )
     .addUserOption((option) =>
         option.setName('as').setDescription('View as user').setRequired(false),
@@ -35,10 +34,8 @@ command
 
 command.setChatInputCommandHandler(async (interaction) => {
     const symbol = interaction.options.getString('symbol', true)
-    const timeframe = interaction.options.getString(
-        'timeframe',
-        true,
-    ) as keyof typeof timeframes
+    const timeframe = (interaction.options.getString('timeframe') ??
+        '1D') as keyof typeof timeframes
     const userId = interaction.options.getUser('as')?.id ?? interaction.user.id
 
     const reply = await generateViewReply(symbol, timeframe, userId)
