@@ -23,12 +23,12 @@ export const BlackjackSchema = new Schema({
         type: Number,
         required: true,
     },
-    player: {
+    playerCards: {
         type: [CardSchema],
         default: [],
         required: true,
     },
-    dealer: {
+    dealerCards: {
         type: [CardSchema],
         default: [],
         required: true,

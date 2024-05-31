@@ -30,7 +30,7 @@ export default class Blackjack {
     public initialize(self: ClientType, client: ClientType) {
         this.hit(self, client)
         this.hit(self, client)
-        this.model.dealer.push(random.card())
+        this.model.dealerCards.push(random.card())
         client.balance -= this.model.bet
         self.balance += this.model.bet
         if (client.balance < 0) UserError.insufficientBalance()
@@ -38,8 +38,8 @@ export default class Blackjack {
 
     public hit(self: ClientType, client: ClientType) {
         if (this.model.winner !== 'tbd') return
-        this.model.player.push(random.card())
-        const playerTotal = calculateTotal(this.model.player)
+        this.model.playerCards.push(random.card())
+        const playerTotal = calculateTotal(this.model.playerCards)
         if (playerTotal === 21) {
             this.model.winner = 'player'
             const cashout = this.model.bet * (this.model.double ? 2 : 1) * 2
@@ -52,11 +52,11 @@ export default class Blackjack {
 
     public stand(self: ClientType, client: ClientType) {
         if (this.model.winner !== 'tbd') return
-        while (calculateTotal(this.model.dealer) < 17) {
-            this.model.dealer.push(random.card())
+        while (calculateTotal(this.model.dealerCards) < 17) {
+            this.model.dealerCards.push(random.card())
         }
-        const playerTotal = calculateTotal(this.model.player)
-        const dealerTotal = calculateTotal(this.model.dealer)
+        const playerTotal = calculateTotal(this.model.playerCards)
+        const dealerTotal = calculateTotal(this.model.dealerCards)
         if (dealerTotal === playerTotal) {
             this.model.winner = 'none'
             const refund = this.model.bet * (this.model.double ? 2 : 1)
@@ -83,11 +83,11 @@ export default class Blackjack {
     }
 
     public getPlayerTotal() {
-        return calculateTotal(this.model.player)
+        return calculateTotal(this.model.playerCards)
     }
 
     public getDealerTotal() {
-        return calculateTotal(this.model.dealer)
+        return calculateTotal(this.model.dealerCards)
     }
 
     public getId() {

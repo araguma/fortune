@@ -46,7 +46,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
             [
                 [
                     `> <@${blackjack.userId}> ▸ **${playerTotal}**${generateHint(playerTotal)}`,
-                    `> └─ ${blackjack.player
+                    `> └─ ${blackjack.playerCards
                         .map(
                             (card) =>
                                 `\`[${card.rank}${suitSymbols[card.suit]}]\``,
@@ -55,7 +55,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                 ].join('\n'),
                 [
                     `> <@${dealerId}> ▸ **${dealerTotal}**${generateHint(dealerTotal)}`,
-                    `> └─ ${blackjack.dealer
+                    `> └─ ${blackjack.dealerCards
                         .map(
                             (card) =>
                                 `\`[${card.rank}${suitSymbols[card.suit]}]\``,
