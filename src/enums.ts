@@ -5,6 +5,7 @@ export enum Color {
     Red = 0xe74c3c,
     Purple = 0x9b59b6,
     Black = 0x000000,
+    White = 0xffffff,
 }
 
 export enum Group {
