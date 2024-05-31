@@ -57,9 +57,9 @@ export default class Client {
             lastSplit: new Date(),
         }
 
-        if (-shares > 0 && previous.shares < -shares)
+        if (shares < 0 && Math.abs(shares) > previous.shares)
             UserError.insufficientShares(symbol)
-        if (cost > 0 && this.model.balance < cost)
+        if (-cost < 0 && Math.abs(cost) > this.model.balance)
             UserError.insufficientBalance()
 
         const current = {

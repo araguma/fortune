@@ -93,10 +93,11 @@ export default class Blackjack {
     }
 
     public modifyDelta(self: ClientType, client: ClientType, delta: number) {
+        if (delta < 0 && Math.abs(delta) > client.balance)
+            UserError.insufficientBalance()
         this.model.delta += delta
         client.balance += delta
         self.balance -= delta
-        if (client.balance < 0) UserError.insufficientBalance()
     }
 
     public getId() {
