@@ -1,4 +1,5 @@
 import { Group } from '@/enums'
+import UserError from '@/errors/user'
 import Command from '@/libs/command'
 import Tag from '@/libs/tag'
 import Client from '@/services/client'
@@ -22,6 +23,9 @@ command.addNumberOption((option) =>
 command.setChatInputCommandHandler(async (interaction) => {
     const bet = interaction.options.getNumber('bet', true)
     const tieBet = interaction.options.getNumber('tie-bet') ?? 0
+
+    if (bet <= 0) UserError.invalid('bet', bet)
+    if (tieBet < 0) UserError.invalid('tie-bet', tieBet)
 
     const war = War.create(interaction.user.id, bet, tieBet)
     const client = await Client.getClientByUserId(interaction.user.id)
