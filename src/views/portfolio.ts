@@ -1,9 +1,4 @@
-import {
-    StringSelectMenuBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-} from 'discord.js'
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js'
 
 import { Color } from '@/enums'
 import divider from '@/libs/canvas/divider'
@@ -16,9 +11,7 @@ import Tag from '@/libs/tag'
 import { ClientType } from '@/models/client'
 import { Quote } from '@/services/yahoo'
 
-const DESCRIPTION_LINE_LIMIT = parseInt(
-    getEnvironmentVariable('DESCRIPTION_LINE_LIMIT'),
-)
+const DESCRIPTION_LINE_LIMIT = parseInt(getEnvironmentVariable('DESCRIPTION_LINE_LIMIT'))
 
 export class PortfolioReply extends Reply<PortfolioReplyData> {
     public constructor(data: PortfolioReplyData) {
@@ -26,107 +19,75 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
         this.update(data)
     }
 
-    public override update({
-        quotes,
-        clientId,
-        client,
-        userIcon,
-        page,
-    }: PortfolioReplyData) {
+    public override update({ quotes, clientId, client, userIcon, page }: PortfolioReplyData) {
         const entries = Array.from(client.portfolio.entries())
-        const padding = Math.min(
-            entries.length.toString().length,
-            DESCRIPTION_LINE_LIMIT.toString().length,
-        )
-        const { symbols, description, value, delta, minDelta, maxDelta } =
-            entries.reduce(
-                (accumulator, [symbol, stock], index) => {
-                    symbol = codec.decode(symbol)
-                    const quote = quotes[symbol]
-                    if (!quote) throw new Error(`No quote found for ${symbol}`)
+        const padding = Math.min(entries.length.toString().length, DESCRIPTION_LINE_LIMIT.toString().length)
+        const { symbols, description, value, delta, minDelta, maxDelta } = entries.reduce(
+            (accumulator, [symbol, stock], index) => {
+                symbol = codec.decode(symbol)
+                const quote = quotes[symbol]
+                if (!quote) throw new Error(`No quote found for ${symbol}`)
 
-                    const price = quote.price || NaN
-                    const open = quote.regularMarketOpen || NaN
-                    const value = stock.shares * price
-                    const delta = stock.shares * (price - open)
+                const price = quote.price || NaN
+                const open = quote.regularMarketOpen || NaN
+                const value = stock.shares * price
+                const delta = stock.shares * (price - open)
 
-                    const number = client.portfolio.size - index
-                    const sign = delta >= 0 ? '▴' : '▾'
-                    const description = [
-                        `\`${number.toString().padStart(padding)}\``,
-                        sign,
-                        format.symbol(symbol),
-                        format.shares(stock.shares),
-                        '⋅',
-                        format.value(price),
-                        '▸',
-                        format.value(value),
-                        `(${format.value(delta)})`,
-                    ].join(' ')
+                const number = client.portfolio.size - index
+                const sign = delta >= 0 ? '▴' : '▾'
+                const description = [
+                    `\`${number.toString().padStart(padding)}\``,
+                    sign,
+                    format.symbol(symbol),
+                    format.shares(stock.shares),
+                    '⋅',
+                    format.value(price),
+                    '▸',
+                    format.value(value),
+                    `(${format.value(delta)})`,
+                ].join(' ')
 
-                    accumulator.symbols.push(symbol)
-                    accumulator.description.push(description)
-                    accumulator.value = accumulator.value + value
-                    accumulator.delta = accumulator.delta + delta
-                    accumulator.minDelta =
-                        delta < accumulator.minDelta.delta
-                            ? { symbol: quote.symbol, delta: delta }
-                            : accumulator.minDelta
-                    accumulator.maxDelta =
-                        delta > accumulator.maxDelta.delta
-                            ? { symbol: quote.symbol, delta: delta }
-                            : accumulator.maxDelta
+                accumulator.symbols.push(symbol)
+                accumulator.description.push(description)
+                accumulator.value = accumulator.value + value
+                accumulator.delta = accumulator.delta + delta
+                accumulator.minDelta =
+                    delta < accumulator.minDelta.delta ? { symbol: quote.symbol, delta: delta } : accumulator.minDelta
+                accumulator.maxDelta =
+                    delta > accumulator.maxDelta.delta ? { symbol: quote.symbol, delta: delta } : accumulator.maxDelta
 
-                    return accumulator
+                return accumulator
+            },
+            {
+                symbols: Array<string>(),
+                description: Array<string>(),
+                value: 0,
+                delta: 0,
+                minDelta: {
+                    symbol: '',
+                    delta: Infinity,
                 },
-                {
-                    symbols: Array<string>(),
-                    description: Array<string>(),
-                    value: 0,
-                    delta: 0,
-                    minDelta: {
-                        symbol: '',
-                        delta: Infinity,
-                    },
-                    maxDelta: {
-                        symbol: '',
-                        delta: -Infinity,
-                    },
+                maxDelta: {
+                    symbol: '',
+                    delta: -Infinity,
                 },
-            )
-
-        const pagination = new Pagination(
-            description,
-            DESCRIPTION_LINE_LIMIT,
-            true,
+            },
         )
+
+        const pagination = new Pagination(description, DESCRIPTION_LINE_LIMIT, true)
         pagination.setPage(page)
 
         const viewSelect = new StringSelectMenuBuilder()
-            .setCustomId(
-                new Tag()
-                    .setCommand('portfolio')
-                    .setAction('view')
-                    .setData('clientId', clientId)
-                    .toCustomId(),
-            )
+            .setCustomId(new Tag().setCommand('portfolio').setAction('view').setData('clientId', clientId).toCustomId())
             .setPlaceholder('View symbol')
             .addOptions(
-                symbols
-                    .slice(pagination.getStart(), pagination.getEnd())
-                    .map((symbol) => ({
-                        label: symbol,
-                        value: symbol,
-                    })),
+                symbols.slice(pagination.getStart(), pagination.getEnd()).map((symbol) => ({
+                    label: symbol,
+                    value: symbol,
+                })),
             )
         const pageSelect = new StringSelectMenuBuilder()
-            .setCustomId(
-                new Tag()
-                    .setCommand('portfolio')
-                    .setAction('page')
-                    .setData('clientId', clientId)
-                    .toCustomId(),
-            )
+            .setCustomId(new Tag().setCommand('portfolio').setAction('page').setData('clientId', clientId).toCustomId())
             .setPlaceholder('Select page')
             .addOptions(
                 Array(pagination.getPages())
@@ -138,29 +99,15 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
             )
         const updateButton = new ButtonBuilder()
             .setCustomId(
-                new Tag()
-                    .setCommand('portfolio')
-                    .setAction('update')
-                    .setData('clientId', clientId)
-                    .toCustomId(),
+                new Tag().setCommand('portfolio').setAction('update').setData('clientId', clientId).toCustomId(),
             )
             .setLabel('Update')
             .setStyle(ButtonStyle.Secondary)
-        const row1 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                viewSelect,
-            )
-        const row2 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                pageSelect,
-            )
-        const row3 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            updateButton,
-        )
+        const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(viewSelect)
+        const row2 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(pageSelect)
+        const row3 = new ActionRowBuilder<ButtonBuilder>().addComponents(updateButton)
 
-        const rows: ActionRowBuilder<
-            StringSelectMenuBuilder | ButtonBuilder
-        >[] = []
+        const rows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[] = []
         if (pagination.getLength() >= 1) rows.push(row1)
         if (pagination.getPages() > 1) rows.push(row2)
         rows.push(row3)
@@ -168,12 +115,8 @@ export class PortfolioReply extends Reply<PortfolioReplyData> {
         this.setAuthor({ name: '---' })
         this.setTitle('Portfolio')
         this.setCanvas(divider())
-        this.setColor(
-            delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow,
-        )
-        this.setDescription(
-            pagination.getCurrent().join('\n') || '> *No stocks found*',
-        )
+        this.setColor(delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow)
+        this.setDescription(pagination.getCurrent().join('\n') || '> *No stocks found*')
         this.setFields(
             {
                 name: 'Value',

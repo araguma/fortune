@@ -32,13 +32,7 @@ export class Alpaca {
         return response
     }
 
-    public async getNews(
-        symbols: string[],
-        start: Date,
-        end: Date,
-        sort: 'asc' | 'desc',
-        limit: number,
-    ) {
+    public async getNews(symbols: string[], start: Date, end: Date, sort: 'asc' | 'desc', limit: number) {
         const url = new URL(`${baseURL}/v1beta1/news`)
         url.searchParams.append('symbols', symbols.join(','))
         url.searchParams.append('start', start.toISOString())
@@ -52,10 +46,7 @@ export class Alpaca {
     }
 }
 
-const alpaca = new Alpaca(
-    getEnvironmentVariable('ALPACA_KEY'),
-    getEnvironmentVariable('ALPACA_SECRET'),
-)
+const alpaca = new Alpaca(getEnvironmentVariable('ALPACA_KEY'), getEnvironmentVariable('ALPACA_SECRET'))
 
 export default alpaca
 

@@ -1,11 +1,4 @@
-import {
-    Client,
-    ClientOptions,
-    Events,
-    GatewayIntentBits,
-    Interaction,
-    Routes,
-} from 'discord.js'
+import { Client, ClientOptions, Events, GatewayIntentBits, Interaction, Routes } from 'discord.js'
 
 import excuses from '@/data/excuses'
 import UserError from '@/errors/user'
@@ -36,17 +29,10 @@ export class Discord extends Client {
 
     public async handleInteraction(interaction: Interaction) {
         const commandName = (() => {
-            if (
-                interaction.isChatInputCommand() ||
-                interaction.isAutocomplete()
-            ) {
+            if (interaction.isChatInputCommand() || interaction.isAutocomplete()) {
                 return interaction.commandName
             }
-            if (
-                interaction.isButton() ||
-                interaction.isStringSelectMenu() ||
-                interaction.isModalSubmit()
-            ) {
+            if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
                 const tag = new Tag(interaction.customId)
                 return tag.getCommand(true)
             }
@@ -58,10 +44,7 @@ export class Discord extends Client {
             if (!(error instanceof UserError)) log.error(error)
             if (!interaction.isRepliable()) return
             const reply = new ErrorReply({
-                message:
-                    error instanceof UserError
-                        ? error.message
-                        : random.sample(excuses),
+                message: error instanceof UserError ? error.message : random.sample(excuses),
             })
             void interaction.reply(reply).catch(log.error)
         })
@@ -77,9 +60,7 @@ export class Discord extends Client {
 
     public async registerCommands() {
         if (!this.user) throw new Error('No user found')
-        const commands = Array.from(this.commands.values()).map((command) =>
-            command.toJSON(),
-        )
+        const commands = Array.from(this.commands.values()).map((command) => command.toJSON())
         await this.rest.put(Routes.applicationCommands(this.user.id), {
             body: commands,
         })

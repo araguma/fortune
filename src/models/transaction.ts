@@ -39,9 +39,6 @@ export const TransactionSchema = new Schema({
     },
 })
 
-export const TransactionModel = database.connection.model(
-    'transaction',
-    TransactionSchema,
-)
+export const TransactionModel = database.connection.model('transaction', TransactionSchema)
 
 export type TransactionType = InferSchemaType<typeof TransactionSchema>

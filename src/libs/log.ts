@@ -28,19 +28,13 @@ function debug(...messages: unknown[]) {
 }
 
 let lastFilename = ''
-function base(
-    background: ChalkInstance,
-    foreground: ChalkInstance,
-    ...messages: unknown[]
-) {
+function base(background: ChalkInstance, foreground: ChalkInstance, ...messages: unknown[]) {
     const filename = basename(getCaller(3) ?? 'unknown', '.ts')
     const abbreviation = format.abbreviation(filename)
     const date = new Date().toISOString()
     if (filename !== lastFilename) console.log()
     lastFilename = filename
-    process.stdout.write(
-        `${background.black.bold(` ${abbreviation} `)}${foreground(` > [${date}]`)} `,
-    )
+    process.stdout.write(`${background.black.bold(` ${abbreviation} `)}${foreground(` > [${date}]`)} `)
     console.log(...messages)
 }
 

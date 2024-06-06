@@ -10,10 +10,7 @@ import { ActivesReply } from '@/views/actives'
 
 const FIELD_LINE_LIMIT = parseInt(getEnvironmentVariable('FIELD_LINE_LIMIT'))
 
-const command = new Command()
-    .setName('actives')
-    .setDescription('List active stocks')
-    .setGroup(Group.Trade)
+const command = new Command().setName('actives').setDescription('List active stocks').setGroup(Group.Trade)
 
 command.addStringOption((option) =>
     option

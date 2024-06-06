@@ -17,10 +17,7 @@ export class WhitelistReply extends Reply<WhitelistReplyData> {
         this.setDescription(
             Array.from(whitelists.entries())
                 .map(([channelId, groups]) => {
-                    return [
-                        `> <#${channelId}>`,
-                        `> └─ ${groups.map((group) => `\`${group}\``).join(' ')}`,
-                    ].join('\n')
+                    return [`> <#${channelId}>`, `> └─ ${groups.map((group) => `\`${group}\``).join(' ')}`].join('\n')
                 })
                 .join('\n\n') || '> *No channels found*',
         )

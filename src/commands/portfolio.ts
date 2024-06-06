@@ -7,18 +7,12 @@ import { generateViewReply } from '@/libs/view'
 import Client from '@/services/client'
 import discord from '@/services/discord'
 
-const command = new Command()
-    .setName('portfolio')
-    .setDescription('Display portfolio')
-    .setGroup(Group.Trade)
+const command = new Command().setName('portfolio').setDescription('Display portfolio').setGroup(Group.Trade)
 
-command.addUserOption((option) =>
-    option.setName('user').setDescription('Target user').setRequired(false),
-)
+command.addUserOption((option) => option.setName('user').setDescription('Target user').setRequired(false))
 
 command.setChatInputCommandHandler(async (interaction) => {
-    const userId =
-        interaction.options.getUser('user')?.id ?? interaction.user.id
+    const userId = interaction.options.getUser('user')?.id ?? interaction.user.id
 
     const reply = await generatePortfolioReply(userId, 1)
     await interaction.reply(reply)
@@ -58,10 +52,7 @@ command.setStringSelectMenuHandler(async (interaction) => {
             const client = await Client.findById(tag.getData('clientId', true))
             const userId = client.model.userId
 
-            const reply = await generatePortfolioReply(
-                userId,
-                parseInt(interaction.values[0] ?? '1'),
-            )
+            const reply = await generatePortfolioReply(userId, parseInt(interaction.values[0] ?? '1'))
             await interaction.update(reply)
             break
         }

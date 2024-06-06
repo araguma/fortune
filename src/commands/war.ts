@@ -7,18 +7,11 @@ import discord from '@/services/discord'
 import War from '@/services/war'
 import { WarReply } from '@/views/war'
 
-const command = new Command()
-    .setName('war')
-    .setDescription('Start casino war game')
-    .setGroup(Group.Casino)
+const command = new Command().setName('war').setDescription('Start casino war game').setGroup(Group.Casino)
 
-command.addNumberOption((option) =>
-    option.setName('bet').setDescription('Bet amount').setRequired(true),
-)
+command.addNumberOption((option) => option.setName('bet').setDescription('Bet amount').setRequired(true))
 
-command.addNumberOption((option) =>
-    option.setName('tie-bet').setDescription('Tie bet amount'),
-)
+command.addNumberOption((option) => option.setName('tie-bet').setDescription('Tie bet amount'))
 
 command.setChatInputCommandHandler(async (interaction) => {
     const bet = interaction.options.getNumber('bet', true)

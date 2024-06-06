@@ -40,9 +40,6 @@ export const BlackjackSchema = new Schema({
     },
 })
 
-export const BlackjackModel = database.connection.model(
-    'blackjack',
-    BlackjackSchema,
-)
+export const BlackjackModel = database.connection.model('blackjack', BlackjackSchema)
 
 export type BlackjackType = InferSchemaType<typeof BlackjackSchema>

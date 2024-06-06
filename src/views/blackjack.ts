@@ -30,9 +30,7 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
     }: BlackjackReplyData) {
         const { delta } = blackjack
 
-        this.setColor(
-            delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow,
-        )
+        this.setColor(delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow)
         this.setAuthor({ name: '---' })
         this.setTitle('Blackjack')
         this.setURL('https://en.wikipedia.org/wiki/Blackjack')
@@ -41,19 +39,13 @@ export class BlackjackReply extends Reply<BlackjackReplyData> {
                 [
                     `> <@${blackjack.userId}> ▸ **${playerTotal}**${generateHint(playerTotal)}`,
                     `> └─ ${blackjack.playerCards
-                        .map(
-                            (card) =>
-                                `\`[${card.rank}${suitSymbols[card.suit]}]\``,
-                        )
+                        .map((card) => `\`[${card.rank}${suitSymbols[card.suit]}]\``)
                         .join(' ')}`,
                 ].join('\n'),
                 [
                     `> <@${dealerId}> ▸ **${dealerTotal}**${generateHint(dealerTotal)}`,
                     `> └─ ${blackjack.dealerCards
-                        .map(
-                            (card) =>
-                                `\`[${card.rank}${suitSymbols[card.suit]}]\``,
-                        )
+                        .map((card) => `\`[${card.rank}${suitSymbols[card.suit]}]\``)
                         .join(' ')}`,
                 ].join('\n'),
             ].join('\n\n'),

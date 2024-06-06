@@ -26,9 +26,7 @@ export default class Tag {
     }
 
     public toCustomId() {
-        return `${this.command ?? ''}.${this.action ?? ''}.${this.field ?? ''}.${Object.entries(
-            this.data,
-        )
+        return `${this.command ?? ''}.${this.action ?? ''}.${this.field ?? ''}.${Object.entries(this.data)
             .map(([key, value]) => `${key}:${value}`)
             .join('-')}`
     }
@@ -41,8 +39,7 @@ export default class Tag {
     public getCommand(required: true): string
     public getCommand(required?: false): string | null
     public getCommand(required?: boolean): string | null {
-        if (required && !this.command)
-            throw new Error('Missing required command')
+        if (required && !this.command) throw new Error('Missing required command')
         return this.command ?? null
     }
 

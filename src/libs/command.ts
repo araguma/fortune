@@ -28,12 +28,10 @@ export default class Command extends SlashCommandBuilder {
             assert(this.group)
             if (this.group === Group.Admin) {
                 const admin = PermissionsBitField.Flags.Administrator
-                if (!interaction.memberPermissions?.has(admin))
-                    UserError.adminOnly()
+                if (!interaction.memberPermissions?.has(admin)) UserError.adminOnly()
             } else {
                 const server = await Server.getServerByGuildId(guildId)
-                if (!server.checkWhitelist(this.group, channelId))
-                    UserError.notWhitelisted(channelId, this.group)
+                if (!server.checkWhitelist(this.group, channelId)) UserError.notWhitelisted(channelId, this.group)
             }
         }
 
@@ -81,22 +79,12 @@ export default class Command extends SlashCommandBuilder {
     }
 }
 
-export type ChatInputCommandHandler = (
-    interaction: ChatInputCommandInteraction,
-) => Promise<void> | void
+export type ChatInputCommandHandler = (interaction: ChatInputCommandInteraction) => Promise<void> | void
 
-export type AutocompleteHandler = (
-    interaction: AutocompleteInteraction,
-) => Promise<void> | void
+export type AutocompleteHandler = (interaction: AutocompleteInteraction) => Promise<void> | void
 
-export type ButtonHandler = (
-    interaction: ButtonInteraction,
-) => Promise<void> | void
+export type ButtonHandler = (interaction: ButtonInteraction) => Promise<void> | void
 
-export type StringSelectMenuHandler = (
-    interaction: StringSelectMenuInteraction,
-) => Promise<void> | void
+export type StringSelectMenuHandler = (interaction: StringSelectMenuInteraction) => Promise<void> | void
 
-export type ModalSubmitHandler = (
-    interaction: ModalSubmitInteraction,
-) => Promise<void> | void
+export type ModalSubmitHandler = (interaction: ModalSubmitInteraction) => Promise<void> | void

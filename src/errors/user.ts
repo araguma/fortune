@@ -19,9 +19,7 @@ export default class UserError extends Error {
     }
 
     public static notWhitelisted(channelId: string, group: Group): never {
-        throw new UserError(
-            `**<#${channelId}>** is not whitelisted for **${group}** commands`,
-        )
+        throw new UserError(`**<#${channelId}>** is not whitelisted for **${group}** commands`)
     }
 
     public static missingSymbol(): never {

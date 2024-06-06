@@ -13,9 +13,7 @@ import Transaction from '@/services/transaction'
 import yahoo from '@/services/yahoo'
 
 const CLAIM_INTERVAL = parseInt(getEnvironmentVariable('CLAIM_INTERVAL'))
-const CLAIM_STOCKPILE_LIMIT = parseInt(
-    getEnvironmentVariable('CLAIM_STOCKPILE_LIMIT'),
-)
+const CLAIM_STOCKPILE_LIMIT = parseInt(getEnvironmentVariable('CLAIM_STOCKPILE_LIMIT'))
 const FRACTION_DIGITS = parseInt(getEnvironmentVariable('FRACTION_DIGITS'))
 const MAX_STOCKS = parseInt(getEnvironmentVariable('MAX_STOCKS'))
 
@@ -31,11 +29,7 @@ export default class Client {
     }
 
     public static async getClientByUserId(userId: string) {
-        const client = await ClientModel.findOneAndUpdate(
-            { userId },
-            { userId },
-            { upsert: true, new: true },
-        )
+        const client = await ClientModel.findOneAndUpdate({ userId }, { userId }, { upsert: true, new: true })
         return new Client(client)
     }
 
@@ -44,12 +38,7 @@ export default class Client {
         return clients.map((client) => new Client(client))
     }
 
-    private modifyPortfolio(
-        symbol: string,
-        shares: number,
-        price: number,
-        cost: number,
-    ) {
+    private modifyPortfolio(symbol: string, shares: number, price: number, cost: number) {
         const key = codec.encode(symbol)
         const previous = this.model.portfolio.get(key) ?? {
             shares: 0,
@@ -57,10 +46,8 @@ export default class Client {
             lastSplit: new Date(),
         }
 
-        if (shares < 0 && Math.abs(shares) > previous.shares)
-            UserError.insufficientShares(symbol)
-        if (-cost < 0 && Math.abs(cost) > this.model.balance)
-            UserError.insufficientBalance()
+        if (shares < 0 && Math.abs(shares) > previous.shares) UserError.insufficientShares(symbol)
+        if (-cost < 0 && Math.abs(cost) > this.model.balance) UserError.insufficientBalance()
 
         const current = {
             shares: previous.shares + shares,
@@ -82,32 +69,25 @@ export default class Client {
         start.setDate(end.getDate() - 365 * 5)
 
         await Promise.all(
-            Array.from(this.model.portfolio.entries()).map(
-                async ([symbol, stock]) => {
-                    try {
-                        const chart = await yahoo.getChart(
-                            codec.decode(symbol),
-                            start,
-                            end,
-                            '3mo',
-                        )
-                        const splits = chart.events?.splits
-                        if (!splits) return
-                        const split = splits[splits.length - 1]
-                        if (!split) return
-                        const splitDate = new Date(split.date)
-                        if (splitDate > stock.lastSplit) {
-                            const ratio = split.numerator / split.denominator
-                            stock.shares *= ratio
-                            stock.seed *= ratio
-                            stock.lastSplit = splitDate
-                            this.model.portfolio.set(symbol, stock)
-                        }
-                    } catch (error) {
-                        log.error(error)
+            Array.from(this.model.portfolio.entries()).map(async ([symbol, stock]) => {
+                try {
+                    const chart = await yahoo.getChart(codec.decode(symbol), start, end, '3mo')
+                    const splits = chart.events?.splits
+                    if (!splits) return
+                    const split = splits[splits.length - 1]
+                    if (!split) return
+                    const splitDate = new Date(split.date)
+                    if (splitDate > stock.lastSplit) {
+                        const ratio = split.numerator / split.denominator
+                        stock.shares *= ratio
+                        stock.seed *= ratio
+                        stock.lastSplit = splitDate
+                        this.model.portfolio.set(symbol, stock)
                     }
-                },
-            ),
+                } catch (error) {
+                    log.error(error)
+                }
+            }),
         )
     }
 
@@ -116,8 +96,7 @@ export default class Client {
     }
 
     public async executeTransaction(transaction: TransactionType) {
-        if (transaction.userId !== this.model.userId)
-            throw new Error('Invalid user ID')
+        if (transaction.userId !== this.model.userId) throw new Error('Invalid user ID')
 
         if (
             (transaction.type === 'claim' || transaction.type === 'buy') &&
@@ -134,12 +113,7 @@ export default class Client {
             await this.updatePortfolio()
             const sign = transaction.type === 'buy' ? 1 : -1
             transaction.stocks.forEach((stock) => {
-                this.modifyPortfolio(
-                    stock.symbol,
-                    sign * stock.shares,
-                    stock.price,
-                    sign * stock.shares * stock.price,
-                )
+                this.modifyPortfolio(stock.symbol, sign * stock.shares, stock.price, sign * stock.shares * stock.price)
             })
         }
     }
@@ -149,15 +123,10 @@ export default class Client {
 
         const lastClaim = this.model.lastClaim.getTime()
         const offset = (Date.now() - lastClaim) % CLAIM_INTERVAL
-        this.model.claims += Math.min(
-            Math.floor((Date.now() - lastClaim) / CLAIM_INTERVAL),
-            CLAIM_STOCKPILE_LIMIT,
-        )
+        this.model.claims += Math.min(Math.floor((Date.now() - lastClaim) / CLAIM_INTERVAL), CLAIM_STOCKPILE_LIMIT)
 
         if (this.model.claims <= 0) {
-            const timeLeft = prettyMilliseconds(
-                CLAIM_INTERVAL - (Date.now() - lastClaim),
-            )
+            const timeLeft = prettyMilliseconds(CLAIM_INTERVAL - (Date.now() - lastClaim))
             UserError.noClaims(timeLeft)
         }
 
@@ -179,10 +148,7 @@ export default class Client {
     public async buyMax(symbol: string) {
         const transaction = Transaction.create(this.model.userId, 'buy')
         const price = await yahoo.getPrice(symbol)
-        const shares =
-            this.model.balance > epsilon
-                ? (this.model.balance - epsilon) / price
-                : 0
+        const shares = this.model.balance > epsilon ? (this.model.balance - epsilon) / price : 0
         transaction.addStock(symbol, shares, price)
         await this.executeTransaction(transaction.model)
         return transaction
@@ -208,13 +174,11 @@ export default class Client {
     public async sellAll() {
         const transaction = Transaction.create(this.model.userId, 'sell')
         await Promise.all(
-            Array.from(this.model.portfolio.entries()).map(
-                async ([symbol, stock]) => {
-                    symbol = codec.decode(symbol)
-                    const price = await yahoo.getPrice(symbol)
-                    transaction.addStock(symbol, stock.shares, price)
-                },
-            ),
+            Array.from(this.model.portfolio.entries()).map(async ([symbol, stock]) => {
+                symbol = codec.decode(symbol)
+                const price = await yahoo.getPrice(symbol)
+                transaction.addStock(symbol, stock.shares, price)
+            }),
         )
         await this.executeTransaction(transaction.model)
         return transaction
@@ -279,10 +243,7 @@ export default class Client {
 
     public async sellRange(start: number, end: number) {
         const transaction = Transaction.create(this.model.userId, 'sell')
-        const stocks = Array.from(this.model.portfolio.keys()).slice(
-            -end,
-            -start + 1,
-        )
+        const stocks = Array.from(this.model.portfolio.keys()).slice(-end, -start + 1)
         await Promise.all(
             stocks.map(async (symbol) => {
                 symbol = codec.decode(symbol)

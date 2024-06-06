@@ -11,40 +11,23 @@ import discord from '@/services/discord'
 import yahoo from '@/services/yahoo'
 import { WatchlistReply } from '@/views/watchlist'
 
-const command = new Command()
-    .setName('watchlist')
-    .setDescription('Manage watchlist')
-    .setGroup(Group.Trade)
+const command = new Command().setName('watchlist').setDescription('Manage watchlist').setGroup(Group.Trade)
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('add')
         .setDescription('Add stock to watchlist')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('remove')
         .setDescription('Remove stock from watchlist')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true)),
 )
 
-command.addSubcommand(
-    new SlashCommandSubcommandBuilder()
-        .setName('show')
-        .setDescription('Display watchlist'),
-)
+command.addSubcommand(new SlashCommandSubcommandBuilder().setName('show').setDescription('Display watchlist'))
 
 command.setChatInputCommandHandler(async (interaction) => {
     const subcommand = interaction.options.getSubcommand()
@@ -120,10 +103,7 @@ command.setStringSelectMenuHandler(async (interaction) => {
             const client = await Client.findById(tag.getData('clientId', true))
             const userId = client.model.userId
 
-            const reply = await generateWatchlistReply(
-                userId,
-                parseInt(interaction.values[0] ?? '1'),
-            )
+            const reply = await generateWatchlistReply(userId, parseInt(interaction.values[0] ?? '1'))
             await interaction.update(reply)
             break
         }

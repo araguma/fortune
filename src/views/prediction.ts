@@ -107,10 +107,7 @@ export class PredictionReply extends Reply<PredictionReplyData> {
                     )
                     .setLabel('Predict')
                     .setStyle(ButtonStyle.Primary)
-                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    closeButton,
-                    predictButton,
-                )
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(closeButton, predictButton)
                 this.setComponents([row])
                 break
             }
@@ -125,9 +122,7 @@ export class PredictionReply extends Reply<PredictionReplyData> {
                     )
                     .setLabel('Settle')
                     .setStyle(ButtonStyle.Secondary)
-                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    settleButton,
-                )
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(settleButton)
                 this.setComponents([row])
                 break
             }

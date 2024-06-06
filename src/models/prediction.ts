@@ -50,9 +50,6 @@ export const PredictionSchema = new Schema({
     },
 })
 
-export const PredictionModel = database.connection.model(
-    'prediction',
-    PredictionSchema,
-)
+export const PredictionModel = database.connection.model('prediction', PredictionSchema)
 
 export type PredictionType = InferSchemaType<typeof PredictionSchema>

@@ -3,64 +3,33 @@ import { SlashCommandSubcommandBuilder } from 'discord.js'
 import { Group } from '@/enums'
 import UserError from '@/errors/user'
 import Command from '@/libs/command'
-import {
-    generateTransactionReply,
-    handleTransactionStringSelectMenu,
-} from '@/libs/transaction'
+import { generateTransactionReply, handleTransactionStringSelectMenu } from '@/libs/transaction'
 import Client from '@/services/client'
 import discord from '@/services/discord'
 
-const command = new Command()
-    .setName('buy')
-    .setDescription('Buy shares')
-    .setGroup(Group.Trade)
+const command = new Command().setName('buy').setDescription('Buy shares').setGroup(Group.Trade)
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('max')
         .setDescription('Exhaust balance')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('share')
         .setDescription('Purchase by shares')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option
-                .setName('shares')
-                .setDescription('Number of shares')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true))
+        .addNumberOption((option) => option.setName('shares').setDescription('Number of shares').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('value')
         .setDescription('Purchase by value')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option
-                .setName('value')
-                .setDescription('Total stock value')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true))
+        .addNumberOption((option) => option.setName('value').setDescription('Total stock value').setRequired(true)),
 )
 
 command.setChatInputCommandHandler(async (interaction) => {

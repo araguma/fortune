@@ -7,14 +7,9 @@ import Client from '@/services/client'
 import discord from '@/services/discord'
 import { BlackjackReply } from '@/views/blackjack'
 
-const command = new Command()
-    .setName('blackjack')
-    .setDescription('Start a blackjack game')
-    .setGroup(Group.Casino)
+const command = new Command().setName('blackjack').setDescription('Start a blackjack game').setGroup(Group.Casino)
 
-command.addNumberOption((option) =>
-    option.setName('bet').setDescription('Bet amount').setRequired(true),
-)
+command.addNumberOption((option) => option.setName('bet').setDescription('Bet amount').setRequired(true))
 
 command.setChatInputCommandHandler(async (interaction) => {
     const bet = interaction.options.getNumber('bet', true)

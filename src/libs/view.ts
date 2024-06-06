@@ -3,11 +3,7 @@ import discord from '@/services/discord'
 import yahoo from '@/services/yahoo'
 import { timeframes, ViewReply } from '@/views/view'
 
-export async function generateViewReply(
-    symbol: string,
-    timeframe: keyof typeof timeframes,
-    userId: string,
-) {
+export async function generateViewReply(symbol: string, timeframe: keyof typeof timeframes, userId: string) {
     const user = await discord.users.fetch(userId)
     const client = await Client.getClientByUserId(userId)
 

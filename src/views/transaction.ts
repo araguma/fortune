@@ -1,8 +1,4 @@
-import {
-    StringSelectMenuBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-} from 'discord.js'
+import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } from 'discord.js'
 
 import { Color } from '@/enums'
 import divider from '@/libs/canvas/divider'
@@ -13,9 +9,7 @@ import Reply from '@/libs/reply'
 import Tag from '@/libs/tag'
 import { TransactionType } from '@/models/transaction'
 
-const DESCRIPTION_LINE_LIMIT = parseInt(
-    getEnvironmentVariable('DESCRIPTION_LINE_LIMIT'),
-)
+const DESCRIPTION_LINE_LIMIT = parseInt(getEnvironmentVariable('DESCRIPTION_LINE_LIMIT'))
 const variant = {
     claim: {
         author: '>>>',
@@ -37,12 +31,7 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         this.update(data)
     }
 
-    public override update({
-        transactionId,
-        transaction,
-        clientIcon,
-        page,
-    }: TransactionReplyData) {
+    public override update({ transactionId, transaction, clientIcon, page }: TransactionReplyData) {
         const { author, title } = variant[transaction.type]
         const { description, stocks, total } = transaction.stocks.reduce(
             (accumulator, stock) => {
@@ -108,18 +97,10 @@ export class TransactionReply extends Reply<TransactionReplyData> {
                         value: (index + 1).toString(),
                     })),
             )
-        const row1 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                viewSelect,
-            )
-        const row2 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                pageSelect,
-            )
+        const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(viewSelect)
+        const row2 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(pageSelect)
 
-        const rows: ActionRowBuilder<
-            StringSelectMenuBuilder | ButtonBuilder
-        >[] = []
+        const rows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[] = []
         if (pagination.getLength() >= 1) rows.push(row1)
         if (pagination.getPages() > 1) rows.push(row2)
 
@@ -127,9 +108,7 @@ export class TransactionReply extends Reply<TransactionReplyData> {
         this.setColor(Color.Blue)
         this.setAuthor({ name: author })
         this.setTitle(title)
-        this.setDescription(
-            pagination.getCurrent().join('\n') || '> *No stocks*',
-        )
+        this.setDescription(pagination.getCurrent().join('\n') || '> *No stocks*')
         this.setFields(
             {
                 name: 'Stocks',

@@ -23,14 +23,10 @@ export class WarReply extends Reply<WarReplyData> {
     public override update({ warId, war, clientIcon, dealerId }: WarReplyData) {
         const { playerCards, dealerCards, delta } = war
 
-        const currentPlayerRank =
-            playerCards[playerCards.length - 1]?.rank ?? 'N/A'
-        const currentDealerRank =
-            dealerCards[dealerCards.length - 1]?.rank ?? 'N/A'
+        const currentPlayerRank = playerCards[playerCards.length - 1]?.rank ?? 'N/A'
+        const currentDealerRank = dealerCards[dealerCards.length - 1]?.rank ?? 'N/A'
 
-        this.setColor(
-            delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow,
-        )
+        this.setColor(delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow)
         this.setAuthor({ name: '---' })
         this.setTitle('Casino War')
         this.setURL('https://en.wikipedia.org/wiki/Casino_War')
@@ -38,21 +34,11 @@ export class WarReply extends Reply<WarReplyData> {
             [
                 [
                     `> <@${war.userId}> ▸ **${currentPlayerRank}**`,
-                    `> └─ ${war.playerCards
-                        .map(
-                            (card) =>
-                                `\`[${card.rank}${suitSymbols[card.suit]}]\``,
-                        )
-                        .join(' ')}`,
+                    `> └─ ${war.playerCards.map((card) => `\`[${card.rank}${suitSymbols[card.suit]}]\``).join(' ')}`,
                 ].join('\n'),
                 [
                     `> <@${dealerId}> ▸ **${currentDealerRank}**`,
-                    `> └─ ${war.dealerCards
-                        .map(
-                            (card) =>
-                                `\`[${card.rank}${suitSymbols[card.suit]}]\``,
-                        )
-                        .join(' ')}`,
+                    `> └─ ${war.dealerCards.map((card) => `\`[${card.rank}${suitSymbols[card.suit]}]\``).join(' ')}`,
                 ].join('\n'),
             ].join('\n\n'),
         )
@@ -84,22 +70,12 @@ export class WarReply extends Reply<WarReplyData> {
             row.addComponents(
                 new ButtonBuilder()
                     .setCustomId(
-                        new Tag()
-                            .setCommand('war')
-                            .setAction('surrender')
-                            .setData('warId', warId)
-                            .toCustomId(),
+                        new Tag().setCommand('war').setAction('surrender').setData('warId', warId).toCustomId(),
                     )
                     .setLabel('Surrender')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId(
-                        new Tag()
-                            .setCommand('war')
-                            .setAction('war')
-                            .setData('warId', warId)
-                            .toCustomId(),
-                    )
+                    .setCustomId(new Tag().setCommand('war').setAction('war').setData('warId', warId).toCustomId())
                     .setLabel('War')
                     .setStyle(ButtonStyle.Danger),
             )

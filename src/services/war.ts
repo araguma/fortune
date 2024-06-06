@@ -15,11 +15,7 @@ export default class War {
         return new War(war)
     }
 
-    public static create(
-        userId: WarType['userId'],
-        bet: WarType['bet'],
-        tieBet: WarType['tieBet'],
-    ) {
+    public static create(userId: WarType['userId'], bet: WarType['bet'], tieBet: WarType['tieBet']) {
         const model = new WarModel({
             userId,
             bet,
@@ -78,8 +74,7 @@ export default class War {
     }
 
     public modifyDelta(self: ClientType, client: ClientType, delta: number) {
-        if (delta < 0 && Math.abs(delta) > client.balance)
-            UserError.insufficientBalance()
+        if (delta < 0 && Math.abs(delta) > client.balance) UserError.insufficientBalance()
         this.model.delta += delta
         client.balance += delta
         self.balance -= delta

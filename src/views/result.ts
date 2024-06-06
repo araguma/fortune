@@ -27,9 +27,7 @@ export default class ResultReply extends Reply<ResultReplyData> {
                 value:
                     winners
                         .map((entry, index) => {
-                            const rank = (index + 1)
-                                .toString()
-                                .padStart(padding, ' ')
+                            const rank = (index + 1).toString().padStart(padding, ' ')
                             return `\`${rank}\`<@${entry.userId}>`
                         })
                         .join('\n') || '> *None*',
@@ -37,10 +35,7 @@ export default class ResultReply extends Reply<ResultReplyData> {
             },
             {
                 name: 'Amount',
-                value:
-                    winners
-                        .map((entry) => `\`${format.value(entry.amount)}\``)
-                        .join('\n') || '> *None*',
+                value: winners.map((entry) => `\`${format.value(entry.amount)}\``).join('\n') || '> *None*',
                 inline: true,
             },
         )

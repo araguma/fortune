@@ -5,21 +5,11 @@ import Client from '@/services/client'
 import discord from '@/services/discord'
 import { PayReply } from '@/views/pay'
 
-const command = new Command()
-    .setName('pay')
-    .setDescription('Pay a user')
-    .setGroup(Group.Trade)
+const command = new Command().setName('pay').setDescription('Pay a user').setGroup(Group.Trade)
 
 command
-    .addUserOption((option) =>
-        option.setName('user').setDescription('Target user').setRequired(true),
-    )
-    .addNumberOption((option) =>
-        option
-            .setName('amount')
-            .setDescription('Amount to pay')
-            .setRequired(true),
-    )
+    .addUserOption((option) => option.setName('user').setDescription('Target user').setRequired(true))
+    .addNumberOption((option) => option.setName('amount').setDescription('Amount to pay').setRequired(true))
 
 command.setChatInputCommandHandler(async (interaction) => {
     const userId = interaction.user.id

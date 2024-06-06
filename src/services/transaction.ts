@@ -11,10 +11,7 @@ export default class Transaction {
         return new Transaction(transaction)
     }
 
-    public static create(
-        userId: TransactionType['userId'],
-        type: TransactionType['type'],
-    ) {
+    public static create(userId: TransactionType['userId'], type: TransactionType['type']) {
         const model = new TransactionModel({
             userId,
             type,
@@ -32,10 +29,7 @@ export default class Transaction {
     }
 
     public getTotal() {
-        return this.model.stocks.reduce(
-            (acc, stock) => acc + stock.shares * stock.price,
-            0,
-        )
+        return this.model.stocks.reduce((acc, stock) => acc + stock.shares * stock.price, 0)
     }
 
     public getId() {

@@ -1,8 +1,5 @@
 import yahooFinance from 'yahoo-finance2'
-import {
-    ChartOptions,
-    ChartResultArray,
-} from 'yahoo-finance2/dist/esm/src/modules/chart'
+import { ChartOptions, ChartResultArray } from 'yahoo-finance2/dist/esm/src/modules/chart'
 import { Quote as YahooQuote } from 'yahoo-finance2/dist/esm/src/modules/quote'
 
 import UserError from '@/errors/user'
@@ -42,9 +39,7 @@ yahooFinance.setGlobalConfig({
 
 async function getQuote(symbol: string) {
     symbol = symbol.toUpperCase()
-    const quote = (await yahooFinance.quoteCombine(symbol)) as
-        | YahooQuote
-        | undefined
+    const quote = (await yahooFinance.quoteCombine(symbol)) as YahooQuote | undefined
     if (!quote) UserError.invalid('symbol', symbol)
     return parseQuote(quote)
 }
@@ -65,12 +60,7 @@ async function getPrice(symbol: string) {
     return price
 }
 
-async function getChart(
-    symbol: string,
-    start: Date,
-    end: Date,
-    interval: NonNullable<ChartOptions['interval']>,
-) {
+async function getChart(symbol: string, start: Date, end: Date, interval: NonNullable<ChartOptions['interval']>) {
     symbol = symbol.toUpperCase()
     const chart = (await yahooFinance.chart(symbol, {
         period1: start,

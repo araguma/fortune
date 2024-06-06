@@ -10,10 +10,7 @@ import { MoversReply } from '@/views/movers'
 
 const FIELD_LINE_LIMIT = parseInt(getEnvironmentVariable('FIELD_LINE_LIMIT'))
 
-const command = new Command()
-    .setName('movers')
-    .setDescription('List top movers')
-    .setGroup(Group.Trade)
+const command = new Command().setName('movers').setDescription('List top movers').setGroup(Group.Trade)
 
 command.addStringOption((option) =>
     option
@@ -50,9 +47,7 @@ command.setButtonHandler(async (interaction) => {
     switch (tag.getAction(true)) {
         case 'update': {
             const userId = tag.getData('userId', true)
-            const by = tag.getData('by', true).toLowerCase() as
-                | 'gainers'
-                | 'losers'
+            const by = tag.getData('by', true).toLowerCase() as 'gainers' | 'losers'
             const movers = await alpaca.getMovers(FIELD_LINE_LIMIT, 'stocks')
 
             const reply = new MoversReply({

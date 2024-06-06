@@ -1,9 +1,4 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    StringSelectMenuBuilder,
-} from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js'
 
 import { Color } from '@/enums'
 import divider from '@/libs/canvas/divider'
@@ -20,13 +15,7 @@ export class ActivesReply extends Reply<ActivesReplyData> {
 
     public override update({ userId, by, actives }: ActivesReplyData) {
         const viewSelect = new StringSelectMenuBuilder()
-            .setCustomId(
-                new Tag()
-                    .setCommand('actives')
-                    .setAction('view')
-                    .setData('userId', userId)
-                    .toCustomId(),
-            )
+            .setCustomId(new Tag().setCommand('actives').setAction('view').setData('userId', userId).toCustomId())
             .setPlaceholder('View symbol')
             .addOptions(
                 actives.map((active) => ({
@@ -45,17 +34,10 @@ export class ActivesReply extends Reply<ActivesReplyData> {
             )
             .setLabel('Update')
             .setStyle(ButtonStyle.Secondary)
-        const row1 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                viewSelect,
-            )
-        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            updateButton,
-        )
+        const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(viewSelect)
+        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(updateButton)
 
-        const rows: ActionRowBuilder<
-            StringSelectMenuBuilder | ButtonBuilder
-        >[] = []
+        const rows: ActionRowBuilder<StringSelectMenuBuilder | ButtonBuilder>[] = []
         if (actives.length > 0) rows.push(row1)
         rows.push(row2)
 

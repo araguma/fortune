@@ -5,10 +5,7 @@ import Client from '@/services/client'
 import discord from '@/services/discord'
 import { LeaderboardReply } from '@/views/leaderboard'
 
-const command = new Command()
-    .setName('leaderboard')
-    .setDescription('Display leaderboard')
-    .setGroup(Group.Trade)
+const command = new Command().setName('leaderboard').setDescription('Display leaderboard').setGroup(Group.Trade)
 
 command.addStringOption((option) =>
     option

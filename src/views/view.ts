@@ -1,9 +1,4 @@
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    StringSelectMenuBuilder,
-} from 'discord.js'
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js'
 import { ChartResultArray } from 'yahoo-finance2/dist/esm/src/modules/chart'
 
 import { Color } from '@/enums'
@@ -48,19 +43,12 @@ export class ViewReply extends Reply<ViewReplyData> {
         this.update(data)
     }
 
-    public override update({
-        quote,
-        chart,
-        timeframe,
-        client,
-        userIcon,
-    }: ViewReplyData) {
+    public override update({ quote, chart, timeframe, client, userIcon }: ViewReplyData) {
         const price = quote.price ?? NaN
         const open = quote.regularMarketOpen ?? NaN
 
         const delta = price - open
-        const color =
-            delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow
+        const color = delta > 0 ? Color.Green : delta < 0 ? Color.Red : Color.Yellow
         const sign = delta >= 0 ? '▴' : '▾'
 
         const key = codec.encode(quote.symbol)
@@ -96,13 +84,8 @@ export class ViewReply extends Reply<ViewReplyData> {
             )
             .setLabel('Update')
             .setStyle(ButtonStyle.Secondary)
-        const row1 =
-            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                timeframeSelect,
-            )
-        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            updateButton,
-        )
+        const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(timeframeSelect)
+        const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(updateButton)
 
         this.setAuthor({ name: '---' })
         this.setColor(color)

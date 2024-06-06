@@ -26,9 +26,7 @@ export class Database {
         log.success(`Connected to MongoDB`)
         log.info(`├─ URI: ${uri}`)
         log.info(`├─ Models: ${Object.keys(this.connection.models).length}`)
-        log.info(
-            `└─ Collections: ${Object.keys(this.connection.collections).length}`,
-        )
+        log.info(`└─ Collections: ${Object.keys(this.connection.collections).length}`)
     }
 }
 

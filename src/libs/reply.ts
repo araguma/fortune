@@ -1,19 +1,11 @@
 import { Canvas } from 'canvas'
-import {
-    ActionRowBuilder,
-    AttachmentPayload,
-    ButtonBuilder,
-    EmbedBuilder,
-    StringSelectMenuBuilder,
-} from 'discord.js'
+import { ActionRowBuilder, AttachmentPayload, ButtonBuilder, EmbedBuilder, StringSelectMenuBuilder } from 'discord.js'
 
 export default abstract class Reply<D extends object> extends EmbedBuilder {
     public embeds: EmbedBuilder[] = []
     public files: AttachmentPayload[] = []
     public canvas: Canvas | null = null
-    public components: ActionRowBuilder<
-        ButtonBuilder | StringSelectMenuBuilder
-    >[] = []
+    public components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = []
     public ephemeral = false
 
     public constructor() {
@@ -31,9 +23,7 @@ export default abstract class Reply<D extends object> extends EmbedBuilder {
         return this
     }
 
-    public setComponents(
-        components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[],
-    ) {
+    public setComponents(components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[]) {
         this.components = components
         return this
     }

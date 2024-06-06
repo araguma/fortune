@@ -7,11 +7,7 @@ export default class Server {
     public constructor(public model: HydratedDocument<ServerType>) {}
 
     public static async getServerByGuildId(guildId: string) {
-        const server = await ServerModel.findOneAndUpdate(
-            { guildId },
-            { guildId },
-            { upsert: true, new: true },
-        )
+        const server = await ServerModel.findOneAndUpdate({ guildId }, { guildId }, { upsert: true, new: true })
         return new Server(server)
     }
 

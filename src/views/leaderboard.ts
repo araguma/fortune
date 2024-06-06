@@ -29,9 +29,7 @@ export class LeaderboardReply extends Reply<LeaderboardReplyData> {
                 name: 'User',
                 value: entries
                     .map((entry, index) => {
-                        const rank = (index + 1)
-                            .toString()
-                            .padStart(padding, ' ')
+                        const rank = (index + 1).toString().padStart(padding, ' ')
                         return `\`${rank}\`<@${entry.userId}>`
                     })
                     .join('\n'),
@@ -39,9 +37,7 @@ export class LeaderboardReply extends Reply<LeaderboardReplyData> {
             },
             {
                 name: format.capitalize(metric),
-                value: entries
-                    .map((entry) => `\`${formatter(entry.metric)}\``)
-                    .join('\n'),
+                value: entries.map((entry) => `\`${formatter(entry.metric)}\``).join('\n'),
                 inline: true,
             },
         )

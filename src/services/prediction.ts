@@ -23,10 +23,8 @@ export default class Prediction {
     }
 
     public setBet(client: ClientType, option: number, amount: number) {
-        if (amount < this.model.minimum)
-            UserError.insufficientBet(this.model.minimum)
-        if (option < 0 || option >= this.model.options.length)
-            UserError.invalid('option', option)
+        if (amount < this.model.minimum) UserError.insufficientBet(this.model.minimum)
+        if (option < 0 || option >= this.model.options.length) UserError.invalid('option', option)
 
         const bet = this.model.bets.get(client.userId)
 
@@ -34,8 +32,7 @@ export default class Prediction {
         if (client.balance < 0) UserError.insufficientBalance()
 
         if (bet) {
-            this.model.pool[bet.option] =
-                (this.model.pool[bet.option] ?? 0) - bet.amount
+            this.model.pool[bet.option] = (this.model.pool[bet.option] ?? 0) - bet.amount
         }
         this.model.pool[option] = (this.model.pool[option] ?? 0) + amount
         this.model.bets.set(client.userId, {
@@ -48,12 +45,7 @@ export default class Prediction {
         this.model.status = 'closed'
     }
 
-    public settle(
-        self: ClientType,
-        clients: Record<string, ClientType>,
-        option: number,
-        revert = false,
-    ) {
+    public settle(self: ClientType, clients: Record<string, ClientType>, option: number, revert = false) {
         this.model.status = 'settled'
         this.model.result = option
 

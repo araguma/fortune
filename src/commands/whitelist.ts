@@ -9,21 +9,13 @@ import { WhitelistReply } from '@/views/whitelist'
 
 const groups = Object.values(Group).filter((group) => group !== Group.Admin)
 
-const command = new Command()
-    .setName('whitelist')
-    .setDescription('Manage whitelist')
-    .setGroup(Group.Admin)
+const command = new Command().setName('whitelist').setDescription('Manage whitelist').setGroup(Group.Admin)
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('add')
         .setDescription('Add group to channel whitelist')
-        .addChannelOption((option) =>
-            option
-                .setName('channel')
-                .setDescription('Target channel')
-                .setRequired(true),
-        )
+        .addChannelOption((option) => option.setName('channel').setDescription('Target channel').setRequired(true))
         .addStringOption((option) =>
             option
                 .setName('group')
@@ -42,12 +34,7 @@ command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('remove')
         .setDescription('Remove group from channel whitelist')
-        .addChannelOption((option) =>
-            option
-                .setName('channel')
-                .setDescription('Target channel')
-                .setRequired(true),
-        )
+        .addChannelOption((option) => option.setName('channel').setDescription('Target channel').setRequired(true))
         .addStringOption((option) =>
             option
                 .setName('group')
@@ -62,17 +49,9 @@ command.addSubcommand(
         ),
 )
 
-command.addSubcommand(
-    new SlashCommandSubcommandBuilder()
-        .setName('clear')
-        .setDescription('Clear whitelist'),
-)
+command.addSubcommand(new SlashCommandSubcommandBuilder().setName('clear').setDescription('Clear whitelist'))
 
-command.addSubcommand(
-    new SlashCommandSubcommandBuilder()
-        .setName('show')
-        .setDescription('Display whitelist'),
-)
+command.addSubcommand(new SlashCommandSubcommandBuilder().setName('show').setDescription('Display whitelist'))
 
 command.setChatInputCommandHandler(async (interaction) => {
     if (!interaction.inGuild()) UserError.guildOnly()
@@ -85,10 +64,7 @@ command.setChatInputCommandHandler(async (interaction) => {
             case 'add':
             case 'remove': {
                 const channel = interaction.options.getChannel('channel', true)
-                const group = interaction.options.getString(
-                    'group',
-                    true,
-                ) as Group
+                const group = interaction.options.getString('group', true) as Group
                 subcommand === 'add'
                     ? server.addToWhitelist(channel.id, group)
                     : server.removeFromWhitelist(channel.id, group)

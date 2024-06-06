@@ -16,10 +16,7 @@ export default class Blackjack {
         return new Blackjack(blackjack)
     }
 
-    public static create(
-        userId: BlackjackType['userId'],
-        bet: BlackjackType['bet'],
-    ) {
+    public static create(userId: BlackjackType['userId'], bet: BlackjackType['bet']) {
         const model = new BlackjackModel({
             userId,
             bet,
@@ -40,11 +37,7 @@ export default class Blackjack {
         const playerTotal = calculateTotal(this.model.playerCards)
         if (playerTotal === 21) {
             this.model.winner = 'player'
-            this.modifyDelta(
-                self,
-                client,
-                this.model.bet * (this.model.double ? 2 : 1) * 2,
-            )
+            this.modifyDelta(self, client, this.model.bet * (this.model.double ? 2 : 1) * 2)
         } else if (playerTotal > 21) {
             this.model.winner = 'dealer'
         }
@@ -59,18 +52,10 @@ export default class Blackjack {
         const dealerTotal = calculateTotal(this.model.dealerCards)
         if (dealerTotal === playerTotal) {
             this.model.winner = 'none'
-            this.modifyDelta(
-                self,
-                client,
-                this.model.bet * (this.model.double ? 2 : 1),
-            )
+            this.modifyDelta(self, client, this.model.bet * (this.model.double ? 2 : 1))
         } else if (dealerTotal > 21 || dealerTotal < playerTotal) {
             this.model.winner = 'player'
-            this.modifyDelta(
-                self,
-                client,
-                this.model.bet * (this.model.double ? 2 : 1) * 2,
-            )
+            this.modifyDelta(self, client, this.model.bet * (this.model.double ? 2 : 1) * 2)
         } else if (dealerTotal === 21 || dealerTotal > playerTotal) {
             this.model.winner = 'dealer'
         }
@@ -93,8 +78,7 @@ export default class Blackjack {
     }
 
     public modifyDelta(self: ClientType, client: ClientType, delta: number) {
-        if (delta < 0 && Math.abs(delta) > client.balance)
-            UserError.insufficientBalance()
+        if (delta < 0 && Math.abs(delta) > client.balance) UserError.insufficientBalance()
         this.model.delta += delta
         client.balance += delta
         self.balance -= delta

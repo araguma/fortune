@@ -3,70 +3,35 @@ import { SlashCommandSubcommandBuilder } from 'discord.js'
 import { Group } from '@/enums'
 import UserError from '@/errors/user'
 import Command from '@/libs/command'
-import {
-    generateTransactionReply,
-    handleTransactionStringSelectMenu,
-} from '@/libs/transaction'
+import { generateTransactionReply, handleTransactionStringSelectMenu } from '@/libs/transaction'
 import Client from '@/services/client'
 import discord from '@/services/discord'
 
-const command = new Command()
-    .setName('sell')
-    .setDescription('Sell shares')
-    .setGroup(Group.Trade)
+const command = new Command().setName('sell').setDescription('Sell shares').setGroup(Group.Trade)
 
-command.addSubcommand(
-    new SlashCommandSubcommandBuilder()
-        .setName('all')
-        .setDescription('Sell everything'),
-)
+command.addSubcommand(new SlashCommandSubcommandBuilder().setName('all').setDescription('Sell everything'))
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('stock')
         .setDescription('Sell by stock')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('share')
         .setDescription('Sell by shares')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option
-                .setName('shares')
-                .setDescription('Number of shares')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true))
+        .addNumberOption((option) => option.setName('shares').setDescription('Number of shares').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('value')
         .setDescription('Sell by value')
-        .addStringOption((option) =>
-            option
-                .setName('symbol')
-                .setDescription('Stock ticker')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option
-                .setName('value')
-                .setDescription('Total stock value')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('symbol').setDescription('Stock ticker').setRequired(true))
+        .addNumberOption((option) => option.setName('value').setDescription('Total stock value').setRequired(true)),
 )
 
 command.addSubcommand(
@@ -74,10 +39,7 @@ command.addSubcommand(
         .setName('last')
         .setDescription('Sell last n stocks')
         .addIntegerOption((option) =>
-            option
-                .setName('count')
-                .setDescription('Number of stocks to sell')
-                .setRequired(false),
+            option.setName('count').setDescription('Number of stocks to sell').setRequired(false),
         ),
 )
 
@@ -85,27 +47,15 @@ command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('ids')
         .setDescription('Sell multiple stocks')
-        .addStringOption((option) =>
-            option
-                .setName('ids')
-                .setDescription('IDs seperated by space')
-                .setRequired(true),
-        ),
+        .addStringOption((option) => option.setName('ids').setDescription('IDs seperated by space').setRequired(true)),
 )
 
 command.addSubcommand(
     new SlashCommandSubcommandBuilder()
         .setName('range')
         .setDescription('Sell stocks in an ID range (inclusive)')
-        .addNumberOption((option) =>
-            option
-                .setName('start')
-                .setDescription('Start ID')
-                .setRequired(true),
-        )
-        .addNumberOption((option) =>
-            option.setName('end').setDescription('End ID').setRequired(true),
-        ),
+        .addNumberOption((option) => option.setName('start').setDescription('Start ID').setRequired(true))
+        .addNumberOption((option) => option.setName('end').setDescription('End ID').setRequired(true)),
 )
 
 command.setChatInputCommandHandler(async (interaction) => {
@@ -139,10 +89,7 @@ command.setChatInputCommandHandler(async (interaction) => {
                 return client.sellLast(count)
             }
             case 'ids': {
-                const ids = interaction.options
-                    .getString('ids', true)
-                    .split(' ')
-                    .map(Number)
+                const ids = interaction.options.getString('ids', true).split(' ').map(Number)
                 return client.sellIds(ids)
             }
             case 'range': {
